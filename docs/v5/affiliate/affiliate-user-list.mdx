@@ -1,0 +1,140 @@
+---
+title: Get Affiliate User List
+sidebar_label: Get Affiliate User List
+sidebar_position: 1
+---
+
+To use this endpoint, you should have an affiliate account and only tick "affiliate" permission while creating the API key.<br/>
+Affiliate site: https://affiliates.bybit.com
+
+:::tip
+* Use master UID only
+* The api key can only have "Affiliate" permission
+:::
+
+### HTTP Request
+GET `/v5/affiliate/aff-user-list`
+
+### Request Parameters
+| Parameter | Required | Type | Comments|
+|:----- |:-------|:-----|------ |
+|size |false |integer |Limit for data size per page. [`0`, `1000`]. Default: `0`|
+|cursor |false |string |Cursor. Use the `nextPageCursor` token from the response to retrieve the next page of the result set|
+|needDeposit |false |boolean |`true`: return deposit info; `false`(default): does not return deposit info|
+|need30 |false |boolean |`true`: return 30 days trading info; `false`(default): does not return 30 days trading info|
+|need365 |false |boolean |`true`: return 365 days trading info; `false`(default): does not return 365 days trading info|
+
+### Response Parameters
+| Parameter | Type | Comments|
+|:----- |:-----|----- |
+|list |array |Object |
+|> userId |string |user Id |
+|> registerTime |string |user register time|
+|> source |integer |user registration source, from which referrer code |
+|> remarks |integer |The remark|
+|> isKyc |boolean |Whether KYC is completed|
+|> takerVol30Day |string |Taker volume in last 30 days (USDT), update at T + 1. All volume related attributes below includes Derivatives, Option, Spot volume|
+|> makerVol30Day |string |Maker volume in last 30 days (USDT), update at T + 1|
+|> tradeVol30Day |string |Total trading volume in last 30 days (USDT), update at T + 1|
+|> depositAmount30Day |string |Deposit amount in last 30 days (USDT)|
+|> takerVol365Day |string |Taker volume in the past year (USDT), update at T + 1|
+|> makerVol365Day |string |Maker volume in the past year (USDT), update at T + 1|
+|> tradeVol365Day |string |Total trading volume in the past year (USDT), update at T + 1|
+|> depositAmount365Day |string |Total deposit amount in the past year (USDT)|
+|nextPageCursor |string | Refer to the `cursor` request parameter
+
+---
+
+### Request Example
+
+<Tabs groupId="programming-languages">
+<TabItem value="http" label="HTTP">
+
+```http
+GET /v5/affiliate/aff-user-list?cursor=""&size=2 HTTP/1.1
+Host: api-testnet.bybit.com
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1685596324209
+X-BAPI-RECV-WINDOW: 5000
+X-BAPI-SIGN: xxxxxx
+Content-Type: application/json
+```
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python
+
+```
+
+</TabItem>
+
+<TabItem value="Node" label="Node.js">
+
+```n4js
+const { RestClientV5 } = require('bybit-api');
+
+const client = new RestClientV5({
+  testnet: true,
+  key: 'xxxxxxxxxxxxxxxxxx',
+  secret: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+});
+
+client
+  .getAffiliateUserInfo({ size: 2 })
+  .then((response) => {
+    console.log(response);
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+```
+
+</TabItem>
+</Tabs>
+
+### Response Example
+
+```json
+{
+    "retCode": 0,
+    "retMsg": "",
+    "result": {
+        "list": [
+            {
+                "userId": "101527036",
+                "registerTime": "2024-06-21",
+                "source": "1564",
+                "remarks": "test",
+                "isKyc": false,
+                "takerVol30Day": "10",
+                "makerVol30Day": "20",
+                "tradeVol30Day": "30",
+                "depositAmount30Day": "90",
+                "takerVol365Day": "100",
+                "makerVol365Day": "500",
+                "tradeVol365Day": "600",
+                "depositAmount365Day": "1300",
+            },
+            {
+                "userId": "103929118",
+                "registerTime": "2024-11-12",
+                "source": "1564",
+                "remarks": "",
+                "isKyc": false,
+                "takerVol30Day": "10",
+                "makerVol30Day": "20",
+                "tradeVol30Day": "30",
+                "depositAmount30Day": "90",
+                "takerVol365Day": "100",
+                "makerVol365Day": "500",
+                "tradeVol365Day": "600",
+                "depositAmount365Day": "1300",
+            }
+        ],
+        "nextPageCursor": "16197"
+    },
+    "retExtInfo": {},
+    "time": 1733205472513
+}
+```

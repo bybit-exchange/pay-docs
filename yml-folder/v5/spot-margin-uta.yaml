@@ -1,0 +1,161 @@
+openapi: 3.0.0
+servers:
+  - url: https://api-testnet.bybit.com
+    description: Testnet server
+info:
+  description: |
+    Collection of v5 Restul API
+  version: 3.0.0
+  title: Bybit Open API v5 explorer - Spot margin trade
+tags:
+  - name: uta-margin-trade
+    description: Spot margin trade (UTA) endpoints
+    x-displayName: Spot Margin Trade (UTA)
+x-tagGroups:
+  - name: private
+    tags:
+      - uta-margin-trade
+paths:
+  /v5/spot-margin-trade/data:
+    get:
+      tags:
+        - uta-margin-trade
+      summary: Get VIP Margin Data
+      description: Get vip margin data
+      operationId: vip-margin
+      parameters:
+        - name: vipLevel
+          in: query
+          description: VIP level
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - No VIP
+                - VIP-1
+                - VIP-2
+                - VIP-3
+                - VIP-4
+                - VIP-5
+                - PRO-1
+                - PRO-2
+                - PRO-3
+                - PRO-4
+                - PRO-5
+        - name: currency
+          in: query
+          description: Coin name
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+  /v5/spot-margin-trade/switch-mode:
+    post:
+      tags:
+        - uta-margin-trade
+      summary: Toggle Margin Trade
+      description: Toggle margin trade
+      operationId: switch-mode
+      parameters:
+        - name: apiKey
+          in: header
+          description: A UTA sub account API key is provided by default
+          required: false
+          schema:
+            type: string
+        - name: secret
+          in: header
+          description: A UTA sub account API key is provided by default
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                spotMarginMode:
+                  type: integer
+                  description: Margin mode. 0=off, 1=on
+                  enum:
+                    - 0
+                    - 1
+                  example: 0
+                required:
+                  - spotMarginMode
+  /v5/spot-margin-trade/set-leverage:
+    post:
+      tags:
+        - uta-margin-trade
+      summary: Set Leverage
+      description: Set leverage for margin trade
+      operationId: set-leverage
+      parameters:
+        - name: apiKey
+          in: header
+          description: A UTA sub account API key is provided by default
+          required: false
+          schema:
+            type: string
+        - name: secret
+          in: header
+          description: A UTA sub account API key is provided by default
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                leverage:
+                  type: integer
+                  description: Levearge, support 2-10
+                  enum:
+                    - 2
+                    - 3
+                    - 4
+                    - 5
+                    - 6
+                    - 7
+                    - 8
+                    - 9
+                    - 10
+                  example: 5
+                required:
+                  - leverage
+  /v5/spot-margin-trade/state:
+    get:
+      tags:
+        - uta-margin-trade
+      summary: Get Status And Leverage
+      description: Get status and leverage
+      operationId: status
+      parameters:
+        - name: apiKey
+          in: header
+          description: A UTA sub account API key is provided by default
+          required: false
+          schema:
+            type: string
+        - name: secret
+          in: header
+          description: A UTA sub account API key is provided by default
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation

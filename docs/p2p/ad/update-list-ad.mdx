@@ -1,0 +1,118 @@
+---
+title: Update / Relist Ad
+sidebar_label: Update / Relist Ad
+sidebar_position: 4
+---
+
+### HTTP Request
+POST `/v5/p2p/item/update`
+
+### Request Parameters
+| Parameter | Required | Type | Comments|
+|:----- |:-------|:-----|------ |
+|id|**true**|string|adv id|
+|priceType|**true**|string|Pricing exchange rate model. `0`: fixed rate; `1`: floating rate|
+|premium|**true**|string|Floating ratio with current exchange rate|
+|price|**true**|string|ads price|
+|minAmount|**true**|string|Min transaction amount|
+|maxAmount|**true**|string|Max transaction amount|
+|remark|**true**|string|Transaction Description(max=900)|
+|tradingPreferenceSet|**true**|Object|Trading Preferences|
+|> hasUnPostAd|false|string|Whether the counterparty must not have posted any advertisements. `0`: not required, `1`: required |
+|> isKyc|false|string|Is it necessary for the counterparty to complete identity authentication? `0`: not required, `1`: required |
+|> isEmail|false|string|Is it necessary for the counterparty to bind an email address? `0`: not required, `1`: required |
+|> isMobile |false |integer | Is it necessary for the counterparty to bind a mobile number? `0`: not required`1`: required|
+|> hasRegisterTime|false|string|Is the registration time required to be no less than {} days? `0`: not required, `1`: required |
+|> registerTimeThreshold|false|string|Registration time threshold(Unit: Day)|
+|> orderFinishNumberDay30|false|string|Limit on number of completed orders in the last 30 days|
+|> completeRateDay30|false|string|Completion rate in the last 30 days|
+|> nationalLimit|false|string|KYC restricted countries. Format: three-letter <a href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3">ISO country code</a>|
+|> hasOrderFinishNumberDay30|false|string|Is it necessary to have no less than {} orders in the last 30 days? `0`: not required, `1`: required |
+|> hasCompleteRateDay30|false|string|Is it necessary to have a completion rate of no less than {} in the last 30 days? `0`: not required, `1`: required |
+|> hasNationalLimit|false|string|Are country restrictions required? `0`: not required, `1`: required |
+|paymentIds|**true**|array[string]|Payment method type ID (len<=5)|
+|actionType|**true**|string|Operation type: `MODIFY`: modify ad; `ACTIVE`: reonline adv|
+|quantity|**true**|string|Number of ads|
+|paymentPeriod|**true**|string|Payment period (unit: minutes)|
+
+### Response Parameters
+None
+
+### Request Example
+
+<Tabs groupId="programming-languages">
+<TabItem value="http" label="HTTP">
+
+```http
+POST /v5/p2p/item/update HTTP/1.1
+Host: api-testnet.bybit.com
+X-BAPI-SIGN: XXXXXX
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1741769463827
+X-BAPI-RECV-WINDOW: 5000
+Content-Type: application/json
+
+{
+    "priceType": "0",
+    "premium": "",
+    "quantity": "1000",
+    "minAmount": "25",
+    "maxAmount": "5000",
+    "paymentPeriod": "15",
+    "remark": "",
+    "price": "0.914",
+    "paymentIds": [
+        "-1"
+    ],
+    "tradingPreferenceSet": {},
+    "actionType": "ACTIVE",
+    "id": "1898988222063644672"
+}
+```
+
+</TabItem>
+<TabItem value="python" label="Python">
+
+```python
+from bybit_p2p import P2P
+api = P2P(
+    testnet=True,
+    api_key="xxxxxxxxxxxxxxxxxx",
+    api_secret="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+)
+print(api.update_ad(
+    id="1898988222063644672",
+    priceType=0,
+    premium="",
+    price=0.914,
+    minAmount=25,
+    maxAmount=5000,
+    remark="",
+    tradingPreferenceSet={},
+    paymentIds=["-1"],
+    actionType="ACTIVE",
+    quantity="1000",
+    paymentPeriod="15"
+))
+```
+
+</TabItem>
+</Tabs>
+
+### Response Example
+
+```json
+{
+    "ret_code": 0,
+    "ret_msg": "SUCCESS",
+    "result": {
+        "securityRiskToken": "",
+        "riskTokenType": "",
+        "riskVersion": "",
+        "needSecurityRisk": false
+    },
+    "ext_code": "",
+    "ext_info": {},
+    "time_now": "1741769514.655369"
+}
+```
