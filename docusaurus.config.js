@@ -106,22 +106,10 @@ const config = {
             label: 'Bybit Pay',
           },
           {
-            type: 'dropdown',
+            type: 'doc',
+            docId: 'changelog/v5',
             position: 'right',
-            label: 'Extras',
-            items: [
-              {
-                type: 'doc',
-                docId: 'changelog/v5',
-                label: 'Changelog',
-              },
-            ]
-          },
-          {
-            type: 'localeDropdown',
-            position: 'right',
-            dropdownItemsBefore: [],
-            dropdownItemsAfter: [],
+            label: 'Changelog',
           },
         ],
       },
