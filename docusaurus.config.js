@@ -80,6 +80,7 @@ const config = {
       },
       colorMode: {
         defaultMode: 'dark',
+        defaultMode: 'light',
       },
       tableOfContents: {
         minHeadingLevel: 2,
