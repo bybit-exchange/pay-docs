@@ -7,6 +7,10 @@ import HomepageFeatures from '@site/src/components/HomepageFeatures';
 
 import styles from './index.module.css';
 
+
+import {Redirect} from '@docusaurus/router';
+
+
 function HomepageHeader() {
   const {siteConfig} = useDocusaurusContext();
   return (
@@ -17,8 +21,8 @@ function HomepageHeader() {
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
-            to="/v5/intro">
-            Introduction to the Bybit V5 APIs – 5min ⏱️
+            to="/bybit-pay/guide">
+            Get started with the Bybit Pay API️
           </Link>
         </div>
       </div>
@@ -27,6 +31,10 @@ function HomepageHeader() {
 }
 
 export default function Home() {
+  const Home = () => {
+    return <Redirect to="/pay-docs/bybit-pay/guide" />;
+  };
+
   const {siteConfig} = useDocusaurusContext();
   return (
     <Layout

@@ -3,33 +3,6 @@ import clsx from 'clsx';
 import styles from './styles.module.css';
 
 const FeatureList = [
-  {
-    title: 'Unified APIs',
-    Svg: require('@site/static/img/power_plug_dark_mode.svg').default,
-    description: (
-      <>
-        Bybit's latest v5 suite of APIs allow for a smooth and easy integration.
-      </>
-    ),
-  },
-  {
-    title: 'Learn Exchange Mechanisms',
-    Svg: require('@site/static/img/clipboard_light_mode.svg').default,
-    description: (
-      <>
-        <b><a href="https://www.bybit.com/en-US/help-center/HelpCenterKnowledge/bybitHC_Guides?language=en_US">Learn</a></b> the intricate details of Bybit's market rules to fully maximise your API usage.
-      </>
-    ),
-  },
-  {
-    title: 'Historical Market Data',
-    Svg: require('@site/static/img/candlesticks_dark_mode.svg').default,
-    description: (
-      <>
-        <b><a href="https://public.bybit.com/">Get</a></b> comprehensive public market data in CSV format to speedily backtest and build strategies.
-      </>
-    ),
-  },
 ];
 
 function Feature({Svg, title, description}) {

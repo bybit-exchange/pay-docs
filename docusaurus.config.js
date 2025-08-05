@@ -6,10 +6,10 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Bybit API Documentation',
+  title: 'Bybit Pay API Documentation',
   tagline: '',
   url: 'https://bybit-exchange.github.io',
-  baseUrl: '/docs/',
+  baseUrl: '/pay-docs/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
@@ -19,7 +19,7 @@ const config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'bybit-exchange', // Usually your GitHub org/user name.
-  projectName: 'docs', // Usually your repo name.
+  projectName: 'pay-docs', // Usually your repo name.
   trailingSlash: false,
 
   // Even if you don't use internalization, you can use this field to set useful
@@ -72,7 +72,7 @@ const config = {
         contextualSearch: true,
         externalUrlRegex: 'external\\.com|domain\\.com',
         replaceSearchResultPathname: {
-          from: '/docs/', // or as RegExp: /\/docs\//
+          from: '/pay-docs/', // or as RegExp: /\/docs\//
           to: '/',
         },
         searchParameters: {},
