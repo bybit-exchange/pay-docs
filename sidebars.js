@@ -49,7 +49,7 @@ const sidebars = {
   'error',
 ],
   changelogSidebar: [
-    "changelog/v5"
+    "changelog/bybit-pay"
   ]
 };
 

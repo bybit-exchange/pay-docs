@@ -108,7 +108,7 @@ const config = {
           },
           {
             type: 'doc',
-            docId: 'changelog/v5',
+            docId: 'changelog/bybit-pay',
             position: 'right',
             label: 'Changelog',
           },
