@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocusaurus_docs=self.webpackChunkdocusaurus_docs||[]).push([[195],{62841:(u,s,e)=>{e.r(s),e.d(s,{default:()=>t});var c=e(67294),r=e(76775);function t(){return c.createElement(r.l_,{to:"/docs"})}}}]);
