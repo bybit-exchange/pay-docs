@@ -6,10 +6,10 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Bybit API Documentation',
+  title: 'Bybit Pay API Documentation',
   tagline: '',
   url: 'https://bybit-exchange.github.io',
-  baseUrl: '/docs/',
+  baseUrl: '/pay-docs/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
@@ -19,7 +19,7 @@ const config = {
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'bybit-exchange', // Usually your GitHub org/user name.
-  projectName: 'docs', // Usually your repo name.
+  projectName: 'pay-docs', // Usually your repo name.
   trailingSlash: false,
 
   // Even if you don't use internalization, you can use this field to set useful
@@ -33,87 +33,6 @@ const config = {
     },
   },
   plugins: [
-    [
-      "docusaurus-plugin-openapi-docs",
-      {
-        id: "openapi",
-        docsPluginId: "classic",
-        config: {
-          v5_market: {
-            specPath: "yml-folder/v5/market.yaml",
-            outputDir: "docs/api-explorer/v5/market",
-            sidebarOptions: {
-              groupPathsBy: "tag",
-              categoryLinkSource: "tag"
-            }
-          },
-          v5_trade: {
-            specPath: "yml-folder/v5/trade.yaml",
-            outputDir: "docs/api-explorer/v5/trade",
-            sidebarOptions: {
-              groupPathsBy: "tag",
-              categoryLinkSource: "tag"
-            }
-          },
-          v5_account: {
-            specPath: "yml-folder/v5/account.yaml",
-            outputDir: "docs/api-explorer/v5/account",
-            sidebarOptions: {
-              groupPathsBy: "tag",
-              categoryLinkSource: "tag"
-            }
-          },
-          v5_position: {
-            specPath: "yml-folder/v5/position.yaml",
-            outputDir: "docs/api-explorer/v5/position",
-            sidebarOptions: {
-              groupPathsBy: "tag",
-              categoryLinkSource: "tag"
-            }
-          },
-          v5_asset: {
-            specPath: "yml-folder/v5/asset.yaml",
-            outputDir: "docs/api-explorer/v5/asset",
-            sidebarOptions: {
-              groupPathsBy: "tag",
-              categoryLinkSource: "tag"
-            }
-          },
-          v5_user: {
-            specPath: "yml-folder/v5/user.yaml",
-            outputDir: "docs/api-explorer/v5/user",
-            sidebarOptions: {
-              groupPathsBy: "tag",
-              categoryLinkSource: "tag"
-            }
-          },
-          v5_lt: {
-            specPath: "yml-folder/v5/lt.yaml",
-            outputDir: "docs/api-explorer/v5/lt",
-            sidebarOptions: {
-              groupPathsBy: "tag",
-              categoryLinkSource: "tag"
-            }
-          },
-          v5_spot_margin_uta: {
-            specPath: "yml-folder/v5/spot-margin-uta.yaml",
-            outputDir: "docs/api-explorer/v5/spot-margin-uta",
-            sidebarOptions: {
-              groupPathsBy: "tag",
-              categoryLinkSource: "tag"
-            }
-          },
-          v5_spot_margin_normal: {
-            specPath: "yml-folder/v5/spot-margin-normal.yaml",
-            outputDir: "docs/api-explorer/v5/spot-margin-normal",
-            sidebarOptions: {
-              groupPathsBy: "tag",
-              categoryLinkSource: "tag"
-            }
-          },
-        }
-      }
-    ],
   ],
   presets: [
     [
@@ -153,7 +72,7 @@ const config = {
         contextualSearch: true,
         externalUrlRegex: 'external\\.com|domain\\.com',
         replaceSearchResultPathname: {
-          from: '/docs/', // or as RegExp: /\/docs\//
+          from: '/pay-docs/', // or as RegExp: /\/docs\//
           to: '/',
         },
         searchParameters: {},
@@ -161,6 +80,7 @@ const config = {
       },
       colorMode: {
         defaultMode: 'dark',
+        defaultMode: 'light',
       },
       tableOfContents: {
         minHeadingLevel: 2,
@@ -182,58 +102,15 @@ const config = {
         items: [
           {
             type: 'doc',
-            docId: 'v5/intro',
-            position: 'left',
-            label: 'V5 API',
-          },
-          {
-            type: 'doc',
-            docId: 'p2p/guide',
-            position: 'left',
-            label: 'P2P Trading',
-          },
-          {
-            type: 'doc',
-            docId: 'bybit-pay/guide',
+            docId: 'guide',
             position: 'left',
             label: 'Bybit Pay',
           },
           {
             type: 'doc',
-            docId: 'v3/intro',
-            position: 'left',
-            label: 'Tax API V3',
-          },
-          {
-            type: 'dropdown',
+            docId: 'changelog/bybit-pay',
             position: 'right',
-            label: 'Extras',
-            items: [
-              {
-                type: 'doc',
-                docId: 'pilot-feature/pilot',
-                label: 'Pilot Features',
-              },
-              {
-                type: 'doc',
-                docId: 'changelog/v5',
-                label: 'Changelog',
-              },
-              {
-                to: '/api-explorer/v5/category',
-                label: 'API Explorer',
-              },
-              {
-                to: '/faq',
-                label: 'FAQ',
-              }
-            ]
-          },
-          {
-            type: 'localeDropdown',
-            position: 'right',
-            dropdownItemsBefore: [],
-            dropdownItemsAfter: [],
+            label: 'Changelog',
           },
         ],
       },
@@ -263,14 +140,6 @@ const config = {
               {
                 label: 'API usage examples',
                 href: 'https://github.com/bybit-exchange/api-usage-examples',
-              },
-              {
-                label: 'Official python SDK – pybit',
-                href: 'https://github.com/bybit-exchange/pybit',
-              },
-              {
-                label: 'Community nodeJS SDK – bybit-api',
-                href: 'https://www.npmjs.com/package/bybit-api',
               },
             ],
           },

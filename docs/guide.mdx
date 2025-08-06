@@ -1,14 +1,7 @@
 ---
-title: P2P Authentication
-sidebar_label: P2P Authentication
-sidebar_position: 1
+title: Authentication
+sidebar_label: Bybit Pay Authentication
 ---
-## API Resources and Support Channels
-* 📌 [Help Center](https://www.bybit.com/en-US/help-center/bybitHC_Guides?language=en_US)
-* 🎉 [Official Python P2P API SDK](https://github.com/bybit-exchange/bybit_p2p)
-* ✉️ [Telegram - API Discussion Group](https://t.me/BybitAPI)
-* ✉️ [Discord](https://discord.gg/3ZDjGBNvKR)
-
 ## Authentication
 :::info
 Please visit Bybit's <a href="https://testnet.bybit.com/app/user/api-management"> <b>testnet</b></a> or <a href="https://www.bybit.com/app/user/api-management"> <b>mainnet</b></a> to generate an API key
@@ -48,7 +41,7 @@ A smaller `X-BAPI-RECV-WINDOW` is more secure, but your request may fail if the 
 :::caution
 Please make sure that the timestamp parameter adheres to the **following rule**:<br/>
 _server_time - recv_window <= timestamp < server_time + 1000_<br/>
-server_time stands for Bybit server time, which can be queried via the [Server Time endpoint](../v5/market/time#).
+server_time stands for Bybit server time, which can be queried via standard API's [Server Time endpoint](https://bybit-exchange.github.io/docs/v5/market/time).
 :::
 
 ### Create A Request
@@ -145,20 +138,19 @@ Host: api-testnet.bybit.com
 ## Common response parameters
 | Parameter | Type | Comments|
 |:----- |:-----|----- |
-|ret_code |number |Success/Error code |
-|ret_msg |string |Success/Error msg. `OK`, `success`, `SUCCESS`, `""` indicate a successful response|
+|retCode |number |Success/Error code |
+|retMsg |string |Success/Error msg. `OK`, `success`, `SUCCESS`, `""` indicate a successful response|
 |result |Object |Business data result|
-|ext_code |string |Extend info. Most of the time it is `""`|
-|ext_info |Object |Extend info. Most of the time it is `{}`|
-|time_now |string |Current timestamp|
+|retExtInfo |Object |Extend info. Most of the time it is `{}`|
+|time |number |Current timestamp (ms)|
 
 ```json
 {
-    "ret_code": 0,
-    "ret_msg": "SUCCESS",
-    "result": {},
-    "ext_code": "",
-    "ext_info": {},
-    "time_now": "1741591549.119556"
+    "retCode": 100000,
+    "retMsg": "OK",
+    "result": {
+    },
+    "retExtInfo": {},
+    "time": 1671017382656
 }
 ```
