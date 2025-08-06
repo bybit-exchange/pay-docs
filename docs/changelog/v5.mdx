@@ -4,6 +4,32 @@ title: V5
 
 import '/src/css/changelog.css';
 
+## 2025-08-07
+### REST API
+- [Get Recent Public Trades](../v5/market/recent-trade) [UPDATE]
+    - Add a new response field `seq`
+
+- [Get Recent Public Trades](../v5/spread/market/recent-trade) [UPDATE]
+    - Add a new response field `seq` for spread trading
+
+## 2025-08-06
+### REST API
+- [Withdraw](../v5/asset/withdraw) [UPDATE]
+    - Request parameter `accountType` becomes mandatory, and supports withdrawing from mutiple wallets.
+
+- [Get Delay Withdraw Amount](../v5/asset/balance/delay-amount)
+    - Support returning UTA wallet balance
+
+## 2025-08-05
+### Websocket API
+- [Trade](../v5/websocket/public/trade) [UPDATE]
+    - Add `seq`
+    - Futures and Spot public trade message will be splited into mutiple when it exceeds 1024 trades
+
+- [Trade](../v5/spread/websocket/public/trade) [UPDATE]
+    - Add `seq` in spread trading
+    - Futures and Spot public trade message will be splited into mutiple when it exceeds 1024 trades
+
 ## 2025-07-31
 ### REST API
 - [Set Limit Price Behaviour](../v5/account/set-price-limit) [NEW]
@@ -64,14 +90,12 @@ import '/src/css/changelog.css';
 ### REST API
 - [Get Wallet Balance](../v5/account/wallet-balance) [UPDATE]
     - Add new response fields: `totalMaintenanceMarginByMp`,`accountMMRateByMp`,`accountIMRateByMp`,`totalInitialMarginByMp`
-
 - [Get Position Info](../v5/position) [UPDATE]
     - Add new response fields: `positionIMByMp`,`positionMMByMp`
 
 ### Websocket API
 - [Wallet](../v5/websocket/private/wallet) [UPDATE]
     - Add new fields: `accountIMRateByMp`,`accountMMRateByMp`,`totalInitialMarginByMp`,`totalMaintenanceMarginByMp`
-
 - [Position](../v5/websocket/private/position) [UPDATE]
     - Add new fields: `positionIMByMp`,`positionMMByMp`
 
@@ -79,17 +103,14 @@ import '/src/css/changelog.css';
 ### REST API
 - [Get Order History](../v5/order/order-list) [UPDATE]
     - Add new enum "GST" for `extraFees` field for Indian GST tax
-
 - [Get Trade History](../v5/order/execution) [UPDATE]
     - Add new enum "GST" for `extraFees` field for Indian GST tax
-
 - [Get Transaction Log (UTA)](../v5/account/transaction-log) [UPDATE]
     - Add new enum "GST" for `extraFees` field for Indian GST tax
 
 ### Websocket API
 - [Execution](../v5/websocket/private/execution) [UPDATE]
     - Add `extraFees` for Indian GST tax
-
 - BTC and ETH leveraged tokens are delisted, and the API service will be terminated on <b>4 July, 2025</b>
 
 ## 2025-06-26
@@ -97,7 +118,6 @@ import '/src/css/changelog.css';
 - [Get Spread Trade History](../v5/spread/trade/trade-history) [UPDATE]
     - Add `execFeeV2` for Spot leg trading fee
     - Add `feeCurrency` for all legs trading fee currency
-
 - [Get Trade History](../v5/order/execution) [UPDATED]
     - Add `execFeeV2` for FutureSpread Spot leg trading fee only
 
@@ -110,14 +130,11 @@ import '/src/css/changelog.css';
 ### REST API
 - [Get Closed Options Positions](../v5/position/close-position) [NEW]
     - Add new endpoint which is used to get closed options positions
-
 - [Get Closed PnL](../v5/position/close-pnl) [UPDATE]
     - Add new response fields `openFee`, `closeFee`
     - Add new enum "option" for `category` field to support getting option closed pnl records
-
 - [Get Delivery Record](../v5/asset/delivery) [UPDATE]
     - Add new response field `entryPrice`
-
 - [Get Transaction Log (UTA)](../v5/account/transaction-log) [UPDATE]
     - Add new types `ONCHAINEARN_SUBSCRIPTION`, `ONCHAINEARN_REDEMPTION`, `ONCHAINEARN_REFUND`, 
     `STRUCTURE_PRODUCT_SUBSCRIPTION`, `STRUCTURE_PRODUCT_REFUND`, `CLASSIC_WEALTH_MANAGEMENT_SUBSCRIPTION`,
@@ -138,15 +155,12 @@ import '/src/css/changelog.css';
 - [Get Deposit Records (on-chain)](../v5/asset/deposit/deposit-record) [UPDATE]
     - Add `id`, `txID` request parameters to filter deposit records
     - Add `id`, an internal unique key field in the response
-
 - [Get Sub Deposit Records (on-chain)](../v5/asset/deposit/sub-deposit-record) [UPDATE]
     - Add `id`, `txID` request parameters to filter deposit records
     - Add `id`, an internal unique key field in the response
-
 - [Get Sub Account Deposit Records](../v5/broker/sub-deposit-record) [UPDATE]
     - Add `id`, `txID` request parameters to filter deposit records
     - Add `id`, an internal unique key field in the response
-
 - [Get Coin Information](../v5/asset/coin-info) [UPDATE]
     - Add `safeConfirmNumber` to indicate the number of security confirmations of deposit
 
@@ -159,14 +173,11 @@ import '/src/css/changelog.css';
 ### REST API
 - [Get Order History](../v5/order/order-list) [UPDATE]
     - Add new response field `extraFees` which is only used for Indonesian site or EU site
-
 - [Get Trade History](../v5/order/execution) [UPDATE]
     - Add new response field `extraFees` which is only used for Indonesian site or EU site
-
 - [Get Transaction Log (UTA)](../v5/account/transaction-log) [UPDATE]
     - Add new response field `extraFees` which is only used for Indonesian site or EU site
-
-- [Payment Status Mock (sandbox)](../scan-payment/payment-status-mock) [UPDATE]
+- [Payment Status Mock (sandbox)](../bybit-pay/scan-payment/payment-status-mock) [UPDATE]
     - Refactor pay status mock path from `/v5/bybitpay/pay-status/mock` to `/v5/bybitpay/paystatus/mock`
 
 ## 2025-05-27
@@ -178,7 +189,6 @@ import '/src/css/changelog.css';
 ### REST API
 - [Get Insurance](../v5/market/insurance) [UPDATE]
     - The balance data update frequency has been changed from every 24 hours to every 1 minute
-
 - [Insurance Pool](../v5/websocket/public/insurance-pool) [NEW]
     - A new WebSocket topic has been introduced to allow users to listen for updates to the insurance pool balance.
 
@@ -193,7 +203,6 @@ import '/src/css/changelog.css';
 - [Get Transaction Log (UTA)](../v5/account/transaction-log) [UPDATE]
     - Add new response field `transSubType`, used for trans log generated by move position now
     - Modify the default time range from 7 days to 24 hours when `startTime` & `endTime` are not passed together
-
 - [Get Spread Order History](../v5/spread/trade/order-history) [UPDATE]
     - Add response field `cxlRejReason`
     - Remove redundent field `orderPrice`
