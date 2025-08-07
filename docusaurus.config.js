@@ -124,19 +124,15 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Community',
+            title: 'Bybit',
             items: [
               {
-                label: 'Telegram – English',
-                href: 'https://t.me/BybitAPI',
+                label: 'Bybit Pay one-pager',
+                href: 'https://www.bybit.com/en/bybitpay/',
               },
               {
-                label: 'Telegram – Chinese',
-                href: 'https://t.me/BybitChineseAPI',
-              },
-              {
-                label: 'Discord',
-                href: 'https://discord.gg/VBwVwS2HUs',
+                label: 'Other Bybit API documentation',
+                href: 'https://bybit-exchange.github.io/docs/',
               },
             ],
           },
