@@ -107,6 +107,12 @@ const config = {
             label: 'Bybit Pay',
           },
           {
+            docId: 'external_docs',
+            href: 'https://bybit-exchange.github.io/docs/',
+            position: 'left',
+            label: 'Other Bybit API docs',
+          },
+          {
             type: 'doc',
             docId: 'changelog/bybit-pay',
             position: 'right',
@@ -118,19 +124,15 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Community',
+            title: 'Bybit',
             items: [
               {
-                label: 'Telegram – English',
-                href: 'https://t.me/BybitAPI',
+                label: 'Bybit Pay one-pager',
+                href: 'https://www.bybit.com/en/bybitpay/',
               },
               {
-                label: 'Telegram – Chinese',
-                href: 'https://t.me/BybitChineseAPI',
-              },
-              {
-                label: 'Discord',
-                href: 'https://discord.gg/VBwVwS2HUs',
+                label: 'Other Bybit API documentation',
+                href: 'https://bybit-exchange.github.io/docs/',
               },
             ],
           },
