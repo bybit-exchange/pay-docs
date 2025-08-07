@@ -107,6 +107,12 @@ const config = {
             label: 'Bybit Pay',
           },
           {
+            docId: 'external_docs',
+            href: 'https://bybit-exchange.github.io/docs/',
+            position: 'left',
+            label: 'Other Bybit API docs',
+          },
+          {
             type: 'doc',
             docId: 'changelog/bybit-pay',
             position: 'right',
