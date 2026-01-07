@@ -19,32 +19,44 @@ GET `/v5/bybitpay/pay_result`
 | Parameter | Type | Comments|
 |:----- |:-----|----- |
 |order |&lt;[PayOrderType](../data-model/pay-order)&gt; |Bybit PayOrder Detail|
+|customer |&lt;[CustomerType](../data-model/customer)&gt; |Customer info|
 
 ### Request Example
-#### Query Pay Order
+#### Query Pay Order by merchantTradeNo
 ```http
-GET /v5/bybitpay/pay_result?merchantId=305142568&paymentType=E_COMMERCE&merchantTradeNo=fe43f6b0-fb6c-4f17-af07-d069746ec760 HTTP/1.1
+GET /v5/bybitpay/pay_result?merchantId=305142568&paymentType=E_COMMERCE&merchantTradeNo=af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c HTTP/1.1
 Host: api.bybit.com
 X-BAPI-SIGN: XXXXX
 X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
-X-BAPI-TIMESTAMP: 1739178959616
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-RECV-WINDOW: 5000
+Content-Type: application/json
+```
+
+#### Query Pay Order by payId (Recommended)
+```http
+GET /v5/bybitpay/pay_result?merchantId=305142568&paymentType=E_COMMERCE&payId=01JY2KM5QNPXR8S4HTJZT9BC12 HTTP/1.1
+Host: api.bybit.com
+X-BAPI-SIGN: XXXXX
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
 X-BAPI-RECV-WINDOW: 5000
 Content-Type: application/json
 ```
 
 #### Query Refund Order
 ```http
-GET /v5/bybitpay/pay_result?merchantId=305142568&paymentType=E_COMMERCE_REFUND&merchantTradeNo=b4b7c249-3ff1-4a85-9fc9-b95420a3cec0 HTTP/1.1
+GET /v5/bybitpay/pay_result?merchantId=305142568&paymentType=E_COMMERCE_REFUND&merchantTradeNo=RF-2026-0001 HTTP/1.1
 Host: api.bybit.com
 X-BAPI-SIGN: XXXXX
 X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
-X-BAPI-TIMESTAMP: 1739178959616
+X-BAPI-TIMESTAMP: 1736233200000
 X-BAPI-RECV-WINDOW: 5000
 Content-Type: application/json
 ```
 
 ### Response Example
-#### Pay Order Response
+#### Pay Order Response (Payment Success)
 ```json
 {
     "retCode": 100000,
@@ -52,24 +64,33 @@ Content-Type: application/json
     "result": {
         "order": {
             "merchantId": "305142568",
-            "clientId": "",
+            "clientId": "client_001",
             "paymentType": "E_COMMERCE",
-            "merchantTradeNo": "fe43f6b0-fb6c-4f17-af07-d069746ec760",
-            "payId": "01JN5WJNK8ZYK8B7JGKTVNXCPN",
-            "status": "TIMEOUT",
+            "merchantTradeNo": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+            "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
+            "status": "PAY_SUCCESS",
             "amount": "100",
             "currency": "USDT",
             "currencyType": "crypto",
-            "createTime": 1740733241,
-            "paymentTime": 0,
-            "finishTime": 0,
-            "refundOrders": []
+            "createTime": 1736233200,
+            "paymentTime": 1736233260,
+            "finishTime": 1736233260,
+            "refundOrders": [],
+            "remark": "Order for digital goods"
+        },
+        "customer": {
+            "uid": "104326789",
+            "externalUserId": "user123@merchant.com",
+            "userName": "John Doe",
+            "registerTime": 1704067200,
+            "kycCountry": "USA",
+            "remarks": "VIP customer"
         }
     }
 }
 ```
 
-#### Refund Order Response
+#### Pay Order Response (Timeout)
 ```json
 {
     "retCode": 100000,
@@ -77,29 +98,70 @@ Content-Type: application/json
     "result": {
         "order": {
             "merchantId": "305142568",
-            "clientId": "",
+            "clientId": "client_001",
             "paymentType": "E_COMMERCE",
-            "merchantTradeNo": "fe43f6b0-fb6c-4f17-af07-d069746ec760",
-            "payId": "01JN5WJNK8ZYK8B7JGKTVNXCPN",
+            "merchantTradeNo": "bf9d3e2-6c4f-5b0g-c8d9-9e3f2g4b6d7e",
+            "payId": "01JY2KM5QNPXR8S4HTJZT9BC13",
+            "status": "TIMEOUT",
+            "amount": "50",
+            "currency": "USDT",
+            "currencyType": "crypto",
+            "createTime": 1736230000,
+            "paymentTime": 0,
+            "finishTime": 1736233600,
+            "refundOrders": []
+        },
+        "customer": {
+            "uid": "104326790",
+            "externalUserId": "user456@merchant.com",
+            "userName": "Jane Smith",
+            "registerTime": 1709251200,
+            "kycCountry": "GBR"
+        }
+    }
+}
+```
+
+#### Order with Refund Response
+```json
+{
+    "retCode": 100000,
+    "retMsg": "success",
+    "result": {
+        "order": {
+            "merchantId": "305142568",
+            "clientId": "client_001",
+            "paymentType": "E_COMMERCE",
+            "merchantTradeNo": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+            "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
             "status": "PAY_SUCCESS",
             "amount": "100",
             "currency": "USDT",
             "currencyType": "crypto",
-            "createTime": 1740733241,
-            "paymentTime": 1740733241,
-            "finishTime": 0,
+            "createTime": 1736233200,
+            "paymentTime": 1736233260,
+            "finishTime": 1736233260,
             "refundOrders": [
                 {
-                    "refundId": "D41717457E604297B96E1E7E8D238302",
+                    "refundId": "RF01JY2KM5QNPXR8S4HTJZT9BC14",
                     "refundType": "MERCHNT_SELF_REFUND",
-                    "merchantTradeNo": "fe43f6b0-fb6c-4f17-af07-d069746ec760",
-                    "merchantRefundNo": "b4b7c249-3ff1-4a85-9fc9-b95420a3cec0",
-                    "payId": "01JN5WJNK8ZYK8B7JGKTVNXCPN",
+                    "merchantTradeNo": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+                    "merchantRefundNo": "RF-2026-0001",
+                    "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
                     "refundStatus": "REFUND_SUCCESS",
-                    "amount": "100",
-                    "createTime": 1740748919
+                    "refundCurrency": "USDT",
+                    "amount": "50",
+                    "createTime": 1736234000
                 }
-            ]
+            ],
+            "remark": "Partial refund processed"
+        },
+        "customer": {
+            "uid": "104326789",
+            "externalUserId": "user123@merchant.com",
+            "userName": "John Doe",
+            "registerTime": 1704067200,
+            "kycCountry": "USA"
         }
     }
 }

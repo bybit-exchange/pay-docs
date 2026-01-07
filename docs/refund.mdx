@@ -19,54 +19,171 @@ POST `/v5/bybitpay/refund`
 
 ### Request Example
 
+#### Single Full Refund (by payId - Recommended)
 ```http
 POST /v5/bybitpay/refund HTTP/1.1
 Host: api.bybit.com
 X-BAPI-SIGN: XXXXX
 X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
-X-BAPI-TIMESTAMP: 1739178959616
-X-BAPI-RECV-WINDOW: 50000
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-RECV-WINDOW: 5000
 Content-Type: application/json
 
 {
+    "merchantId": "305142568",
+    "clientId": "client_001",
     "list": [
         {
             "refundType": "MERCHNT_SELF_REFUND",
-            "merchantTradeNo": "fe43f6b0-fb6c-4f17-af07-d069746ec760",
-            "payId": "",
-            "merchantRefundNo": "b4b7c249-3ff1-4a85-9fc9-b95420a3cec0",
-            "refundAmount": "101",
+            "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
+            "merchantRefundNo": "RF-2026-0001",
+            "refundAmount": "100",
             "env": {
-                "browserVersion": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-                "device": "xxde",
-                "ip": "127.0.0.1",
-                "terminalType": "APP"
+                "terminalType": "WEB",
+                "device": "Mozilla/5.0 compatible browser",
+                "browserVersion": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+                "ip": "203.0.113.50"
+            },
+            "riskInfo": {
+                "terminalType": "WEB"
+            },
+            "customer": {
+                "externalUserId": "user123@merchant.com",
+                "userName": "John Doe",
+                "registerTime": 1704067200,
+                "kycCountry": "USA"
             }
         }
-    ],
-    "merchantId": "305142568"
+    ]
+}
+```
+
+#### Single Partial Refund (by merchantTradeNo)
+```http
+POST /v5/bybitpay/refund HTTP/1.1
+Host: api.bybit.com
+X-BAPI-SIGN: XXXXX
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-RECV-WINDOW: 5000
+Content-Type: application/json
+
+{
+    "merchantId": "305142568",
+    "list": [
+        {
+            "refundType": "MERCHNT_SELF_REFUND",
+            "merchantTradeNo": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+            "merchantRefundNo": "RF-2026-0002",
+            "refundAmount": "50",
+            "env": {
+                "terminalType": "APP",
+                "device": "iPhone15,2",
+                "browserVersion": "iOS 18.0",
+                "ip": "198.51.100.25"
+            }
+        }
+    ]
+}
+```
+
+#### Batch Refund (Multiple Orders)
+```http
+POST /v5/bybitpay/refund HTTP/1.1
+Host: api.bybit.com
+X-BAPI-SIGN: XXXXX
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-RECV-WINDOW: 5000
+Content-Type: application/json
+
+{
+    "merchantId": "305142568",
+    "clientId": "client_001",
+    "list": [
+        {
+            "refundType": "MERCHNT_SELF_REFUND",
+            "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
+            "merchantRefundNo": "RF-BATCH-001",
+            "refundAmount": "100",
+            "env": {
+                "terminalType": "WEB",
+                "device": "batch-processor",
+                "browserVersion": "Server/1.0",
+                "ip": "10.0.1.100"
+            }
+        },
+        {
+            "refundType": "MERCHNT_SELF_REFUND",
+            "payId": "01JY2KM5QNPXR8S4HTJZT9BC13",
+            "merchantRefundNo": "RF-BATCH-002",
+            "refundAmount": "50.50",
+            "env": {
+                "terminalType": "WEB",
+                "device": "batch-processor",
+                "browserVersion": "Server/1.0",
+                "ip": "10.0.1.100"
+            }
+        }
+    ]
 }
 ```
 
 ### Response Example
 
+#### Single Refund Success Response
 ```json
 {
     "retCode": 100000,
     "retMsg": "success",
     "result": {
-        "refundOrders":[
-                {
-                    "refundId":"123",
-                    "refundType":"MERCHNT_SELF_REFUND",
-                    "merchantTradeNo":"123456",
-                    "merchantRefundNo":"123456",
-                    "payId":"123456",
-                    "refundStatus":"REFUND_SUCCESS",
-                    "amount":"100",
-                    "createTime":1739178959
-                }
-            ]
+        "refundOrders": [
+            {
+                "refundId": "RF01JY2KM5QNPXR8S4HTJZT9BC14",
+                "refundType": "MERCHNT_SELF_REFUND",
+                "merchantTradeNo": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+                "merchantRefundNo": "RF-2026-0001",
+                "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
+                "refundStatus": "REFUND_SUCCESS",
+                "refundCurrency": "USDT",
+                "amount": "100",
+                "createTime": 1736234000
+            }
+        ]
+    }
+}
+```
+
+#### Batch Refund Response
+```json
+{
+    "retCode": 100000,
+    "retMsg": "success",
+    "result": {
+        "refundOrders": [
+            {
+                "refundId": "RF01JY2KM5QNPXR8S4HTJZT9BC14",
+                "refundType": "MERCHNT_SELF_REFUND",
+                "merchantTradeNo": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+                "merchantRefundNo": "RF-BATCH-001",
+                "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
+                "refundStatus": "REFUND_SUCCESS",
+                "refundCurrency": "USDT",
+                "amount": "100",
+                "createTime": 1736234000
+            },
+            {
+                "refundId": "RF01JY2KM5QNPXR8S4HTJZT9BC15",
+                "refundType": "MERCHNT_SELF_REFUND",
+                "merchantTradeNo": "bf9d3e2-6c4f-5b0g-c8d9-9e3f2g4b6d7e",
+                "merchantRefundNo": "RF-BATCH-002",
+                "payId": "01JY2KM5QNPXR8S4HTJZT9BC13",
+                "refundStatus": "REFUND_SUCCESS",
+                "refundCurrency": "USDT",
+                "amount": "50.50",
+                "createTime": 1736234000
+            }
+        ]
     }
 }
 ```

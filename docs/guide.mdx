@@ -53,7 +53,7 @@ To assist in diagnosing advanced network problems, you may consider adding `cdn-
 **Basic steps:**
 1. timestamp + API key + (recv_window) + (queryString | jsonBodyString)
 2. Use the <b>HMAC_SHA256</b> or <b>RSA_SHA256</b> algorithm to sign the string in step 1, and convert it to a hex string (HMAC_SHA256) / base64 (RSA_SHA256) to obtain the sign parameter.
-3. Append the `sign` parameter to request header, and send the HTTP request. **Note:** the plain text for **GET** and **POST** requests is different. Please refer to blew examples.
+3. Append the `sign` parameter to request header, and send the HTTP request. **Note:** the plain text for **GET** and **POST** requests is different. Please refer to below examples.
 
 :::info
 <b>Example signature algorithms can be found <a href="https://github.com/bybit-exchange/api-usage-examples">here</a>.</b>

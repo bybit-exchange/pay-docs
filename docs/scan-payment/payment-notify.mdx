@@ -22,7 +22,7 @@ URL: provide the callback url in the [Create Payment](create-payment) request pa
 | Parameter | Type | Comments|
 |:----- |:-----|----- |
 |paymentType |string |Payment type  <li>`E_COMMERCE`: Bybit QR Pay for e-commerce</li><li>`E_COMMERCE_REFUND`: Bybit QR Pay refund for e-commerce</li>|
-| |&lt;[PayOrderType](../data-model/pay-order)&gt; |Retured when "paymentType"=`E_COMMERCE`|
+| |&lt;[PayOrderType](../data-model/pay-order)&gt; |Returned when "paymentType"=`E_COMMERCE`|
 | |&lt;[RefundOrderType](../data-model/refund-order)&gt; |Returned when "paymentType"=`E_COMMERCE_REFUND`|
 
 ### Signature Algorithm
@@ -32,7 +32,7 @@ URL: provide the callback url in the [Create Payment](create-payment) request pa
 3. Encrypt string content with sha256 and sign with PKCS1V15,1024
 4. Encode the encrypted bytes in base64
 
-For example, we sign the following data. The timestamp is `1740541514`, the RSA key is
+For example, we sign the following data. The timestamp is `1736236800`, the RSA key is
 ```shell
 -----The following key pairs are for testing only-----
 -----BEGIN RSA PUBLIC KEY-----
@@ -61,26 +61,26 @@ IavMyjrhDKyBGZ0mI6eoREaC4bxl31RRkYtg9mNeU3TxsBM=
 ```json
 {
     "paymentType": "E_COMMERCE",
-    "merchantId": "12",
-    "clientId": "xx",
-    "merchantTradeNo": "123456",
-    "payId": "123456",
-    "status": "INIT",
+    "merchantId": "305142568",
+    "clientId": "client_001",
+    "merchantTradeNo": "a]f8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+    "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
+    "status": "PAY_SUCCESS",
     "amount": "100",
     "currency": "USDT",
     "currencyType": "crypto",
-    "createTime": 1740488831,
-    "paymentTime": 1740488831,
-    "finishTime": 1740488831
+    "createTime": 1736233200,
+    "paymentTime": 1736233260,
+    "finishTime": 1736233260
 }
 ```
 1. Sort all fields in ascending alphabetical order by field name(key) in key=value format.
 ```json
-amount=100&clientId=xx&createTime=1740488831000&currency=USDT&currencyType=crypto&finishTime=1740488831000&merchantId=12&merchantTradeNo=123456&payId=123456&paymentTime=1740488831000&paymentType=E_COMMERCE&status=INIT
+amount=100&clientId=client_001&createTime=1736233200000&currency=USDT&currencyType=crypto&finishTime=1736233260000&merchantId=305142568&merchantTradeNo=a]f8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c&payId=01JY2KM5QNPXR8S4HTJZT9BC12&paymentTime=1736233260000&paymentType=E_COMMERCE&status=PAY_SUCCESS
 ```
 2. Generate a second timestamp and append it to the end of the sorted string in the format &amp;timestamp=${timestamp}
 ```json
-amount=100&clientId=xx&createTime=1740488831000&currency=USDT&currencyType=crypto&finishTime=1740488831000&merchantId=12&merchantTradeNo=123456&payId=123456&paymentTime=1740488831000&paymentType=E_COMMERCE&status=INIT&timestamp=1740541514
+amount=100&clientId=client_001&createTime=1736233200000&currency=USDT&currencyType=crypto&finishTime=1736233260000&merchantId=305142568&merchantTradeNo=a]f8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c&payId=01JY2KM5QNPXR8S4HTJZT9BC12&paymentTime=1736233260000&paymentType=E_COMMERCE&status=PAY_SUCCESS&timestamp=1736236800
 ```
 3. Encrypt string content with sha256 and sign with PKCS1V15,1024
 4. Encode the encrypted bytes in base64
@@ -98,7 +98,7 @@ For example, we provided the following data.
 ``` shell
 NgDZLZCVBdma904hzZXmU+fQ7dr7z7muZkuwAbDnibLXXXXXXXXXXXXgmzad58LfRtLXGlkNPXXXXXXXXXXX9jNYd6gxp7j0Mlh0vQlQCIb2283DQ3wbZDphilvXXXXXXXXXXXXX2IIBelYBBw39U=
 ```
-The timestamp is `1740541514`, the RSA key is
+The timestamp is `1736236800`, the RSA key is
 ```shell
 -----The following key pairs are for testing only-----
 -----BEGIN RSA PUBLIC KEY-----
@@ -125,58 +125,97 @@ IavMyjrhDKyBGZ0mI6eoREaC4bxl31RRkYtg9mNeU3TxsBM=
 ```
 1. Sort all fields in ascending alphabetical order by field name(key) in key=value format.
 ```json
-amount=100&clientId=xx&createTime=1740488831000&currency=USDT&currencyType=crypto&finishTime=1740488831000&merchantId=12&merchantTradeNo=123456&payId=123456&paymentTime=1740488831000&paymentType=E_COMMERCE&status=INIT
+amount=100&clientId=client_001&createTime=1736233200000&currency=USDT&currencyType=crypto&finishTime=1736233260000&merchantId=305142568&merchantTradeNo=a]f8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c&payId=01JY2KM5QNPXR8S4HTJZT9BC12&paymentTime=1736233260000&paymentType=E_COMMERCE&status=PAY_SUCCESS
 ```
 2. Generate a second timestamp and append it to the end of the sorted string in the format &amp;timestamp=${timestamp}
 ```json
-amount=100&clientId=xx&createTime=1740488831000&currency=USDT&currencyType=crypto&finishTime=1740488831000&merchantId=12&merchantTradeNo=123456&payId=123456&paymentTime=1740488831000&paymentType=E_COMMERCE&status=INIT&timestamp=1740541514
+amount=100&clientId=client_001&createTime=1736233200000&currency=USDT&currencyType=crypto&finishTime=1736233260000&merchantId=305142568&merchantTradeNo=a]f8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c&payId=01JY2KM5QNPXR8S4HTJZT9BC12&paymentTime=1736233260000&paymentType=E_COMMERCE&status=PAY_SUCCESS&timestamp=1736236800
 ```
 3. decode the signature bytes from base64
 4. Encrypt string content with sha256 and verify signature  base PKCS1V15,1024
 
 
 ### Request Example
-#### Callback Pay Order
+#### Callback Pay Order (Payment Success)
 ```http
 POST ${webhook url} HTTP/1.1
-Host: XXXXX
-timestamp: XXXXX
-signature: XXXXX
+Host: www.merchant.com
+timestamp: 1736233260
+signature: NgDZLZCVBdma904hzZXmU+fQ7dr7z7muZkuwAbDnibLXXXXXXXXXXXXgmzad58Lf...
 Content-Type: application/json
 
 {
     "paymentType": "E_COMMERCE",
-    "merchantId": "12",
-    "clientId": "xx",
-    "merchantTradeNo": "123456",
-    "payId": "123456",
-    "status": "INIT",
+    "merchantId": "305142568",
+    "clientId": "client_001",
+    "merchantTradeNo": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+    "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
+    "status": "PAY_SUCCESS",
     "amount": "100",
     "currency": "USDT",
     "currencyType": "crypto",
-    "createTime": 1740488831,
-    "paymentTime": 1740488831,
-    "finishTime": 1740488831
+    "createTime": 1736233200,
+    "paymentTime": 1736233260,
+    "finishTime": 1736233260,
+    "customer": {
+        "uid": "104326789",
+        "externalUserId": "user123@merchant.com",
+        "userName": "John Doe",
+        "registerTime": 1704067200,
+        "kycCountry": "USA"
+    }
+}
+```
+
+#### Callback Pay Order (Payment Failed)
+```http
+POST ${webhook url} HTTP/1.1
+Host: www.merchant.com
+timestamp: 1736233500
+signature: NgDZLZCVBdma904hzZXmU+fQ7dr7z7muZkuwAbDnibLXXXXXXXXXXXXgmzad58Lf...
+Content-Type: application/json
+
+{
+    "paymentType": "E_COMMERCE",
+    "merchantId": "305142568",
+    "clientId": "client_001",
+    "merchantTradeNo": "bf9d3e2-6c4f-5b0g-c8d9-9e3f2g4b6d7e",
+    "payId": "01JY2KM5QNPXR8S4HTJZT9BC13",
+    "status": "PAY_FAILED",
+    "amount": "50",
+    "currency": "USDT",
+    "currencyType": "crypto",
+    "createTime": 1736233300,
+    "paymentTime": 0,
+    "finishTime": 1736233500,
+    "customer": {
+        "uid": "104326790",
+        "externalUserId": "user456@merchant.com",
+        "userName": "Jane Smith",
+        "registerTime": 1709251200,
+        "kycCountry": "GBR"
+    }
 }
 ```
 
 #### Callback Refund Order
 ```http
 POST ${webhook url} HTTP/1.1
-Host: XXXXX
-timestamp: XXXXX
-signature: XXXXX
+Host: www.merchant.com
+timestamp: 1736234000
+signature: NgDZLZCVBdma904hzZXmU+fQ7dr7z7muZkuwAbDnibLXXXXXXXXXXXXgmzad58Lf...
 Content-Type: application/json
 
 {
     "paymentType": "E_COMMERCE_REFUND",
-    "refundId": "123",
+    "refundId": "RF01JY2KM5QNPXR8S4HTJZT9BC14",
     "refundType": "MERCHNT_SELF_REFUND",
-    "merchantTradeNo": "123456",
-    "merchantRefundNo": "123456",
-    "payId": "123456",
+    "merchantTradeNo": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+    "merchantRefundNo": "RF-2026-0001",
+    "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
     "refundStatus": "REFUND_SUCCESS",
-    "amount": "17399",
-    "createTime": 1740488831
+    "refundCurrency": "USDT",
+    "amount": "50",
+    "createTime": 1736234000
 }
 ```
