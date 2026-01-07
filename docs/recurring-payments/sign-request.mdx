@@ -1,0 +1,178 @@
+---
+title: Sign Request API
+sidebar_label: Sign Request
+sidebar_position: 2
+---
+
+## HTTP Request
+
+POST `/v5/bybitpay/agreement/sign`
+
+Create a sign request to initiate the agreement signing process. Returns a QR code and URL for the user to scan and complete authorization.
+
+---
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|:----------|:-----|:---------|:------------|
+| merchant_id | string | **Yes** | Merchant ID |
+| user_id | string | **Yes** | Platform user ID |
+| agreement_type | string | **Yes** | Sign type: `CYCLE` (periodic) / `SINGLE` (one-time) |
+| merchant_user_id | string | **Yes** | Merchant-side user ID (for mapping) |
+| scene_code | string | **Yes** | [Scene code](appendix#scene-codes): TAXI, PARKING, SUBSCRIPTION, etc. |
+| product_code | string | No | Product code (assigned by platform) |
+| external_agreement_no | string | **Yes** | Merchant agreement number (unique) |
+| sign_valid_time | string | No | Sign validity period (ISO8601 format) |
+| single_limit | object | No | Single transaction limit |
+| single_limit.amount | string | Conditional | Limit amount (required if single_limit provided) |
+| single_limit.currency | string | Conditional | Currency code |
+| single_limit.currency_type | string | Conditional | `FIAT` or `CRYPTO` |
+| single_limit.chain | string | No | Chain network (for crypto, e.g., ERC20, TRC20) |
+| period_limits | array | No | Period limit configuration list |
+| period_limits[].period_type | string | Conditional | `DAY` / `WEEK` / `MONTH` / `YEAR` |
+| period_limits[].amount | string | Conditional | Period limit amount |
+| period_limits[].currency | string | Conditional | Currency code |
+| period_limits[].currency_type | string | Conditional | `FIAT` or `CRYPTO` |
+| period_limits[].chain | string | No | Chain network |
+| notify_url | string | **Yes** | Sign result webhook URL |
+| return_url | string | No | Redirect URL after sign completion |
+| sign_expire_minutes | int | No | Sign link validity (minutes), default 30, max 1440 |
+| extra_params | object | No | Extension parameters (passed through) |
+
+---
+
+## Response Parameters
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| code | string | Response code |
+| message | string | Response message |
+| data | object | Response data |
+| data.sign_order_id | string | Platform sign order number |
+| data.sign_url | string | Sign page URL (for H5 redirect) |
+| data.qr_code | string | Sign QR code content (for App scan) |
+| data.qr_code_url | string | Sign QR code image URL |
+| data.expire_time | string | Sign link expiration time |
+
+---
+
+## Request Example
+
+### Basic Sign Request
+
+```http
+POST /v5/bybitpay/agreement/sign HTTP/1.1
+Host: api.bybit.com
+Content-Type: application/json
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440000
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "merchant_user_id": "merchant_user_123",
+  "scene_code": "SUBSCRIPTION",
+  "external_agreement_no": "MERCHANT_AGR_001",
+  "notify_url": "https://merchant.com/notify/sign"
+}
+```
+
+### Sign Request with Limits
+
+```http
+POST /v5/bybitpay/agreement/sign HTTP/1.1
+Host: api.bybit.com
+Content-Type: application/json
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440001
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "merchant_user_id": "merchant_user_123",
+  "scene_code": "SUBSCRIPTION",
+  "product_code": "PROD_001",
+  "external_agreement_no": "MERCHANT_AGR_002",
+  "sign_valid_time": "2027-12-31T23:59:59Z",
+  "single_limit": {
+    "amount": "100000",
+    "currency": "USDT",
+    "currency_type": "CRYPTO",
+    "chain": "TRC20"
+  },
+  "period_limits": [
+    {
+      "period_type": "DAY",
+      "amount": "500000",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    {
+      "period_type": "MONTH",
+      "amount": "5000000",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    }
+  ],
+  "notify_url": "https://merchant.com/notify/sign",
+  "return_url": "https://merchant.com/return",
+  "sign_expire_minutes": 60
+}
+```
+
+---
+
+## Response Example
+
+### Success Response
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "sign_order_id": "AGR202601070001",
+    "sign_url": "https://pay.bybit.com/sign?token=xxx",
+    "qr_code": "https://pay.bybit.com/sign?token=xxx",
+    "qr_code_url": "https://pay.bybit.com/qr/AGR202601070001.png",
+    "expire_time": "2026-01-07T11:30:00Z"
+  }
+}
+```
+
+### Failure Response
+
+```json
+{
+  "code": "PARAM_ERROR",
+  "message": "Parameter error: external_agreement_no already exists",
+  "data": null
+}
+```
+
+---
+
+## Sign Types
+
+| Type | Description | Use Case |
+|:-----|:------------|:---------|
+| `CYCLE` | Periodic deduction | Subscriptions, recurring payments |
+| `SINGLE` | Single authorization | One-time pre-authorization |
+
+---
+
+## Notes
+
+1. **User Identity Mapping**: `merchant_user_id` establishes the mapping between merchant's user system and Bybit platform
+2. **Limit Configuration**: If not provided, platform default limits apply
+3. **Sign Expiration**: Default 30 minutes, can be extended up to 24 hours
+4. **Idempotency**: Same `external_agreement_no` returns existing sign request result

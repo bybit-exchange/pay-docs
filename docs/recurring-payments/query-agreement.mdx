@@ -1,0 +1,130 @@
+---
+title: Query Agreement API
+sidebar_label: Query Agreement
+sidebar_position: 7
+---
+
+## HTTP Request
+
+GET `/v5/bybitpay/agreement/query`
+
+Query single agreement status and details.
+
+---
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|:----------|:-----|:---------|:------------|
+| merchant_id | string | **Yes** | Merchant ID |
+| user_id | string | **Yes** | Platform user ID |
+| agreement_type | string | **Yes** | Sign type: `CYCLE` / `SINGLE` |
+| agreement_no | string | Either | Platform agreement number |
+| external_agreement_no | string | Either | Merchant agreement number |
+
+:::info
+Either `agreement_no` or `external_agreement_no` must be provided.
+:::
+
+---
+
+## Response Parameters
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| code | string | Response code |
+| data | object | Response data |
+| data.agreement_no | string | Platform agreement number |
+| data.external_agreement_no | string | Merchant agreement number |
+| data.user_id | string | Platform user ID |
+| data.merchant_user_id | string | Merchant-side user ID |
+| data.status | string | Agreement status |
+| data.sign_time | string | Sign time |
+| data.valid_time | string | Validity period |
+| data.single_limit | object | Single transaction limit |
+| data.period_limits | array | Period limits list |
+| data.used_quota | object | Used quota |
+
+---
+
+## Request Example
+
+```
+GET /v5/bybitpay/agreement/query?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202601070001 HTTP/1.1
+Host: api.bybit.com
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440009
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+```
+
+---
+
+## Response Example
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "agreement_no": "AGR202601070001",
+    "external_agreement_no": "MERCHANT_AGR_001",
+    "user_id": "U_123456789",
+    "merchant_user_id": "merchant_user_123",
+    "status": "SIGNED",
+    "sign_time": "2026-01-07T10:30:00Z",
+    "valid_time": "2027-01-07T10:30:00Z",
+    "single_limit": {
+      "amount": "100000",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    "period_limits": [
+      {
+        "period_type": "DAY",
+        "amount": "500000",
+        "currency": "USDT",
+        "currency_type": "CRYPTO",
+        "chain": "TRC20"
+      },
+      {
+        "period_type": "MONTH",
+        "amount": "5000000",
+        "currency": "USDT",
+        "currency_type": "CRYPTO",
+        "chain": "TRC20"
+      }
+    ],
+    "used_quota": {
+      "day_used": "50000",
+      "month_used": "150000",
+      "currency": "USDT",
+      "currency_type": "CRYPTO"
+    }
+  }
+}
+```
+
+---
+
+## Agreement Status
+
+| Status | Description | Deduction Allowed |
+|:-------|:------------|:------------------|
+| `INIT` | Waiting for user scan | No |
+| `PENDING` | User scanned, verification in progress | No |
+| `SIGNED` | Agreement active | **Yes** |
+| `SUSPENDED` | Temporarily paused | No |
+| `UNSIGNED` | Terminated | No |
+| `EXPIRED` | Expired | No |
+| `FAILED` | Sign failed | No |
+| `TIMEOUT` | Sign link expired | No |
+
+---
+
+## Notes
+
+- Use this API to check agreement status before deduction
+- `used_quota` shows current period usage (resets based on period type)
+- All states support query operation

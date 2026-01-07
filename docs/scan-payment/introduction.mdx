@@ -1,0 +1,141 @@
+---
+title: QR Payment Introduction
+sidebar_label: Introduction
+sidebar_position: 0
+---
+
+## Overview
+
+QR Payment is a one-time payment method where users scan a merchant-generated QR code to complete payment through the Bybit App.
+
+**Applicable Scenarios:**
+- E-commerce checkout
+- Retail POS systems
+- One-time service payments
+- Event ticket purchases
+
+---
+
+## Payment Flow
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Merchant   │     │    Bybit     │     │   Bybit App  │     │     User     │
+│    Server    │     │   Platform   │     │              │     │              │
+└──────┬───────┘     └──────┬───────┘     └──────┬───────┘     └──────┬───────┘
+       │                    │                    │                    │
+       │ 1. Create Payment  │                    │                    │
+       │ ─────────────────→ │                    │                    │
+       │                    │                    │                    │
+       │ 2. Return QR Code  │                    │                    │
+       │    & Pay URL       │                    │                    │
+       │ ←───────────────── │                    │                    │
+       │                    │                    │                    │
+       │   Display QR Code  │                    │                    │
+       │   to User          │                    │    3. Scan QR      │
+       │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─│─ ─ ─ ─ ─ ─ ─ ─ ─ →│← ─ ─ ─ ─ ─ ─ ─ ─  │
+       │                    │                    │                    │
+       │                    │                    │ 4. Confirm Payment │
+       │                    │                    │    & Enter PIN     │
+       │                    │                    │ ←─────────────────→│
+       │                    │                    │                    │
+       │                    │    5. Process      │                    │
+       │                    │    Payment         │                    │
+       │                    │ ←──────────────────│                    │
+       │                    │                    │                    │
+       │ 6. Webhook Notify  │                    │  7. Show Result    │
+       │    Payment Result  │                    │ ──────────────────→│
+       │ ←───────────────── │                    │                    │
+       │                    │                    │                    │
+       ▼                    ▼                    ▼                    ▼
+```
+
+---
+
+## API List
+
+| API Name | Method | Endpoint | Description |
+|:---------|:-------|:---------|:------------|
+| [Create Payment](create-payment) | POST | `/v5/bybitpay/create_pay` | Create payment order, get QR code |
+| [Get Payment Result](payment-result) | GET | `/v5/bybitpay/pay_result` | Query payment status |
+| [Payment Notify](payment-notify) | POST | Webhook URL | Receive payment result callback |
+| [Payment FxConvert](payment-fx-convert) | POST | `/v5/bybitpay/fx/convert` | Get exchange rate quotation |
+| [Payment Status Mock](payment-status-mock) | POST | `/v5/bybitpay/paystatus/mock` | Mock payment status (sandbox only) |
+
+---
+
+## Order Status Flow
+
+```
+┌──────────┐     ┌───────────────┐     ┌───────────────┐
+│   INIT   │────→│  PAY_SUCCESS  │────→│ REFUND_SUCCESS│
+│  (Created)│     │   (Paid)      │     │  (Refunded)   │
+└────┬─────┘     └───────────────┘     └───────────────┘
+     │
+     │ Timeout/Failed
+     ▼
+┌───────────────┐
+│ TIMEOUT/FAILED│
+│               │
+└───────────────┘
+```
+
+| Status | Description |
+|:-------|:------------|
+| `INIT` | Order created, waiting for payment |
+| `PAY_SUCCESS` | Payment completed successfully |
+| `PAY_FAILED` | Payment failed |
+| `TIMEOUT` | Order expired (not paid in time) |
+| `REFUND_SUCCESS` | Refund completed |
+| `REFUND_FAILED` | Refund failed |
+
+---
+
+## Quick Start
+
+### Step 1: Create Payment
+
+```bash
+POST /v5/bybitpay/create_pay
+```
+
+```json
+{
+    "merchantId": "305142568",
+    "clientId": "client_001",
+    "paymentType": "E_COMMERCE",
+    "merchantTradeNo": "ORDER-2026-0001",
+    "orderAmount": "100",
+    "currency": "USDT",
+    "webhookUrl": "https://merchant.com/webhook",
+    "expireTime": 1800
+}
+```
+
+### Step 2: Display QR Code
+
+Display the returned `qrCodeUrl` or `payUrl` to the user.
+
+### Step 3: Handle Webhook
+
+Receive payment result notification at your webhook URL:
+
+```json
+{
+    "paymentType": "E_COMMERCE",
+    "merchantId": "305142568",
+    "merchantTradeNo": "ORDER-2026-0001",
+    "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
+    "status": "PAY_SUCCESS",
+    "amount": "100",
+    "currency": "USDT"
+}
+```
+
+---
+
+## Related APIs
+
+- [Refund](refund) - Process refunds for completed payments
+- [Payout](payout) - Send payouts to Bybit users
+- [Settlement](settlement) - Query settlement records

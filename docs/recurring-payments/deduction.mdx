@@ -1,0 +1,270 @@
+---
+title: Agreement Deduction API
+sidebar_label: Deduction
+sidebar_position: 5
+---
+
+## HTTP Request
+
+POST `/v5/bybitpay/agreement/pay`
+
+Execute automatic deduction from user's account using a signed agreement. This is the core API for agreement payment.
+
+---
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|:----------|:-----|:---------|:------------|
+| merchant_id | string | **Yes** | Merchant ID |
+| user_id | string | **Yes** | Platform user ID |
+| agreement_type | string | **Yes** | Sign type: `CYCLE` / `SINGLE` |
+| agreement_no | string | **Yes** | Platform agreement number |
+| out_trade_no | string | **Yes** | Merchant order number (unique) |
+| scene_code | string | **Yes** | [Scene code](appendix#scene-codes) |
+| amount | object | **Yes** | Deduction amount |
+| amount.total | string | **Yes** | Amount (minimum unit) |
+| amount.currency | string | **Yes** | Currency code |
+| amount.currency_type | string | **Yes** | `FIAT` or `CRYPTO` |
+| amount.chain | string | No | Chain network (required for crypto) |
+| order_info | object | **Yes** | Order information |
+| order_info.order_title | string | **Yes** | Order title (displayed to user) |
+| order_info.order_desc | string | No | Order description |
+| order_info.goods_name | string | No | Goods name |
+| order_info.goods_id | string | No | Goods ID |
+| order_info.goods_category | string | No | Goods category |
+| scene_info | object | No | Scene information |
+| scene_info.device_id | string | No | Device ID |
+| scene_info.device_ip | string | No | Device IP |
+| scene_info.location | object | No | Location information |
+| scene_info.location.latitude | string | No | Latitude |
+| scene_info.location.longitude | string | No | Longitude |
+| scene_info.location.address | string | No | Detailed address |
+| notify_url | string | **Yes** | Deduction result webhook URL |
+| risk_info | object | No | Risk control information |
+| risk_info.user_ip | string | No | User IP address |
+| risk_info.device_fingerprint | string | No | Device fingerprint |
+| risk_info.user_agent | string | No | User agent string |
+
+---
+
+## Response Parameters
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| code | string | Response code |
+| message | string | Response message |
+| data | object | Response data |
+| data.order_no | string | Platform order number |
+| data.trade_no | string | Platform trade number |
+| data.out_trade_no | string | Merchant order number |
+| data.status | string | Transaction status: `PROCESSING` / `SUCCESS` / `FAILED` / `TIMEOUT` |
+| data.amount | object | Requested amount |
+| data.crypto_payment | object | Actual crypto payment info (for fiat orders) |
+| data.crypto_payment.currency | string | Cryptocurrency (e.g., USDT) |
+| data.crypto_payment.amount | string | Cryptocurrency amount |
+| data.crypto_payment.chain | string | Chain network |
+| data.crypto_payment.exchange_rate | string | Exchange rate |
+| data.crypto_payment.rate_time | string | Rate lock time |
+| data.pay_time | string | Payment time (on success) |
+| data.failure_reason | string | Failure reason (on failure) |
+
+---
+
+## Request Examples
+
+### Cryptocurrency Order
+
+```http
+POST /v5/bybitpay/agreement/pay HTTP/1.1
+Host: api.bybit.com
+Content-Type: application/json
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440005
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "agreement_no": "AGR202601070001",
+  "out_trade_no": "ORDER20260107001",
+  "scene_code": "SUBSCRIPTION",
+  "amount": {
+    "total": "2350",
+    "currency": "USDT",
+    "currency_type": "CRYPTO",
+    "chain": "TRC20"
+  },
+  "order_info": {
+    "order_title": "Monthly subscription - January 2026",
+    "order_desc": "Premium membership",
+    "goods_name": "Premium Plan",
+    "goods_id": "PREMIUM_001"
+  },
+  "notify_url": "https://merchant.com/notify/pay"
+}
+```
+
+### Fiat Currency Order
+
+```http
+POST /v5/bybitpay/agreement/pay HTTP/1.1
+Host: api.bybit.com
+Content-Type: application/json
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440006
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "agreement_no": "AGR202601070001",
+  "out_trade_no": "ORDER20260107002",
+  "scene_code": "TAXI",
+  "amount": {
+    "total": "10000",
+    "currency": "USD",
+    "currency_type": "FIAT"
+  },
+  "order_info": {
+    "order_title": "Ride fare",
+    "order_desc": "Trip from A to B"
+  },
+  "scene_info": {
+    "device_id": "DEVICE_001",
+    "device_ip": "192.168.1.1",
+    "location": {
+      "latitude": "39.9042",
+      "longitude": "116.4074",
+      "address": "Beijing, China"
+    }
+  },
+  "risk_info": {
+    "user_ip": "203.0.113.45",
+    "device_fingerprint": "fp_abc123xyz"
+  },
+  "notify_url": "https://merchant.com/notify/pay"
+}
+```
+
+---
+
+## Response Examples
+
+### Crypto Order Success
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "order_no": "ORD202601070001",
+    "trade_no": "PAY202601070001",
+    "out_trade_no": "ORDER20260107001",
+    "status": "SUCCESS",
+    "amount": {
+      "total": "2350",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    "pay_time": "2026-01-07T10:30:00Z"
+  }
+}
+```
+
+### Fiat Order Success (with Crypto Payment)
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "order_no": "ORD202601070002",
+    "trade_no": "PAY202601070002",
+    "out_trade_no": "ORDER20260107002",
+    "status": "SUCCESS",
+    "amount": {
+      "total": "10000",
+      "currency": "USD",
+      "currency_type": "FIAT"
+    },
+    "crypto_payment": {
+      "currency": "USDT",
+      "amount": "10005.50",
+      "chain": "TRC20",
+      "exchange_rate": "1.00055",
+      "rate_time": "2026-01-07T10:29:55Z"
+    },
+    "pay_time": "2026-01-07T10:30:00Z"
+  }
+}
+```
+
+### Processing Status
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "order_no": "ORD202601070003",
+    "trade_no": "PAY202601070003",
+    "out_trade_no": "ORDER20260107003",
+    "status": "PROCESSING",
+    "amount": {
+      "total": "5000",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    }
+  }
+}
+```
+
+### Deduction Failed
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "order_no": "ORD202601070004",
+    "trade_no": "PAY202601070004",
+    "out_trade_no": "ORDER20260107004",
+    "status": "FAILED",
+    "amount": {
+      "total": "5000",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    "failure_reason": "BALANCE_NOT_ENOUGH"
+  }
+}
+```
+
+---
+
+## Verification Steps
+
+Platform performs the following checks before executing deduction:
+
+1. **Agreement Validity**: Agreement must be in `SIGNED` status
+2. **Single Limit Check**: Amount does not exceed single transaction limit
+3. **Period Limit Check**: Cumulative amount does not exceed period limit
+4. **Balance Check**: User account has sufficient balance
+5. **Risk Check**: Transaction passes risk control rules
+
+---
+
+## Notes
+
+1. **Idempotency**: Same `out_trade_no` returns result of first request
+2. **Async Processing**: `PROCESSING` status requires waiting for webhook or query
+3. **Timeout Handling**: Set 30-second timeout, query if timeout occurs
+4. **Fiat Orders**: User pays with cryptocurrency; `crypto_payment` shows actual payment details

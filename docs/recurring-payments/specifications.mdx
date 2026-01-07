@@ -1,0 +1,222 @@
+---
+title: Common Specifications
+sidebar_label: Specifications
+sidebar_position: 1
+---
+
+## Common Request Headers
+
+All API requests must include the following headers:
+
+| Parameter | Type | Required | Description |
+|:----------|:-----|:---------|:------------|
+| Content-Type | string | Yes | `application/json` |
+| X-Request-Id | string | Yes | Request unique identifier (UUID format) |
+| X-Timestamp | string | Yes | Request timestamp (millisecond Unix timestamp) |
+| X-Signature | string | Yes | Request signature (see [Signature Algorithm](signature)) |
+| Authorization | string | Yes | `Bearer {access_token}` |
+
+---
+
+## Common Response Format
+
+### Success Response
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    // Business data
+  }
+}
+```
+
+### Failure Response
+
+```json
+{
+  "code": "ERROR_CODE",
+  "message": "Error description",
+  "data": null
+}
+```
+
+### Response Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| code | string | Response code, `SUCCESS` indicates success |
+| message | string | Response message |
+| data | object/null | Response data, `null` on failure |
+
+---
+
+## HTTP Status Codes
+
+| HTTP Status | Description | Scenario |
+|:------------|:------------|:---------|
+| 200 | Success | Business success or failure (distinguished by `code`) |
+| 400 | Bad Request | Parameter format error, missing required field |
+| 401 | Unauthorized | Token invalid or expired |
+| 403 | Forbidden | IP not in whitelist, no API permission |
+| 404 | Not Found | API path error |
+| 429 | Too Many Requests | Rate limit triggered |
+| 500 | Internal Server Error | System exception, please retry |
+| 503 | Service Unavailable | System maintenance |
+
+---
+
+## Field Length Limits
+
+| Field Type | Max Length | Example Fields |
+|:-----------|:-----------|:---------------|
+| Merchant ID | 32 | `merchant_id` |
+| User ID | 64 | `user_id`, `merchant_user_id` |
+| Agreement No | 64 | `agreement_no`, `external_agreement_no` |
+| Order No | 64 | `out_trade_no`, `out_refund_no` |
+| Trade No | 64 | `trade_no`, `refund_no` |
+| Amount | 32 | `amount.total` |
+| Currency Code | 16 | `currency` |
+| URL | 512 | `notify_url`, `return_url` |
+| Description | 256 | `order_desc`, `refund_reason` |
+| Title | 128 | `order_title` |
+| Extra Params | 2048 | `extra_params` (JSON string) |
+
+---
+
+## Idempotency
+
+Idempotency is guaranteed through business unique indexes:
+
+| Business Scenario | Idempotency Key | Unique Index |
+|:------------------|:----------------|:-------------|
+| Sign Request | external_agreement_no | (merchant_id, external_agreement_no) |
+| Deduction Order | out_trade_no | (merchant_id, out_trade_no) |
+| Refund Request | out_refund_no | (merchant_id, out_refund_no) |
+
+**Notes:**
+- `X-Request-Id` is used for request tracing and troubleshooting
+- Format requirement: UUID v4, e.g., `550e8400-e29b-41d4-a716-446655440000`
+- Repeated requests with the same merchant order number return the result of the first request
+
+---
+
+## API Timeout Recommendations
+
+| API | Recommended Timeout | Description |
+|:----|:--------------------|:------------|
+| Sign Request | 10 seconds | Sync return sign link |
+| Sign Confirmation | 10 seconds | Sync return sign status |
+| Unsign | 10 seconds | Sync return unsign result |
+| Agreement Deduction | 30 seconds | May involve on-chain operations |
+| Deduction Refund | 30 seconds | May involve on-chain operations |
+| Query APIs | 10 seconds | Sync return query result |
+
+**Timeout Handling:**
+- After timeout, call query API to confirm actual status
+- Deduction/refund timeout does not mean failure
+- Confirm final status through query or async notification
+
+---
+
+## Concurrency Handling
+
+### Same Agreement Concurrent Deductions
+
+- Same agreement supports concurrent deduction requests
+- Each deduction needs different `out_trade_no`
+- Limit verification is real-time; concurrent requests may be rejected if exceeding quota
+
+### Same Order Repeated Requests
+
+- Requests with same `out_trade_no` are treated as the same transaction
+- After first request succeeds, repeated requests return the first result (idempotent)
+- After first request fails, use a new `out_trade_no` to retry
+
+---
+
+## Transaction Status Flow
+
+### Deduction Status
+
+```
+                    ┌─────────────┐
+                    │  PROCESSING │
+                    └──────┬──────┘
+                           │
+           ┌───────────────┼───────────────┐
+           │               │               │
+           ▼               ▼               ▼
+    ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+    │   SUCCESS   │ │   FAILED    │ │   TIMEOUT   │
+    └─────────────┘ └─────────────┘ └─────────────┘
+```
+
+| Status | Description | Follow-up Actions |
+|:-------|:------------|:------------------|
+| PROCESSING | Deduction in progress | Wait for notification or query |
+| SUCCESS | Deduction successful | Can initiate refund |
+| FAILED | Deduction failed | Retry with new order number |
+| TIMEOUT | Deduction timeout | Query to confirm, then decide |
+
+### Refund Status
+
+```
+                    ┌─────────────┐
+                    │  PROCESSING │
+                    └──────┬──────┘
+                           │
+                ┌──────────┴──────────┐
+                │                     │
+                ▼                     ▼
+         ┌─────────────┐       ┌─────────────┐
+         │   SUCCESS   │       │   FAILED    │
+         └─────────────┘       └─────────────┘
+```
+
+| Status | Description | Follow-up Actions |
+|:-------|:------------|:------------------|
+| PROCESSING | Refund in progress | Wait for notification or query |
+| SUCCESS | Refund successful | Funds returned to user |
+| FAILED | Refund failed | Check reason, retry with new refund number |
+
+**Refund Notes:**
+- Refund amount cannot exceed refundable amount
+- Same transaction supports multiple partial refunds
+- Used quota is restored after successful refund
+
+---
+
+## Rate Limiting
+
+### Rate Limit Strategy
+
+| API Type | Dimension | Threshold | Description |
+|:---------|:----------|:----------|:------------|
+| Sign Request | Merchant + User | 10/minute | Same merchant for same user |
+| Agreement Deduction | Merchant | 1000/second | Merchant-level QPS |
+| Agreement Deduction | Agreement | 10/second | Single agreement frequency |
+| Query APIs | Merchant | 5000/second | All query APIs shared |
+| Refund API | Merchant | 500/second | Merchant-level refund rate |
+
+### Rate Limit Response
+
+HTTP status `429` with body:
+
+```json
+{
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "Too many requests, please try again later",
+  "data": {
+    "retry_after": 1000
+  }
+}
+```
+
+### Handling Recommendations
+
+1. **Exponential Backoff**: Retry with delays (1s, 2s, 4s, 8s)
+2. **Request Merging**: Use list query API instead of multiple single queries
+3. **Async Processing**: Use message queue for peak shaving in high concurrency
+4. **Monitoring**: Monitor 429 response ratio, adjust strategy accordingly

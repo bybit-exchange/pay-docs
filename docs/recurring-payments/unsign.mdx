@@ -1,0 +1,145 @@
+---
+title: Unsign API
+sidebar_label: Unsign
+sidebar_position: 4
+---
+
+## HTTP Request
+
+POST `/v5/bybitpay/agreement/unsign`
+
+Terminate an active agreement. After unsign, no further deductions can be made. Existing successful transactions can still be refunded.
+
+---
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|:----------|:-----|:---------|:------------|
+| merchant_id | string | **Yes** | Merchant ID |
+| user_id | string | **Yes** | Platform user ID |
+| agreement_type | string | **Yes** | Sign type: `CYCLE` / `SINGLE` |
+| agreement_no | string | Either | Platform agreement number |
+| external_agreement_no | string | Either | Merchant agreement number |
+| unsign_type | string | No | Unsign type: `USER` / `MERCHANT` / `SYSTEM` |
+| unsign_reason | string | No | Unsign reason |
+
+:::info
+Either `agreement_no` or `external_agreement_no` must be provided.
+:::
+
+---
+
+## Response Parameters
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| code | string | Response code |
+| message | string | Response message |
+| data | object | Response data |
+| data.agreement_no | string | Platform agreement number |
+| data.status | string | Status: `UNSIGNED` |
+| data.unsign_time | string | Unsign time |
+
+---
+
+## Request Example
+
+### Unsign by Agreement Number
+
+```http
+POST /v5/bybitpay/agreement/unsign HTTP/1.1
+Host: api.bybit.com
+Content-Type: application/json
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440003
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "agreement_no": "AGR202601070001",
+  "unsign_type": "USER",
+  "unsign_reason": "User cancelled subscription"
+}
+```
+
+### Unsign by External Agreement Number
+
+```http
+POST /v5/bybitpay/agreement/unsign HTTP/1.1
+Host: api.bybit.com
+Content-Type: application/json
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440004
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "external_agreement_no": "MERCHANT_AGR_001",
+  "unsign_type": "MERCHANT",
+  "unsign_reason": "Service terminated"
+}
+```
+
+---
+
+## Response Examples
+
+### Success Response
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "agreement_no": "AGR202601070001",
+    "status": "UNSIGNED",
+    "unsign_time": "2026-01-07T15:30:00Z"
+  }
+}
+```
+
+### Agreement Not Exist
+
+```json
+{
+  "code": "AGREEMENT_NOT_EXIST",
+  "message": "Agreement does not exist",
+  "data": null
+}
+```
+
+### Agreement Already Unsigned
+
+```json
+{
+  "code": "AGREEMENT_UNSIGNED",
+  "message": "Agreement already unsigned, no need to repeat",
+  "data": null
+}
+```
+
+---
+
+## Unsign Types
+
+| Type | Description |
+|:-----|:------------|
+| `USER` | User initiated unsign |
+| `MERCHANT` | Merchant initiated unsign |
+| `SYSTEM` | System unsign (risk, account abnormal) |
+
+---
+
+## Notes
+
+1. **Final State**: Unsigned is a final state; agreement cannot be reactivated
+2. **Refund Allowed**: Existing successful transactions can still be refunded after unsign
+3. **Allowed States**: Only `SIGNED` and `SUSPENDED` agreements can be unsigned
+4. **Webhook Notification**: Platform sends unsign notification to merchant after unsign

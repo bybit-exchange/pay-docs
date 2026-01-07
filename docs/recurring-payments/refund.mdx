@@ -1,0 +1,210 @@
+---
+title: Deduction Refund API
+sidebar_label: Refund
+sidebar_position: 6
+---
+
+## HTTP Request
+
+POST `/v5/bybitpay/agreement/refund`
+
+Initiate refund for a successful deduction transaction. Supports full and partial refunds.
+
+---
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|:----------|:-----|:---------|:------------|
+| merchant_id | string | **Yes** | Merchant ID |
+| user_id | string | **Yes** | Platform user ID |
+| agreement_type | string | **Yes** | Sign type: `CYCLE` / `SINGLE` |
+| trade_no | string | Either | Platform trade number |
+| out_trade_no | string | Either | Merchant order number |
+| out_refund_no | string | **Yes** | Merchant refund number (unique) |
+| refund_amount | object | **Yes** | Refund amount |
+| refund_amount.total | string | **Yes** | Refund amount (minimum unit) |
+| refund_amount.currency | string | **Yes** | Currency code |
+| refund_amount.currency_type | string | **Yes** | `FIAT` or `CRYPTO` |
+| refund_amount.chain | string | No | Chain network (required for crypto) |
+| refund_reason | string | No | Refund reason |
+| notify_url | string | **Yes** | Refund result webhook URL |
+
+:::info
+Either `trade_no` or `out_trade_no` must be provided.
+:::
+
+---
+
+## Response Parameters
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| code | string | Response code |
+| message | string | Response message |
+| data | object | Response data |
+| data.refund_no | string | Platform refund number |
+| data.out_refund_no | string | Merchant refund number |
+| data.trade_no | string | Original trade number |
+| data.status | string | Refund status: `PROCESSING` / `SUCCESS` / `FAILED` |
+| data.refund_amount | object | Refund amount |
+| data.refund_time | string | Refund success time (on success) |
+| data.failure_reason | string | Failure reason (on failure) |
+
+---
+
+## Request Example
+
+### Full Refund
+
+```http
+POST /v5/bybitpay/agreement/refund HTTP/1.1
+Host: api.bybit.com
+Content-Type: application/json
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440007
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "trade_no": "PAY202601070001",
+  "out_refund_no": "REFUND20260107001",
+  "refund_amount": {
+    "total": "2350",
+    "currency": "USDT",
+    "currency_type": "CRYPTO",
+    "chain": "TRC20"
+  },
+  "refund_reason": "User requested cancellation",
+  "notify_url": "https://merchant.com/notify/refund"
+}
+```
+
+### Partial Refund
+
+```http
+POST /v5/bybitpay/agreement/refund HTTP/1.1
+Host: api.bybit.com
+Content-Type: application/json
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440008
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "out_trade_no": "ORDER20260107001",
+  "out_refund_no": "REFUND20260107002",
+  "refund_amount": {
+    "total": "1000",
+    "currency": "USDT",
+    "currency_type": "CRYPTO",
+    "chain": "TRC20"
+  },
+  "refund_reason": "Partial service not provided",
+  "notify_url": "https://merchant.com/notify/refund"
+}
+```
+
+---
+
+## Response Examples
+
+### Refund Success
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "refund_no": "RF202601070001",
+    "out_refund_no": "REFUND20260107001",
+    "trade_no": "PAY202601070001",
+    "status": "SUCCESS",
+    "refund_amount": {
+      "total": "2350",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    "refund_time": "2026-01-07T11:30:00Z"
+  }
+}
+```
+
+### Refund Processing
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "refund_no": "RF202601070002",
+    "out_refund_no": "REFUND20260107002",
+    "trade_no": "PAY202601070001",
+    "status": "PROCESSING",
+    "refund_amount": {
+      "total": "1000",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    }
+  }
+}
+```
+
+### Refund Failed
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "refund_no": "RF202601070003",
+    "out_refund_no": "REFUND20260107003",
+    "trade_no": "PAY202601070001",
+    "status": "FAILED",
+    "refund_amount": {
+      "total": "5000",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    "failure_reason": "REFUND_AMOUNT_EXCEED"
+  }
+}
+```
+
+---
+
+## Refund Rules
+
+1. **Refundable Amount**: Cannot exceed original transaction amount minus already refunded amount
+2. **Multiple Refunds**: Same transaction supports multiple partial refunds
+3. **Quota Restoration**: Used agreement quota is restored after successful refund
+4. **Agreement State**: Refund is allowed even after agreement is unsigned/expired
+
+---
+
+## Error Scenarios
+
+| Error Code | Description | Handling |
+|:-----------|:------------|:---------|
+| REFUND_AMOUNT_EXCEED | Refund amount exceeds refundable amount | Check refunded amount |
+| REFUND_NOT_ALLOW | Transaction status does not support refund | Transaction must be successful |
+| REFUND_PROCESSING | Another refund is in progress | Wait for completion |
+| TRADE_NOT_EXIST | Original transaction not found | Check trade number |
+
+---
+
+## Notes
+
+1. **Idempotency**: Same `out_refund_no` returns result of first request
+2. **Currency Matching**: Refund currency must match original transaction currency
+3. **Async Processing**: `PROCESSING` status requires waiting for webhook or query
+4. **Timeout Handling**: Set 30-second timeout, query if timeout occurs

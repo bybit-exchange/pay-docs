@@ -1,0 +1,134 @@
+---
+title: List Agreements API
+sidebar_label: List Agreements
+sidebar_position: 8
+---
+
+## HTTP Request
+
+GET `/v5/bybitpay/agreement/list`
+
+Query agreement list under merchant with pagination and filtering support.
+
+---
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|:----------|:-----|:---------|:------------|
+| merchant_id | string | **Yes** | Merchant ID |
+| user_id | string | No | Platform user ID (filter by user) |
+| agreement_type | string | No | Sign type: `CYCLE` / `SINGLE` (query all if not provided) |
+| status | string | No | Status filter: `INIT` / `PENDING` / `SIGNED` / `SUSPENDED` / `UNSIGNED` / `EXPIRED` / `FAILED` |
+| scene_code | string | No | Scene code filter |
+| start_time | string | No | Sign start time (ISO8601) |
+| end_time | string | No | Sign end time (ISO8601) |
+| page_no | int | No | Page number, default 1 |
+| page_size | int | No | Page size, default 20, max 100 |
+
+---
+
+## Response Parameters
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| code | string | Response code |
+| data | object | Response data |
+| data.total | int | Total record count |
+| data.page_no | int | Current page number |
+| data.page_size | int | Page size |
+| data.list | array | Agreement list |
+| data.list[].agreement_no | string | Platform agreement number |
+| data.list[].external_agreement_no | string | Merchant agreement number |
+| data.list[].user_id | string | Platform user ID |
+| data.list[].merchant_user_id | string | Merchant-side user ID |
+| data.list[].agreement_type | string | Sign type |
+| data.list[].scene_code | string | Scene code |
+| data.list[].status | string | Agreement status |
+| data.list[].sign_time | string | Sign time |
+| data.list[].valid_time | string | Validity period |
+
+---
+
+## Request Examples
+
+### List All Active Agreements
+
+```
+GET /v5/bybitpay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&page_size=20 HTTP/1.1
+Host: api.bybit.com
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440010
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+```
+
+### List Agreements for Specific User
+
+```
+GET /v5/bybitpay/agreement/list?merchant_id=M123456789&user_id=U_123456789&page_no=1&page_size=20 HTTP/1.1
+Host: api.bybit.com
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440011
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+```
+
+### List Agreements by Scene and Time Range
+
+```
+GET /v5/bybitpay/agreement/list?merchant_id=M123456789&scene_code=SUBSCRIPTION&start_time=2026-01-01T00:00:00Z&end_time=2026-01-31T23:59:59Z&page_no=1&page_size=50 HTTP/1.1
+Host: api.bybit.com
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440012
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+```
+
+---
+
+## Response Example
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "total": 150,
+    "page_no": 1,
+    "page_size": 20,
+    "list": [
+      {
+        "agreement_no": "AGR202601070001",
+        "external_agreement_no": "MERCHANT_AGR_001",
+        "user_id": "U_123456789",
+        "merchant_user_id": "merchant_user_123",
+        "agreement_type": "CYCLE",
+        "scene_code": "SUBSCRIPTION",
+        "status": "SIGNED",
+        "sign_time": "2026-01-07T10:30:00Z",
+        "valid_time": "2027-01-07T10:30:00Z"
+      },
+      {
+        "agreement_no": "AGR202601060001",
+        "external_agreement_no": "MERCHANT_AGR_002",
+        "user_id": "U_987654321",
+        "merchant_user_id": "merchant_user_456",
+        "agreement_type": "CYCLE",
+        "scene_code": "TAXI",
+        "status": "SIGNED",
+        "sign_time": "2026-01-06T15:20:00Z",
+        "valid_time": "2027-01-06T15:20:00Z"
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Notes
+
+- Use pagination for large result sets to avoid timeout
+- Combine filters for efficient querying
+- `sign_time` is used for time range filtering

@@ -1,0 +1,204 @@
+---
+title: Appendix
+sidebar_label: Appendix
+sidebar_position: 14
+---
+
+## Scene Codes
+
+Scene codes are based on MCC (Merchant Category Code) industry categories.
+
+### MCC Industry Categories
+
+| MCC Range | Industry | Description |
+|:----------|:---------|:------------|
+| 3xxx | Travel & Accommodation | Airlines, hotels, car rental |
+| 4xxx | Transportation & Utilities | Transportation, telecom, utilities |
+| 5xxx | Retail & Consumer | Retail, food & beverage, gas |
+| 6xxx | Financial Services | Banks, insurance, loans |
+| 7xxx | Business Services | Entertainment, auto, professional |
+| 8xxx | Professional Organizations | Healthcare, education, membership |
+
+### Scene Code List
+
+| Scene Code | MCC Industry | Description | Use Cases |
+|:-----------|:-------------|:------------|:----------|
+| **Transportation (4xxx)** ||||
+| TAXI | 4xxx | Taxi/Ride-hailing | Didi, Uber |
+| TRANSIT | 4xxx | Public Transportation | Subway, bus, train |
+| TOLL | 4xxx | Toll Fees | ETC, highway fees |
+| UTILITY | 4xxx | Utilities | Electricity, water, gas |
+| TELECOM | 4xxx | Telecom Services | Phone bills, broadband |
+| **Retail (5xxx)** ||||
+| FOOD | 5xxx | Food & Beverage | Food delivery, restaurant |
+| SUBSCRIPTION | 5xxx | Subscription Services | Content, recurring delivery |
+| **Financial (6xxx)** ||||
+| INSURANCE | 6xxx | Insurance Services | Auto, health insurance |
+| LOAN | 6xxx | Loan Repayment | Credit card, installment |
+| **Business Services (7xxx)** ||||
+| PARKING | 7xxx | Parking Services | Parking lots, street parking |
+| RENT | 7xxx | Rental Services | Car rental, bike sharing |
+| ENTERTAINMENT | 7xxx | Entertainment | Video, music, gaming |
+| FITNESS | 7xxx | Fitness & Sports | Gyms, sports apps |
+| CLOUD | 7xxx | Cloud Computing | Cloud servers, SaaS |
+| **Professional (8xxx)** ||||
+| EDUCATION | 8xxx | Education & Training | Online courses |
+| MEMBERSHIP | 8xxx | Membership Organizations | Clubs, VIP membership |
+| **Other** ||||
+| OTHERS | - | Other Scenarios | Fallback for uncategorized |
+
+---
+
+## Currency List
+
+### Fiat Currency
+
+| Code | Description | Standard |
+|:-----|:------------|:---------|
+| CNY | Chinese Yuan | ISO 4217 |
+| USD | US Dollar | ISO 4217 |
+| EUR | Euro | ISO 4217 |
+| GBP | British Pound | ISO 4217 |
+| JPY | Japanese Yen | ISO 4217 |
+| KRW | Korean Won | ISO 4217 |
+| SGD | Singapore Dollar | ISO 4217 |
+| HKD | Hong Kong Dollar | ISO 4217 |
+| AUD | Australian Dollar | ISO 4217 |
+| CAD | Canadian Dollar | ISO 4217 |
+
+### Cryptocurrency
+
+| Code | Description | Networks |
+|:-----|:------------|:---------|
+| USDT | Tether | ERC20, TRC20, Arbitrum, Optimism |
+| USDC | USD Coin | ERC20, TRC20, Arbitrum, Optimism |
+| BTC | Bitcoin | Bitcoin |
+| ETH | Ethereum | Ethereum |
+| BNB | Binance Coin | BSC |
+| SOL | Solana | Solana |
+| XRP | Ripple | Ripple |
+| DOGE | Dogecoin | Dogecoin |
+| TRX | Tron | Tron |
+| MATIC | Polygon | Polygon |
+| ARB | Arbitrum | Arbitrum |
+| OP | Optimism | Optimism |
+
+### Currency Type
+
+| Type | Description |
+|:-----|:------------|
+| FIAT | Fiat Currency |
+| CRYPTO | Cryptocurrency |
+
+---
+
+## Chain Network List
+
+| Chain Code | Description | Supported Currencies |
+|:-----------|:------------|:---------------------|
+| ERC20 | Ethereum Network | USDT, USDC, ETH |
+| TRC20 | Tron Network | USDT, USDC, TRX |
+| Arbitrum | Arbitrum L2 | USDT, USDC, ARB, ETH |
+| Optimism | Optimism L2 | USDT, USDC, OP, ETH |
+| BSC | Binance Smart Chain | BNB, USDT, USDC |
+| Polygon | Polygon Network | MATIC, USDT, USDC |
+| Solana | Solana Network | SOL, USDT, USDC |
+| Bitcoin | Bitcoin Network | BTC |
+| Tron | Tron Native | TRX |
+| Ripple | Ripple Network | XRP |
+| Dogecoin | Dogecoin Network | DOGE |
+
+**Notes:**
+- `chain` field must match `currency`
+- Same currency has different addresses on different chains
+- Chain support may expand with platform upgrades
+
+---
+
+## Amount Precision
+
+### General Rules
+
+- All amounts are transmitted as **strings** to avoid floating-point precision loss
+- Amount values are **integers** representing minimum units (no decimal point)
+
+### Fiat Currency Precision
+
+| Currency | Minimum Unit | Decimals | Example |
+|:---------|:-------------|:---------|:--------|
+| USD | cent | 2 | "10000" = 100.00 USD |
+| EUR | cent | 2 | "5000" = 50.00 EUR |
+| CNY | fen | 2 | "10000" = 100.00 CNY |
+| JPY | yen | 0 | "1000" = 1000 JPY |
+| KRW | won | 0 | "50000" = 50000 KRW |
+| GBP | pence | 2 | "2000" = 20.00 GBP |
+| SGD | cent | 2 | "1500" = 15.00 SGD |
+| HKD | cent | 2 | "7800" = 78.00 HKD |
+
+### Cryptocurrency Precision
+
+| Currency | Minimum Unit | Decimals | Example |
+|:---------|:-------------|:---------|:--------|
+| USDT | minimum unit | 6 | "1000000" = 1.000000 USDT |
+| USDC | minimum unit | 6 | "1000000" = 1.000000 USDC |
+| BTC | satoshi | 8 | "100000000" = 1.00000000 BTC |
+| ETH | wei | 18 | "1000000000000000000" = 1.0 ETH |
+| TRX | sun | 6 | "1000000" = 1.000000 TRX |
+| SOL | lamport | 9 | "1000000000" = 1.000000000 SOL |
+| BNB | jager | 8 | "100000000" = 1.00000000 BNB |
+| DOGE | koinu | 8 | "100000000" = 1.00000000 DOGE |
+
+### Precision Notes
+
+1. **Validation**: Amounts exceeding supported precision return `INVALID_AMOUNT`
+2. **Exchange Rate**: System handles precision conversion for fiat-to-crypto
+3. **Refund**: Refund amount precision must match original transaction
+4. **Minimum Amount**: Each currency has minimum transaction amount per merchant config
+
+---
+
+## Sandbox Environment
+
+### Environment Information
+
+| Environment | Domain | Description |
+|:------------|:-------|:------------|
+| Sandbox | api.testnet.bybit.com | Test environment, no real transactions |
+| Production | api.bybit.com | Production environment, real transactions |
+
+### Sandbox Features
+
+1. **Isolated Data**: Completely isolated from production
+2. **Simulated Transactions**: No real fund transfers
+3. **Feature Consistency**: Same API definitions as production
+4. **Relaxed Rate Limits**: Lower thresholds for testing
+
+### Test Accounts
+
+| Type | Description | How to Obtain |
+|:-----|:------------|:--------------|
+| Merchant Account | Sandbox test merchant | Contact platform operations |
+| Test User | Simulated sign user | Auto-created in sandbox |
+| API Key | Sandbox dedicated key | Merchant dashboard |
+
+### Testing Recommendations
+
+1. **Full Flow Testing**: Complete sign → deduction → refund → unsign flow
+2. **Exception Simulation**: Use special amounts to trigger states
+3. **Webhook Verification**: Ensure correct webhook handling
+4. **Signature Verification**: Verify signature implementation
+
+### Special Amount Triggers
+
+| Amount (Minimum Unit) | Triggered Status | Description |
+|:----------------------|:-----------------|:------------|
+| Ends with `01` | SUCCESS | Immediate success |
+| Ends with `02` | PROCESSING | Stays processing |
+| Ends with `03` | FAILED | Balance insufficient |
+| Ends with `04` | TIMEOUT | Simulates timeout |
+| Ends with `99` | RISK_REJECT | Triggers risk control |
+
+**Examples:**
+- Amount `100001` → Returns SUCCESS immediately
+- Amount `100002` → Stays PROCESSING, wait for notification
+- Amount `100003` → Returns FAILED with BALANCE_NOT_ENOUGH

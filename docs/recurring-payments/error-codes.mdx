@@ -1,0 +1,148 @@
+---
+title: Error Codes
+sidebar_label: Error Codes
+sidebar_position: 13
+---
+
+## Overview
+
+Error codes are returned through the `retCode` field in the response body. The `retMsg` field provides an English error description.
+
+---
+
+## Success Code
+
+| Error Code | Identifier | Description | Handling |
+|:-----------|:-----------|:------------|:---------|
+| 20000 | SUCCESS | Success | Request processed successfully |
+
+---
+
+## Common Error Codes
+
+| Error Code | Identifier | Description | Handling |
+|:-----------|:-----------|:------------|:---------|
+| 40000 | PARAM_VALID_ERROR | Parameter validation failed | Check request parameter format and required fields |
+| 40001 | UNAUTHORIZED | Unauthorized | Check if Authorization header is correct |
+| 40002 | FORBIDDEN | Access forbidden | Check IP whitelist or API permission |
+| 40003 | NOT_FOUND | Resource not found | Check if request path is correct |
+| 40004 | DUPLICATE_REQUEST | Duplicate request | Use query API to get existing result |
+
+---
+
+## Agreement Error Codes
+
+| Error Code | Identifier | Description | Handling |
+|:-----------|:-----------|:------------|:---------|
+| 139001001 | AGREEMENT_NOT_EXIST | Agreement does not exist | Check agreement number or guide user to re-sign |
+| 139001002 | AGREEMENT_EXPIRED | Agreement has expired | Guide user to re-sign |
+| 139001003 | AGREEMENT_UNSIGNED | Agreement has been unsigned | Guide user to re-sign |
+| 139001004 | AGREEMENT_SUSPENDED | Agreement is suspended | Wait for resume or contact platform |
+| 139001005 | AGREEMENT_STATUS_INVALID | Invalid agreement status | Check if current status supports this operation |
+| 139001006 | AGREEMENT_TEMPLATE_NOT_EXIST | Agreement template does not exist | Contact platform to confirm template configuration |
+| 139001007 | AGREEMENT_ALREADY_SIGNED | Agreement already signed | Can directly initiate deduction |
+| 139001008 | SCENE_CODE_MISMATCH | Scene code mismatch | Deprecated - scene code no longer strictly verified |
+| 139001009 | MERCHANT_ID_MISMATCH | Merchant ID mismatch | Check if merchant ID matches sign time |
+| 139001010 | USER_ID_MISMATCH | User ID mismatch | Check if user ID matches sign time |
+| 139001011 | AGREEMENT_USER_MISMATCH | Agreement user mismatch | Check user-agreement binding |
+| 139001012 | SIGN_URL_EXPIRED | Sign URL has expired | Re-initiate sign request for new link |
+| 139001013 | AGREEMENT_TYPE_MISMATCH | Agreement type mismatch | Check if agreement type (CYCLE/SINGLE) is correct |
+
+---
+
+## Transaction Error Codes
+
+| Error Code | Identifier | Description | Handling |
+|:-----------|:-----------|:------------|:---------|
+| 139002001 | TRADE_NOT_EXIST | Trade does not exist | Check if trade number is correct |
+| 139002002 | QUOTA_EXCEEDED | Quota exceeded | Notify user of insufficient quota; wait for reset |
+| 139002003 | BALANCE_NOT_ENOUGH | Insufficient balance | Notify user to top up |
+| 139002004 | TRADE_STATUS_INVALID | Invalid trade status | Check if current status supports this operation |
+| 139002005 | TRADE_PROCESSING | Trade is processing | Wait for completion; do not retry |
+
+---
+
+## Refund Error Codes
+
+| Error Code | Identifier | Description | Handling |
+|:-----------|:-----------|:------------|:---------|
+| 139003001 | REFUND_AMOUNT_EXCEED | Refund amount exceeds refundable amount | Check refunded amount |
+| 139003002 | REFUND_NOT_ALLOW | Refund not allowed | Trade must be successful to refund |
+| 139003003 | REFUND_PROCESSING | Refund is processing | Wait for completion |
+| 139003004 | REFUND_NOT_EXIST | Refund does not exist | Check if refund number is correct |
+
+---
+
+## Currency/Amount Error Codes
+
+| Error Code | Identifier | Description | Handling |
+|:-----------|:-----------|:------------|:---------|
+| 139004001 | CHAIN_NOT_SUPPORTED | Chain network not supported | Check supported chain list |
+| 139004002 | CURRENCY_NOT_SUPPORTED | Currency not supported | Check supported currency list |
+| 139004003 | EXCHANGE_RATE_EXPIRED | Exchange rate has expired | Re-get exchange rate before retry |
+| 139004004 | INVALID_AMOUNT | Invalid amount | Check amount format and precision |
+| 139004005 | AMOUNT_EXCEED_SINGLE_LIMIT | Amount exceeds single limit | Lower amount or adjust limit config |
+| 139004006 | AMOUNT_EXCEED_PERIOD_LIMIT | Amount exceeds period limit | Wait for reset or adjust limit config |
+
+---
+
+## Security/Authentication Error Codes
+
+| Error Code | Identifier | Description | Handling |
+|:-----------|:-----------|:------------|:---------|
+| 139005001 | RISK_REJECT | Rejected by risk control | Guide user to active payment with identity verification |
+| 139005002 | INVALID_SIGNATURE | Invalid signature | Check signature algorithm and key |
+| 139005003 | INVALID_TIMESTAMP | Invalid timestamp | Request timestamp differs >5 minutes from server |
+| 139005004 | KEY_NOT_FOUND | Key not found | Contact platform to confirm key configuration |
+
+---
+
+## Merchant/User Error Codes
+
+| Error Code | Identifier | Description | Handling |
+|:-----------|:-----------|:------------|:---------|
+| 139006001 | MERCHANT_NOT_EXIST | Merchant does not exist | Check if merchant ID is correct |
+| 139006002 | USER_NOT_EXIST | User does not exist | Check if user ID is correct |
+
+---
+
+## System Error Codes
+
+| Error Code | Identifier | Description | Handling |
+|:-----------|:-----------|:------------|:---------|
+| 50000 | SYSTEM_ERROR | System error | Retry later or contact support |
+| 50001 | SERVICE_UNAVAILABLE | Service unavailable | System maintenance; retry later |
+| 50002 | DOWNSTREAM_ERROR | Downstream service error | Retry later or contact support |
+
+---
+
+## Error Handling Best Practices
+
+### Retryable Errors
+
+The following errors may be temporary and can be retried with exponential backoff:
+
+- `50000` (SYSTEM_ERROR)
+- `50001` (SERVICE_UNAVAILABLE)
+- `50002` (DOWNSTREAM_ERROR)
+- `139002005` (TRADE_PROCESSING)
+- `139003003` (REFUND_PROCESSING)
+
+### Non-Retryable Errors
+
+These errors require business logic handling:
+
+- `139001001` - `139001013` (Agreement errors)
+- `139002001` - `139002004` (Transaction errors)
+- `139003001` - `139003004` (Refund errors)
+- `139004001` - `139004006` (Amount errors)
+- `139005001` - `139005004` (Security errors)
+
+### User-Facing Error Messages
+
+| Error Code | Suggested User Message |
+|:-----------|:-----------------------|
+| BALANCE_NOT_ENOUGH | Your account balance is insufficient. Please top up. |
+| QUOTA_EXCEEDED | You have reached your spending limit for this period. |
+| AGREEMENT_EXPIRED | Your payment authorization has expired. Please re-authorize. |
+| RISK_REJECT | This transaction requires additional verification. |

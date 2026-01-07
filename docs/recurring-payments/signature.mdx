@@ -1,0 +1,271 @@
+---
+title: Signature Algorithm
+sidebar_label: Signature
+sidebar_position: 12
+---
+
+## Overview
+
+All Agreement Payment APIs use RSA2 signature algorithm (SHA256withRSA with 2048-bit key) for request authentication and webhook verification.
+
+---
+
+## Signature Algorithm
+
+| Algorithm | Description |
+|:----------|:------------|
+| RSA2 | RSA-SHA256 with 2048-bit key |
+
+**Notes:**
+- Only RSA2 signature algorithm is supported
+- `signType` is fixed as `RSA2`
+- Private key supports both PKCS1 and PKCS8 PEM formats
+
+---
+
+## Request Signature
+
+### Signature Flow
+
+**1. Construct String to Sign**
+
+```
+String to sign = HTTP Method + "\n" + Request Path + "\n" + Timestamp + "\n" + Request Body
+```
+
+**Example:**
+```
+POST
+/v5/bybitpay/agreement/pay
+1736233200000
+{"merchant_id":"M123456789","user_id":"U_123456789",...}
+```
+
+**2. Calculate Signature**
+
+```
+Signature = Base64(RSA_SHA256_Sign(String to sign, Merchant Private Key))
+```
+
+**3. Set Request Headers**
+
+```
+X-Timestamp: 1736233200000
+X-Signature: Base64 encoded signature value
+X-Request-Id: Unique request identifier
+Authorization: Bearer {access_token}
+```
+
+---
+
+## Code Examples
+
+### Java
+
+```java
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
+
+public class SignatureUtil {
+
+    /**
+     * RSA2 Signature (SHA256withRSA)
+     */
+    public static String sign(String content, String privateKeyStr) throws Exception {
+        PrivateKey privateKey = loadPrivateKey(privateKeyStr);
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initSign(privateKey);
+        signature.update(content.getBytes("UTF-8"));
+        return Base64.getEncoder().encodeToString(signature.sign());
+    }
+
+    /**
+     * Load private key (supports PKCS1 and PKCS8)
+     */
+    private static PrivateKey loadPrivateKey(String privateKeyStr) throws Exception {
+        // PKCS8 format
+        if (privateKeyStr.contains("BEGIN PRIVATE KEY")) {
+            String keyContent = privateKeyStr
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "")
+                    .replaceAll("\\s+", "");
+            byte[] keyBytes = Base64.getDecoder().decode(keyContent);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            return keyFactory.generatePrivate(keySpec);
+        }
+        // PKCS1 format requires BouncyCastle library
+        throw new IllegalArgumentException("Unsupported private key format");
+    }
+
+    /**
+     * Construct request signature
+     */
+    public static String signRequest(String method, String path,
+                                      long timestamp, String body,
+                                      String privateKeyStr) throws Exception {
+        String content = method + "\n" + path + "\n" + timestamp + "\n" + body;
+        return sign(content, privateKeyStr);
+    }
+}
+```
+
+### Python
+
+```python
+import base64
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+
+def sign_request(method, path, timestamp, body, private_key):
+    content = f"{method}\n{path}\n{timestamp}\n{body}"
+    signature = private_key.sign(
+        content.encode('utf-8'),
+        padding.PKCS1v15(),
+        hashes.SHA256()
+    )
+    return base64.b64encode(signature).decode('utf-8')
+```
+
+### cURL Example
+
+```bash
+#!/bin/bash
+
+API_HOST="https://api.bybit.com"
+API_PATH="/v5/bybitpay/agreement/pay"
+MERCHANT_PRIVATE_KEY="./merchant_private_key.pem"
+ACCESS_TOKEN="your_access_token"
+
+REQUEST_BODY='{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "agreement_no": "AGR202601070001",
+  "out_trade_no": "ORDER20260107001",
+  "scene_code": "SUBSCRIPTION",
+  "amount": {
+    "total": "2350",
+    "currency": "USDT",
+    "currency_type": "CRYPTO",
+    "chain": "TRC20"
+  },
+  "order_info": {
+    "order_title": "Monthly subscription"
+  },
+  "notify_url": "https://merchant.com/notify/pay"
+}'
+
+TIMESTAMP=$(date +%s000)
+REQUEST_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+
+# Construct string to sign
+SIGN_CONTENT="POST
+${API_PATH}
+${TIMESTAMP}
+${REQUEST_BODY}"
+
+# Calculate RSA signature
+SIGNATURE=$(echo -n "$SIGN_CONTENT" | openssl dgst -sha256 -sign "$MERCHANT_PRIVATE_KEY" | base64 | tr -d '\n')
+
+# Send request
+curl -X POST "${API_HOST}${API_PATH}" \
+  -H "Content-Type: application/json" \
+  -H "X-Request-Id: ${REQUEST_ID}" \
+  -H "X-Timestamp: ${TIMESTAMP}" \
+  -H "X-Signature: ${SIGNATURE}" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -d "${REQUEST_BODY}"
+```
+
+---
+
+## Webhook Signature Verification
+
+### Verification Steps
+
+1. Get `sign` and `signType` from request body
+2. Remove `sign` and `signType` to get content to verify
+3. Use platform public key to verify signature (RSA2/SHA256withRSA)
+4. Verify timestamp from `X-Timestamp` header (within 5 minutes)
+
+### Java Example
+
+```java
+public class WebhookVerifier {
+
+    public boolean verifyWebhook(String body, String timestamp,
+                                  String platformPublicKey) throws Exception {
+        // 1. Check timestamp
+        long now = System.currentTimeMillis();
+        long ts = Long.parseLong(timestamp);
+        if (Math.abs(now - ts) > 5 * 60 * 1000) {
+            return false;
+        }
+
+        // 2. Extract signature
+        JSONObject notify = JSONObject.parseObject(body);
+        String sign = notify.getString("sign");
+
+        // 3. Remove sign and signType
+        notify.remove("sign");
+        notify.remove("signType");
+        String contentToVerify = notify.toJSONString();
+
+        // 4. Verify RSA2 signature
+        return verifyRSA2(contentToVerify, sign, platformPublicKey);
+    }
+
+    private boolean verifyRSA2(String content, String signBase64,
+                                String publicKeyStr) throws Exception {
+        String keyContent = publicKeyStr
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
+                .replaceAll("\\s+", "");
+
+        byte[] keyBytes = Base64.getDecoder().decode(keyContent);
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PublicKey publicKey = keyFactory.generatePublic(keySpec);
+
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initVerify(publicKey);
+        signature.update(content.getBytes("UTF-8"));
+        return signature.verify(Base64.getDecoder().decode(signBase64));
+    }
+}
+```
+
+---
+
+## Key Management
+
+| Key Type | Purpose | Custodian | Format |
+|:---------|:--------|:----------|:-------|
+| Merchant Private Key | Sign API requests | Merchant (confidential) | PEM (PKCS1/PKCS8) |
+| Merchant Public Key | Platform verifies requests | Platform | PEM (X.509) |
+| Platform Private Key | Sign webhooks | Platform | PEM |
+| Platform Public Key | Verify webhooks | Merchant | PEM (X.509) |
+
+### Private Key Formats
+
+```
+# PKCS1 format
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEA...
+-----END RSA PRIVATE KEY-----
+
+# PKCS8 format (recommended)
+-----BEGIN PRIVATE KEY-----
+MIIEvgIBADANBgkq...
+-----END PRIVATE KEY-----
+```
+
+### Security Requirements
+
+1. Store private keys encrypted; never store in plaintext
+2. Rotate keys periodically (recommended annually)
+3. Contact platform immediately if key is compromised
+4. Use different keys for test and production environments
+5. PKCS8 format is recommended for better compatibility

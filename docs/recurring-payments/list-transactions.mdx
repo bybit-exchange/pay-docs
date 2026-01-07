@@ -1,0 +1,212 @@
+---
+title: List Transactions API
+sidebar_label: List Transactions
+sidebar_position: 10
+---
+
+## HTTP Request
+
+GET `/v5/bybitpay/agreement/pay/list`
+
+Query deduction transaction or refund record list under an agreement with pagination support.
+
+---
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|:----------|:-----|:---------|:------------|
+| merchant_id | string | **Yes** | Merchant ID |
+| user_id | string | **Yes** | Platform user ID |
+| agreement_type | string | **Yes** | Sign type: `CYCLE` / `SINGLE` |
+| agreement_no | string | **Yes** | Platform agreement number |
+| record_type | string | No | Record type: `PAY` (default) / `REFUND` |
+| status | string | No | Status filter: `SUCCESS` / `FAILED` / `PROCESSING` |
+| start_time | string | No | Start time (ISO8601) |
+| end_time | string | No | End time (ISO8601) |
+| page_no | int | No | Page number, default 1 |
+| page_size | int | No | Page size, default 20, max 100 |
+
+---
+
+## Response Parameters (Deduction Transactions)
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| code | string | Response code |
+| data | object | Response data |
+| data.total | int | Total record count |
+| data.page_no | int | Current page number |
+| data.page_size | int | Page size |
+| data.list | array | Transaction list |
+| data.list[].trade_no | string | Platform trade number |
+| data.list[].out_trade_no | string | Merchant order number |
+| data.list[].status | string | Transaction status |
+| data.list[].amount | object | Requested amount |
+| data.list[].crypto_payment | object | Actual crypto payment (for fiat orders) |
+| data.list[].pay_time | string | Payment time |
+| data.list[].refund_amount | object | Refunded amount |
+
+## Response Parameters (Refund Records)
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| code | string | Response code |
+| data | object | Response data |
+| data.total | int | Total record count |
+| data.page_no | int | Current page number |
+| data.page_size | int | Page size |
+| data.list | array | Refund list |
+| data.list[].refund_no | string | Platform refund number |
+| data.list[].out_refund_no | string | Merchant refund number |
+| data.list[].trade_no | string | Original trade number |
+| data.list[].status | string | Refund status |
+| data.list[].refund_amount | object | Refund amount |
+| data.list[].refund_time | string | Refund success time |
+| data.list[].failure_reason | string | Failure reason |
+
+---
+
+## Request Examples
+
+### List Successful Transactions
+
+```
+GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202601070001&record_type=PAY&status=SUCCESS&page_no=1&page_size=20 HTTP/1.1
+Host: api.bybit.com
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440015
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+```
+
+### List All Transactions with Time Range
+
+```
+GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202601070001&record_type=PAY&start_time=2026-01-01T00:00:00Z&end_time=2026-01-31T23:59:59Z&page_no=1&page_size=50 HTTP/1.1
+Host: api.bybit.com
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440016
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+```
+
+### List Refund Records
+
+```
+GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202601070001&record_type=REFUND&page_no=1&page_size=20 HTTP/1.1
+Host: api.bybit.com
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440017
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
+```
+
+---
+
+## Response Examples
+
+### Deduction Transaction List
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "total": 50,
+    "page_no": 1,
+    "page_size": 20,
+    "list": [
+      {
+        "trade_no": "PAY202601070001",
+        "out_trade_no": "ORDER20260107001",
+        "status": "SUCCESS",
+        "amount": {
+          "total": "2350",
+          "currency": "USDT",
+          "currency_type": "CRYPTO",
+          "chain": "TRC20"
+        },
+        "pay_time": "2026-01-07T10:30:00Z",
+        "refund_amount": {
+          "total": "0",
+          "currency": "USDT",
+          "currency_type": "CRYPTO"
+        }
+      },
+      {
+        "trade_no": "PAY202601070002",
+        "out_trade_no": "ORDER20260107002",
+        "status": "SUCCESS",
+        "amount": {
+          "total": "10000",
+          "currency": "USD",
+          "currency_type": "FIAT"
+        },
+        "crypto_payment": {
+          "currency": "USDT",
+          "amount": "10005.50",
+          "chain": "TRC20",
+          "exchange_rate": "1.00055",
+          "rate_time": "2026-01-07T10:29:55Z"
+        },
+        "pay_time": "2026-01-07T14:30:00Z",
+        "refund_amount": {
+          "total": "2000",
+          "currency": "USD",
+          "currency_type": "FIAT"
+        }
+      }
+    ]
+  }
+}
+```
+
+### Refund Record List
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "total": 10,
+    "page_no": 1,
+    "page_size": 20,
+    "list": [
+      {
+        "refund_no": "RF202601070001",
+        "out_refund_no": "REFUND20260107001",
+        "trade_no": "PAY202601070001",
+        "status": "SUCCESS",
+        "refund_amount": {
+          "total": "2350",
+          "currency": "USDT",
+          "currency_type": "CRYPTO",
+          "chain": "TRC20"
+        },
+        "refund_time": "2026-01-07T11:30:00Z"
+      },
+      {
+        "refund_no": "RF202601070002",
+        "out_refund_no": "REFUND20260107002",
+        "trade_no": "PAY202601070002",
+        "status": "SUCCESS",
+        "refund_amount": {
+          "total": "2000",
+          "currency": "USD",
+          "currency_type": "FIAT"
+        },
+        "refund_time": "2026-01-07T16:00:00Z"
+      }
+    ]
+  }
+}
+```
+
+---
+
+## Notes
+
+- Use pagination for large result sets
+- Combine `status` and time range filters for efficient querying
+- `crypto_payment` is only present for fiat currency transactions

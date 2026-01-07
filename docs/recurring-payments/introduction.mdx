@@ -1,0 +1,254 @@
+---
+title: Recurring Payments Introduction
+sidebar_label: Introduction
+sidebar_position: 0
+---
+
+:::caution Note
+This API is not yet publicly available. Please contact Bybit Pay team if you need access to Recurring Payments.
+:::
+
+## Overview
+
+Recurring Payments (Auto-deduction) enables merchants to automatically deduct funds from users' Bybit accounts after users pre-authorize the agreement. No manual confirmation is required for each transaction.
+
+**Document Version**: v2.1
+
+**Applicable Scenarios:**
+- Ride-hailing contactless payment
+- Membership auto-renewal / Subscriptions
+- Utility bill payment
+- Parking lot automatic deduction
+- Recurring service payments
+
+**Security Mechanism:**
+- Strong authentication for signing (SMS/Face/Password)
+- Single and period limit controls
+- Real-time risk control interception
+- Async notification for every deduction
+
+---
+
+## Core Concepts
+
+### Agreement Lifecycle
+
+```
+                                    ┌─────────────────────────────────────┐
+                                    │                                     │
+                                    ▼                                     │
+┌──────┐  Sign Request  ┌──────┐  User Scan   ┌─────────┐  Confirm Sign  ┌────────┐
+│      │ ─────────────→ │      │ ───────────→ │         │ ─────────────→ │        │
+│ Start│                │ INIT │              │ PENDING │                │ SIGNED │◀──┐
+│      │                │      │              │         │                │        │   │
+└──────┘                └──────┘              └─────────┘                └────────┘   │
+                            │                    │ │                         │ │ │    │
+                            │ Timeout            │ │ Failed/Rejected         │ │ │    │
+                            ▼                    ▼ │                         │ │ │    │
+                        ┌─────────┐         ┌────────┐                      │ │ │    │
+                        │ TIMEOUT │         │ FAILED │                      │ │ │    │
+                        └─────────┘         └────────┘                      │ │ │    │
+                                                                            │ │ │    │
+                             ┌──────────────────────────────────────────────┘ │ │    │
+                             │ Unsign                                         │ │    │
+                             ▼                                                │ │    │
+                        ┌──────────┐                                          │ │    │
+                        │ UNSIGNED │                                          │ │    │
+                        └──────────┘                                          │ │    │
+                                                                              │ │    │
+                             ┌────────────────────────────────────────────────┘ │    │
+                             │ Expired                                           │    │
+                             ▼                                                   │    │
+                        ┌─────────┐                                              │    │
+                        │ EXPIRED │                                              │    │
+                        └─────────┘                                              │    │
+                                                                                 │    │
+                             ┌───────────────────────────────────────────────────┘    │
+                             │ Risk/Abnormal                                          │
+                             ▼                                                        │
+                        ┌───────────┐  Resume                                         │
+                        │ SUSPENDED │ ────────────────────────────────────────────────┘
+                        └───────────┘
+```
+
+### Agreement States
+
+| Status | Description | Deduction Allowed |
+|:-------|:------------|:------------------|
+| `INIT` | Sign request created, waiting for user scan | No |
+| `PENDING` | User scanned, waiting to complete verification | No |
+| `SIGNED` | Agreement active | **Yes** |
+| `SUSPENDED` | Temporarily paused (can be resumed) | No |
+| `UNSIGNED` | Agreement terminated (final) | No |
+| `EXPIRED` | Agreement expired (final) | No |
+| `FAILED` | Sign failed (final) | No |
+| `TIMEOUT` | Sign link expired (final) | No |
+
+---
+
+## Integration Flow
+
+### 1. Sign Flow (One-time Setup)
+
+```
+Merchant Server                  Platform                         User App
+    │                         │                            │
+    │  1.Sign Request         │                            │
+    │  (user_id +             │                            │
+    │   merchant_user_id)     │                            │
+    │ ──────────────────────→ │                            │
+    │                         │                            │
+    │  2.Return Sign QR Code  │                            │
+    │  (qr_code/sign_url)     │                            │
+    │ ←────────────────────── │                            │
+    │                         │                            │
+    │     Display QR Code     │        3.Scan              │
+    │ - - - - - - - - - - - - │ ←────────────────────────  │
+    │                         │                            │
+    │                         │     4.Login/Register       │
+    │                         │ ←─────────────────────────→│
+    │                         │                            │
+    │                         │     5.Identity Verification│
+    │                         │     (SMS/Face/Password)    │
+    │                         │ ←─────────────────────────→│
+    │                         │                            │
+    │                         │     6.Confirm Sign Auth    │
+    │                         │ ←────────────────────────  │
+    │                         │                            │
+    │  7.Webhook Notification │                            │
+    │  (agreement_no)         │                            │
+    │ ←────────────────────── │                            │
+    │                         │                            │
+```
+
+### 2. Deduction Flow (Automatic Payment)
+
+```
+Merchant Server → Deduction Request(agreement_no) → Platform
+                                      ↓
+                            ┌─────────────────┐
+                            │ 1. Agreement     │
+                            │    validity check│
+                            │ 2. Limit check   │
+                            │ 3. Risk check    │
+                            │ 4. Execute       │
+                            │    deduction     │
+                            └─────────────────┘
+                                      ↓
+   ←←←←←←← Sync return result + Async notification ←←←←
+
+User receives deduction notification (Push/SMS)
+```
+
+### 3. Refund Flow
+
+```
+Merchant Server → Refund Request(trade_no + refund_amount) → Platform
+                                                   ↓
+                                         ┌─────────────────┐
+                                         │ 1. Transaction  │
+                                         │    validity check│
+                                         │ 2. Refundable   │
+                                         │    amount check │
+                                         │ 3. Execute refund│
+                                         └─────────────────┘
+                                                   ↓
+   ←←←←←←← Sync return result + Async notification ←←←←←←←←
+
+User receives refund notification (Push/SMS)
+```
+
+---
+
+## API List
+
+| API Name | Method | Endpoint | Description |
+|:---------|:-------|:---------|:------------|
+| [Sign Request](sign-request) | POST | `/v5/bybitpay/agreement/sign` | Create sign request, get QR code |
+| [Sign Confirm](sign-confirm) | POST | `/v5/bybitpay/agreement/confirm` | Confirm sign status (optional) |
+| [Unsign](unsign) | POST | `/v5/bybitpay/agreement/unsign` | Terminate agreement |
+| [Deduction](deduction) | POST | `/v5/bybitpay/agreement/pay` | Execute automatic deduction |
+| [Refund](refund) | POST | `/v5/bybitpay/agreement/refund` | Refund deduction transaction |
+| [Query Agreement](query-agreement) | GET | `/v5/bybitpay/agreement/query` | Query single agreement status |
+| [List Agreements](list-agreements) | GET | `/v5/bybitpay/agreement/list` | List merchant agreements |
+| [Query Transaction](query-transaction) | GET | `/v5/bybitpay/agreement/pay/query` | Query single transaction/refund |
+| [List Transactions](list-transactions) | GET | `/v5/bybitpay/agreement/pay/list` | List transactions under agreement |
+
+---
+
+## Quick Start
+
+### Step 1: Create Sign Request
+
+```bash
+POST /v5/bybitpay/agreement/sign
+```
+
+```json
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "merchant_user_id": "merchant_user_123",
+  "scene_code": "SUBSCRIPTION",
+  "external_agreement_no": "MERCHANT_AGR_001",
+  "single_limit": {
+    "amount": "100000",
+    "currency": "USDT",
+    "currency_type": "CRYPTO"
+  },
+  "notify_url": "https://merchant.com/notify/sign"
+}
+```
+
+### Step 2: User Completes Sign
+
+Display the returned `qr_code` or `sign_url` to the user. User scans and completes identity verification.
+
+### Step 3: Receive Sign Webhook
+
+```json
+{
+  "notifyType": "AGREEMENT_SIGN",
+  "data": {
+    "agreementNo": "AGR202312230001",
+    "status": "SIGNED",
+    "userId": "U_123456789"
+  }
+}
+```
+
+### Step 4: Execute Deduction
+
+```bash
+POST /v5/bybitpay/agreement/pay
+```
+
+```json
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "agreement_no": "AGR202312230001",
+  "out_trade_no": "ORDER20231223001",
+  "scene_code": "SUBSCRIPTION",
+  "amount": {
+    "total": "2350",
+    "currency": "USDT",
+    "currency_type": "CRYPTO"
+  },
+  "order_info": {
+    "order_title": "Monthly subscription"
+  },
+  "notify_url": "https://merchant.com/notify/pay"
+}
+```
+
+---
+
+## Related Documentation
+
+- [Common Specifications](specifications) - Request headers, response format, rate limits
+- [Webhooks](webhooks) - Async notification handling
+- [Error Codes](error-codes) - Error code reference
+- [Appendix](appendix) - Scene codes, currencies, sandbox testing

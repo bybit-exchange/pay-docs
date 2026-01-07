@@ -4,40 +4,139 @@ sidebar_label: API Overview
 sidebar_position: 0
 ---
 
-## REST API Endpoints
+## Business Scenarios
 
-### Base URL
+Bybit Pay provides two main payment integration methods for merchants:
+
+| Scenario | Description | Use Case |
+|:---------|:------------|:---------|
+| **[QR Payment](scan-payment/introduction)** | QR code based payment where users scan to pay | E-commerce checkout, retail POS, one-time payments |
+| **[Recurring Payments](recurring-payments/introduction)** | Pre-authorized automatic deduction payment | Subscriptions, ride-hailing, recurring payments, utility bills |
+
+---
+
+## QR Payment Flow
+
+User scans merchant's QR code and completes payment through Bybit App.
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Merchant   │     │    Bybit     │     │   Bybit App  │     │     User     │
+│    Server    │     │   Platform   │     │              │     │              │
+└──────┬───────┘     └──────┬───────┘     └──────┬───────┘     └──────┬───────┘
+       │                    │                    │                    │
+       │ 1. Create Payment  │                    │                    │
+       │ ─────────────────→ │                    │                    │
+       │                    │                    │                    │
+       │ 2. Return QR Code  │                    │                    │
+       │ ←───────────────── │                    │                    │
+       │                    │                    │                    │
+       │     Display QR     │                    │    3. Scan QR      │
+       │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─│─ ─ ─ ─ ─ ─ ─ ─ ─ →│← ─ ─ ─ ─ ─ ─ ─ ─  │
+       │                    │                    │                    │
+       │                    │                    │ 4. Confirm Payment │
+       │                    │                    │ ←─────────────────→│
+       │                    │                    │                    │
+       │                    │    5. Deduct       │                    │
+       │                    │ ←──────────────────│                    │
+       │                    │                    │                    │
+       │ 6. Webhook Notify  │                    │                    │
+       │ ←───────────────── │                    │                    │
+       │                    │                    │                    │
+       ▼                    ▼                    ▼                    ▼
+```
+
+**Key Features:**
+- One-time payment authorization
+- Real-time payment result notification
+- Support for crypto and fiat currencies
+- Refund capability
+
+---
+
+## Recurring Payments Flow
+
+User pre-authorizes merchant for automatic deductions without manual confirmation each time.
+
+### Sign Flow (One-time Setup)
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Merchant   │     │    Bybit     │     │   Bybit App  │     │     User     │
+│    Server    │     │   Platform   │     │              │     │              │
+└──────┬───────┘     └──────┬───────┘     └──────┬───────┘     └──────┬───────┘
+       │                    │                    │                    │
+       │ 1. Sign Request    │                    │                    │
+       │ ─────────────────→ │                    │                    │
+       │                    │                    │                    │
+       │ 2. Return Sign URL │                    │                    │
+       │ ←───────────────── │                    │                    │
+       │                    │                    │                    │
+       │     Display QR     │                    │    3. Scan QR      │
+       │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─│─ ─ ─ ─ ─ ─ ─ ─ ─ →│← ─ ─ ─ ─ ─ ─ ─ ─  │
+       │                    │                    │                    │
+       │                    │                    │ 4. Identity Verify │
+       │                    │                    │ ←─────────────────→│
+       │                    │                    │                    │
+       │                    │                    │ 5. Confirm Sign    │
+       │                    │                    │ ←─────────────────→│
+       │                    │                    │                    │
+       │ 6. Sign Webhook    │                    │                    │
+       │   (agreement_no)   │                    │                    │
+       │ ←───────────────── │                    │                    │
+       │                    │                    │                    │
+       ▼                    ▼                    ▼                    ▼
+```
+
+### Deduction Flow (Automatic Payment)
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Merchant   │     │    Bybit     │     │     User     │
+│    Server    │     │   Platform   │     │   (Passive)  │
+└──────┬───────┘     └──────┬───────┘     └──────┬───────┘
+       │                    │                    │
+       │ 1. Deduction       │                    │
+       │   (agreement_no)   │                    │
+       │ ─────────────────→ │                    │
+       │                    │                    │
+       │                    │  2. Verify:        │
+       │                    │  - Agreement valid │
+       │                    │  - Limit check     │
+       │                    │  - Risk check      │
+       │                    │  - Balance check   │
+       │                    │                    │
+       │                    │ 3. Auto Deduct     │
+       │                    │ ──────────────────→│
+       │                    │                    │
+       │ 4. Result + Webhook│                    │
+       │ ←───────────────── │                    │
+       │                    │                    │
+       │                    │ 5. Notification    │
+       │                    │ ──────────────────→│
+       │                    │                    │
+       ▼                    ▼                    ▼
+```
+
+**Key Features:**
+- Pre-authorized automatic payments
+- No user confirmation required per transaction
+- Single and period limit controls
+- Support for subscriptions, ride-hailing, utilities
+- Agreement lifecycle management (sign, suspend, resume, unsign)
+
+---
+
+## Base URL
+
 | Environment | Base URL |
 |:------------|:---------|
-| Testnet | `https://api-testnet.bybit.com` |
-| Mainnet | `https://api.bybit.com` |
+| Testnet (Sandbox) | `https://api-testnet.bybit.com` |
+| Mainnet (Production) | `https://api.bybit.com` |
 
-### API List
+---
 
-| Category | API Name | Method | Endpoint | Description |
-|:---------|:---------|:-------|:---------|:------------|
-| **Payment** | [Create Payment](scan-payment/create-payment) | POST | `/v5/bybitpay/create_pay` | Create a new payment order and get QR code for checkout |
-| **Payment** | [Get Payment Result](scan-payment/payment-result) | GET | `/v5/bybitpay/pay_result` | Query order status by merchant order number or pay ID |
-| **Payment** | [Payment Notify](scan-payment/payment-notify) | POST | Webhook URL | Receive payment status callback notifications |
-| **Payment** | [Payment Status Mock](scan-payment/payment-status-mock) | POST | `/v5/bybitpay/paystatus/mock` | Mock order status for sandbox testing |
-| **Payment** | [Payment FxConvert](scan-payment/payment-fx-convert) | POST | `/v5/bybitpay/fx/convert` | Get exchange rate quotation for fiat/crypto conversion |
-| **Refund** | [Order Refund](refund) | POST | `/v5/bybitpay/refund` | Create refund orders (supports batch processing) |
-| **Payout** | [Payout](payout) | POST | `/v5/bybitpay/payout` | Send payout to Bybit users |
-| **Settlement** | [Settlement Report](settlement) | POST | `/v5/bybitpay/settlement_record` | Query settlement records by date range *(Not yet supported)* |
-
-### Authentication
-
-All API requests require the following HTTP headers:
-
-| Header | Required | Description |
-|:-------|:---------|:------------|
-| `X-BAPI-API-KEY` | Yes | Your API key |
-| `X-BAPI-TIMESTAMP` | Yes | UTC timestamp in milliseconds |
-| `X-BAPI-SIGN` | Yes | Request signature |
-| `X-BAPI-RECV-WINDOW` | No | Request validity window (default: 5000ms) |
-| `Content-Type` | Yes | `application/json` |
-
-### Common Response Structure
+## Common Response Structure
 
 ```json
 {
@@ -55,27 +154,11 @@ All API requests require the following HTTP headers:
 | retMsg | string | Return message |
 | result | object | Business data |
 
-### Payment Types
+---
 
-| Type | Description |
-|:-----|:------------|
-| `E_COMMERCE` | Bybit QR Pay for e-commerce |
-| `E_COMMERCE_REFUND` | Bybit QR Pay refund for e-commerce |
-| `QR_PAY` | Bybit QR Pay for standard QR code pay |
-| `QR_PAY_REFUND` | Bybit QR Pay refund for standard QR code pay |
-| `MERCHANT_PAYOUT` | Bybit pay payout for merchant |
+## Getting Started
 
-### Order Status Flow
+Choose the integration method based on your business needs:
 
-| Status | Description |
-|:-------|:------------|
-| `INIT` | Order created, waiting for payment |
-| `PAY_SUCCESS` | Payment successful |
-| `PAY_FAILED` | Payment failed |
-| `TIMEOUT` | Order expired |
-| `REFUND_SUCCESS` | Refund successful |
-| `REFUND_FAILED` | Refund failed |
-
-### Rate Limits
-
-Please refer to [Bybit API documentation](https://bybit-exchange.github.io/docs/) for rate limit details.
+- **For one-time payments**: Start with [QR Payment Integration](scan-payment/introduction)
+- **For recurring/automatic payments**: Start with [Recurring Payments Integration](recurring-payments/introduction)
