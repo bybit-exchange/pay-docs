@@ -18,6 +18,7 @@ const sidebars = {
 
   // But you can create a sidebar manually
   bbyPaySideBar: [
+    'api-overview',
     'guide',
     'flow',
     'user-guide',
@@ -34,6 +35,7 @@ const sidebars = {
   },
   'refund',
   'payout',
+  'settlement',
   {
     type: 'category',
     label: 'Data Models',
