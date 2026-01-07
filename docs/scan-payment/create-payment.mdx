@@ -15,16 +15,18 @@ POST `/v5/bybitpay/create_pay`
 |[paymentType](../data-model/payment-type) | **true**|string |Payment type|
 |customer |false|&lt;[CustomerType](../data-model/customer)&gt; |Customer info|
 |merchantTradeNo |**true**|string |Merchant order number|
+|quotationId |false|string |Return result quotationId to create order|
 |goods |**true**|array&lt;[GoodType](../data-model/good)&gt; |Product description|
 |orderAmount | **true**|string |Order amount|
 |currency | **true**|string |Order currency (uppercase, e.g., `EUR`, `USD`, `USDT`)|
 |currencyType |**true**|string |Currency type (`fiat` or `crypto`)|
-|successUrl | false|string |URL to return after successful payment (max 256 characters)|
-|failedUrl | false|string |URL to return after failed payment (max 256 characters)|
-|webhookUrl |false|string |API URL to call when order is successful or failed (max 256 characters)|
+|successUrl | **true**|string |URL to return after successful payment (max 256 characters)|
+|failedUrl | **true**|string |URL to return after failed payment (max 256 characters)|
+|webhookUrl |**true**|string |API URL to call when order is successful or failed (max 256 characters)|
 |orderExpireTime | false|int64 |Order expiration time in UTC timestamp (second precision), default is 1 hour, max is 1 hour|
 |env | **true**|&lt;[EnvType](../data-model/env)&gt; |Transaction source|
 |riskInfo |false|&lt;[RiskInfoType](../data-model/risk-info)&gt; |Risk info for order pay|
+|remark |false|string |Payment remark, max 50 characters|
 
 ### Response Parameters
 | Parameter | Type | Comments|
@@ -44,42 +46,48 @@ POST /v5/bybitpay/create_pay HTTP/1.1
 Host: api.bybit.com
 X-BAPI-SIGN: XXXXX
 X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
-X-BAPI-TIMESTAMP: 1739178959616
-X-BAPI-RECV-WINDOW: 50000
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-RECV-WINDOW: 5000
 Content-Type: application/json
 
 {
+    "merchantId": "305142568",
+    "merchantName": "Digital Store",
+    "clientId": "client_001",
+    "paymentType": "E_COMMERCE",
+    "merchantTradeNo": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+    "orderAmount": "100",
     "currency": "USDT",
     "currencyType": "crypto",
-    "env": {
-        "browserVersion": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-        "device": "xxde",
-        "ip": "127.0.0.1",
-        "terminalType": "APP"
-    },
-    "failedUrl": "",
-    "customer":{
-        "externalUserId": "test@gmail.com",
-        "userName": "john li",
-        "registerTime": "1739178959",
-        "kycCountry": "AUS"
+    "successUrl": "https://www.merchant.com/success",
+    "failedUrl": "https://www.merchant.com/failed",
+    "webhookUrl": "https://www.merchant.com/webhook/bybitpay",
+    "orderExpireTime": 1736236800,
+    "remark": "Order for digital goods",
+    "customer": {
+        "externalUserId": "user123@merchant.com",
+        "userName": "John Doe",
+        "registerTime": 1704067200,
+        "kycCountry": "USA",
+        "remarks": "VIP customer"
     },
     "goods": [
         {
-            "shoppingName": "test good",
-            "mccCode": "1520",
-            "goodsName": "test",
-            "goodsDetail": "test"
+            "shoppingName": "Digital Store",
+            "mccCode": "5816",
+            "goodsName": "Premium Subscription",
+            "goodsDetail": "Monthly subscription for premium features"
         }
     ],
-    "merchantId": "305142568",
-    "merchantName": "uquid",
-    "merchantTradeNo": "841e4ba2-c7ec-40b1-a071-a2a45de7bd00",
-    "orderAmount": "100",
-    "orderExpireTime": 0,
-    "paymentType": "E_COMMERCE",
-    "successUrl": "",
-    "webhookUrl": ""
+    "env": {
+        "terminalType": "WEB",
+        "device": "Mozilla/5.0 compatible browser",
+        "browserVersion": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
+        "ip": "192.168.1.100"
+    },
+    "riskInfo": {
+        "terminalType": "WEB"
+    }
 }
 ```
 
@@ -90,25 +98,34 @@ Content-Type: application/json
     "retCode": 100000,
     "retMsg": "success",
     "result": {
-        "payId": "01JN6AZVEMAC8H9SED6JES3QH8",
-        "terminalType": "APP",
-        "expireTime": 1740751953,
-        "checkoutLink": "",
-        "qrContent": "data:image/png;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UXXXXXXXXQAUUUUAFFFFABRRRQAUUUUAf/Z",
+        "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
+        "terminalType": "WEB",
+        "expireTime": 1736236800,
+        "checkoutLink": "bybitapp://open/route?targetUrl=by-mini%3A%2F%2Fpay%2FscanResult%3ForderNo%3D01JY2KM5QNPXR8S4HTJZT9BC12",
+        "qrContent": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAIAAAAP3aGbAAC...",
         "order": {
             "merchantId": "305142568",
-            "clientId": "",
+            "clientId": "client_001",
             "paymentType": "E_COMMERCE",
-            "merchantTradeNo": "841e4ba2-c7ec-40b1-a071-a2a45de7bd00",
-            "payId": "01JN6AZVEMAC8H9SED6JES3QH8",
-            "status": "INITIAL",
+            "merchantTradeNo": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+            "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
+            "status": "INIT",
             "amount": "100",
             "currency": "USDT",
             "currencyType": "crypto",
-            "createTime": 1740748353,
+            "createTime": 1736233200,
             "paymentTime": 0,
             "finishTime": 0,
-            "refundOrders": []
+            "refundOrders": [],
+            "remark": "Order for digital goods"
+        },
+        "customer": {
+            "uid": "104326789",
+            "externalUserId": "user123@merchant.com",
+            "userName": "John Doe",
+            "registerTime": 1704067200,
+            "kycCountry": "USA",
+            "remarks": "VIP customer"
         }
     }
 }

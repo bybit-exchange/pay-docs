@@ -8,7 +8,7 @@ POST `/v5/bybitpay/payout`
 ### Request Parameters
 | Parameter | Required | Type | Comments|
 |:----- |:-------|:-----|------ |
-|merchantId |**true** |string |Merchant UID|
+|merchantId |**true** |string |Onboarding merchant UID|
 |merchantName |false |string |If not filled in, we will show users the name of your company doing KYB on the Bybit platform|
 |clientId |false|string |Merchant client ID|
 |[paymentType](data-model/payment-type) |**true**|string |Payment Type|
@@ -16,10 +16,12 @@ POST `/v5/bybitpay/payout`
 |amount |**true**|string |Order Amount|
 |currency |**true**|string |Order Currency (uppercase, e.g., EUR, USD, USDT)|
 |currencyType |**true**|string |Currency Type (`fiat` or `crypto`)|
+|combined |false|bool |Whether combined payment is supported (`true` or `false`), default `false`. e.g.: When merchant's USDT assets are insufficient for the order amount, can BTC or other cryptocurrency assets be exchanged for USDT|
 |webhookUrl |false|string |API URL to call when order is successful or failed (max 256 characters)|
-|[payee](data-model/payee) |**true**|string |Payee Bybit uid|
+|[payee](data-model/payee) |**true**|&lt;[PayeeType](data-model/payee)&gt; |Bybit payee|
 |env |**true**|&lt;[EnvType](data-model/env)&gt; |Transaction source|
 |riskInfo |false|&lt;[RiskInfoType](data-model/risk-info)&gt; |Risk info for order pay|
+|mccCode |**true**|string |Merchant category codes, [ISO 18245:2023](https://www.iso.org/standard/79450.html)|
 
 ### Response Parameters
 | Parameter | Type | Comments|
@@ -28,33 +30,78 @@ POST `/v5/bybitpay/payout`
 
 ### Request Example
 
+#### Basic Payout (USDT)
 ```http
-POST /v5/bybitpay/refund HTTP/1.1
+POST /v5/bybitpay/payout HTTP/1.1
 Host: api.bybit.com
 X-BAPI-SIGN: XXXXX
 X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
-X-BAPI-TIMESTAMP: 1739178959616
-X-BAPI-RECV-WINDOW: 50000
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-RECV-WINDOW: 5000
 Content-Type: application/json
 
 {
+    "merchantId": "305142568",
+    "merchantName": "Digital Rewards Platform",
+    "clientId": "client_001",
+    "paymentType": "MERCHANT_PAYOUT",
+    "merchantTradeNo": "PO-2026-0001",
+    "amount": "100.00",
     "currency": "USDT",
     "currencyType": "crypto",
+    "mccCode": "5816",
+    "payee": {
+        "uid": "104326789"
+    },
+    "webhookUrl": "https://www.merchant.com/webhook/payout",
     "env": {
-        "browserVersion": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36",
-        "device": "xxde",
-        "ip": "127.0.0.1",
-        "terminalType": "APP"
-    }, 
+        "terminalType": "WEB",
+        "device": "payout-service",
+        "browserVersion": "Server/1.0",
+        "ip": "10.0.1.100"
+    },
+    "riskInfo": {
+        "terminalType": "WEB"
+    }
+}
+```
+
+#### Payout with Combined Payment (Multi-currency)
+```http
+POST /v5/bybitpay/payout HTTP/1.1
+Host: api.bybit.com
+X-BAPI-SIGN: XXXXX
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-RECV-WINDOW: 5000
+Content-Type: application/json
+
+{
     "merchantId": "305142568",
-    "merchantTradeNo": "841e4ba2-c7ec-40b1-a071-a2a45de7bd00",
-    "amount": "100",
-    "webhookUrl": "www.bybit.com/successUrl"
+    "merchantName": "Digital Rewards Platform",
+    "paymentType": "MERCHANT_PAYOUT",
+    "merchantTradeNo": "PO-2026-0002",
+    "amount": "5000.00",
+    "currency": "USDT",
+    "currencyType": "crypto",
+    "combined": true,
+    "mccCode": "5816",
+    "payee": {
+        "uid": "104326790"
+    },
+    "webhookUrl": "https://www.merchant.com/webhook/payout",
+    "env": {
+        "terminalType": "WEB",
+        "device": "payout-service",
+        "browserVersion": "Server/1.0",
+        "ip": "10.0.1.100"
+    }
 }
 ```
 
 ### Response Example
 
+#### Payout Created Response
 ```json
 {
     "retCode": 100000,
@@ -62,15 +109,43 @@ Content-Type: application/json
     "result": {
         "order": {
             "merchantId": "305142568",
-            "clientId": "",
-            "paymentType": "E_COMMERCE",
-            "merchantTradeNo": "841e4ba2-c7ec-40b1-a071-a2a45de7bd00",
-            "payId": "01JN6AZVEMAC8H9SED6JES3QH8",
-            "status": "INITIAL",
-            "amount": "100",
+            "clientId": "client_001",
+            "paymentType": "MERCHANT_PAYOUT",
+            "merchantTradeNo": "PO-2026-0001",
+            "payId": "01JY2KM5QNPXR8S4HTJZT9PO01",
+            "status": "INIT",
+            "amount": "100.00",
             "currency": "USDT",
             "currencyType": "crypto",
-            "createTime": 1740748353
+            "createTime": 1736233200,
+            "paymentTime": 0,
+            "finishTime": 0,
+            "refundOrders": []
+        }
+    }
+}
+```
+
+#### Payout Success Response (via webhook or query)
+```json
+{
+    "retCode": 100000,
+    "retMsg": "success",
+    "result": {
+        "order": {
+            "merchantId": "305142568",
+            "clientId": "client_001",
+            "paymentType": "MERCHANT_PAYOUT",
+            "merchantTradeNo": "PO-2026-0001",
+            "payId": "01JY2KM5QNPXR8S4HTJZT9PO01",
+            "status": "PAY_SUCCESS",
+            "amount": "100.00",
+            "currency": "USDT",
+            "currencyType": "crypto",
+            "createTime": 1736233200,
+            "paymentTime": 1736233260,
+            "finishTime": 1736233260,
+            "refundOrders": []
         }
     }
 }

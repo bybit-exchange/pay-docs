@@ -4,7 +4,98 @@ title: Bybit Pay changelog
 
 import '/src/css/changelog.css';
 
+## 2025-09-09
+### REST API
+- [Create Payment](../scan-payment/create-payment) [UPDATE]
+    - Add `remarks` in customer object in API `/v5/bybitpay/create_pay` and `/v5/bybitpay/pay_result`
+
+## 2025-09-03
+### REST API
+- [Error Codes](../error) [UPDATE]
+    - Add new error codes
+
+## 2025-07-04
+### REST API
+- [Payment FxConvert](../scan-payment/payment-fx-convert) [NEW]
+    - Add 5.1.5 Payment FxConvert API
+    - Support fiat or crypto create order, settlement diff currency
+- [Payout](../payout) [UPDATE]
+    - Add payout mcc required
+
+## 2025-06-30
+### REST API
+- [Signature Algorithm](../sign-algo) [UPDATE]
+    - Update signature algorithm
+
+## 2025-06-01
+### REST API
+- Add crypto scale support
+
 ## 2025-05-28
+### REST API
+- [Create Payment](../scan-payment/create-payment) [UPDATE]
+    - Add `customer` with `uid` field in API `/v5/bybitpay/pay_result` and Payment Notify
+- [Payment Status Mock (sandbox)](../scan-payment/payment-status-mock) [UPDATE]
+    - Refactor pay status mock path from `/v5/bybitpay/pay-status/mock` to `/v5/bybitpay/paystatus/mock`
+
+## 2025-05-27
+### REST API
+- [Payment Type](../data-model/payment-type) [UPDATE]
+    - Refactor payment type from `BYBIT_PAY_MERCHANT_PAYOUT` to `MERCHANT_PAYOUT`
+
+## 2025-05-21
+### REST API
+- [Payment Notify](../scan-payment/payment-notify) [UPDATE]
+    - Add webhook support merchant public key
+
+## 2025-05-13
 ### REST API
 - [Payment Status Mock (sandbox)](../scan-payment/payment-status-mock) [UPDATE]
     - Refactor pay status mock path from `/v5/bybitpay/pay-status/mock` to `/v5/bybitpay/paystatus/mock`
+
+## 2025-05-09
+### REST API
+- [Payout](../payout) [UPDATE]
+    - Add payout status
+
+## 2025-04-16
+### REST API
+- [Settlement](../settlement) [NEW]
+    - Add 5.4 Settlement API
+
+## 2025-03-31
+### REST API
+- [Payment Status Mock (sandbox)](../scan-payment/payment-status-mock) [NEW]
+    - Add 5.1.4 Payment mock
+- [Payout](../payout) [NEW]
+    - Add 5.3 Payout API
+
+## 2025-03-03
+### REST API
+- [Refund](../refund) [UPDATE]
+    - Change `clientId` to not required when initial a refund or query the order status
+    - Change request body type from json array to json object when creating a refund order
+    - Add `merchantRefundNo` when creating a refund order
+- [Create Payment](../scan-payment/create-payment) [UPDATE]
+    - Move field `goods` into PayOrder structure
+    - Move field `customer` from PayOrder structure
+    - Rename `orderAmount` to `amount` for all PayOrder type
+- [Payment Notify](../scan-payment/payment-notify) [UPDATE]
+    - Change notify request body
+- [Signature Algorithm](../sign-algo) [UPDATE]
+    - Add signature algorithm description
+- [Error Codes](../error) [UPDATE]
+    - Add error code 50000 (Bybit internal error)
+    - Add error code 400004 (Order not found)
+    - Add error code 500105 (Order not paid)
+- [Data Types](../data-model/customer) [UPDATE]
+    - Change `regionTime` to `registerTime` in Customer type
+    - Add Type RefundOrder, remove fields of refund from PayOrder
+    - Remove all Customer and Good data from response structure
+
+## 2025-02-17
+### REST API
+- Modify the state machine
+- Add `PayId` to the Payment Notify demo
+- Add Authentication description to Payment Notify
+- Add MCC Codes explanation of goods details

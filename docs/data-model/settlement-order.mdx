@@ -3,25 +3,52 @@ title: SettlementOrderType
 sidebar_label: SettlementOrder
 sidebar_position: 7
 ---
-| Parameter | Required | Type | Comments|
-|:----- |:-------|:-----|------ |
-|merchantId|**true**|string|Merchant ID|
-|clientId|false|string|Merchant client ID|
-|[paymentType](payment-type#)|**true**|string|Payment type|
-|merchantTradeNo|**true**|string|Merchant order number|
-|settleAccountDate|**true**|string|Settle account date , format: `2025-09-10`|
-|[refundType](refund-type#)|**true**|string|Refund type|
-|acquireAmount|**true**|string|Acquired amount|
-|acquireCurrencyType|**true**|string|Acquired currency type, `fiat` or `crypto`|
-|acquireCurrencyCode|**true**|string|Acquired currency code, uppercase fiat or crypto code, e.g., EUR, USD, USDT|
-|settlementCurrencyType|**true**|string|Settlement currency type, `fiat` or `crypto`|
-|settlementCurrencyCode|**true**|string|Settlement Currency code , uppercase fiat or crypto code, e.g., EUR, USD, USDT|
-|settlementAmount|**true**|string|Settlement amount|
-|commission|**true**|string|Commission|
-|margin|**true**|string|Margin|
-|refundAmount|**true**|string|Refund amount|
-|refundCommissionAmount|**true**|string|Refund commission amount|
-|transferAmount|**true**|string|Transfer amount|
-|settlementTime|**true**|number|Settlement timestamp, in second|
-|status|**true**|string|Status|
-|remark|**true**|string|Remark|
+| Parameter | Type | Comments|
+|:----- |:-----|------ |
+|[paymentType](payment-type#)|string|Payment type|
+|settlementTaskNo|string|Merchant settlement task number|
+|orderBusinessDate|string|Order date, format: `2025-09-09`|
+|settleCreateDate|string|Settle create date, format: `2025-09-10`|
+|settleAccountDate|string|Settle account date, format: `2025-09-11`|
+|settleAccountAmount|string|Settle account amount|
+|totalPayableAmount|string|Merchants order total payable amount|
+|totalPayAmount|string|Bybit pay to merchants amount|
+|totalPrincipalAmount|string|Total principal amount|
+|totalOrderAmount|string|Merchants order amount|
+|totalRefundAmount|string|Merchants order refund amount|
+|totalFeeAmount|string|Merchants fee amount|
+|previousRollingReserveAmount|string|Previous rolling reserve amount|
+|currentRollingReserveDeductionAmount|string|Current rolling reserve deduction amount|
+|fixedReserveDeductionAmount|string|Fixed reserve deduction amount|
+|settlementDetails|array&lt;[SettlementOrderDetailType](#settlementorderdetailtype)&gt;|Settlement order details|
+
+## SettlementOrderDetailType
+| Parameter | Type | Comments|
+|:----- |:-----|------ |
+|settlementVoucherNumber|string|Settlement voucher number|
+|merchantOrderNumber|string|Merchant order number|
+|orderType|string|Order type, `order` or `refund`|
+|originalOrderNumberRefund|string|Original order number of refund|
+|orderStartTime|string|Order start time|
+|merchantNumber|string|Merchant number|
+|clearingBatchNumber|string|Clearing batch number|
+|orderAmount|string|Total order amount|
+|OrderCurrency|string|Order currency|
+|orderClearingCurrencyType|string|Order clearing currency type: `CRYPTO` or `FIAT`|
+|OrderClearingExchangeRate|string|Order clearing exchange rate|
+|principalClearingAmount|string|Principal clearing amount|
+|principalClearingCurrencyType|string|Principal clearing currency type|
+|principalClearingCurrency|string|Principal clearing currency|
+|principalClearingExchangeRate|string|Principal clearing exchange rate|
+|marginClearingAmount|string|Margin clearing amount|
+|marginClearingCurrencyType|string|Margin clearing currency type|
+|marginClearingCurrency|string|Margin clearing currency|
+|marginClearingExchangeRate|string|Margin clearing exchange rate|
+|feeClearingAmount|string|Fee clearing amount|
+|feeClearingCurrencyType|string|Fee clearing currency type|
+|feeClearingCurrency|string|Fee clearing currency|
+|feeClearingExchangeRate|string|Fee clearing exchange rate|
+|marginReturnClearingAmount|string|Margin return clearing amount|
+|marginReturnClearingCurrencyType|string|Margin return clearing currency type|
+|marginReturnClearingCurrency|string|Margin return clearing currency|
+|marginReturnClearingExchangeRate|string|Margin return clearing exchange rate|

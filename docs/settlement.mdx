@@ -1,0 +1,201 @@
+---
+title: Settlement Report
+sidebar_label: Settlement
+---
+### HTTP Request
+POST `/v5/bybitpay/settlement_record`
+
+:::caution Note
+This API is not yet supported. Please contact Bybit Pay team for settlement report inquiries.
+:::
+
+### Request Parameters
+| Parameter | Required | Type | Comments|
+|:----- |:-------|:-----|------ |
+|merchantId |**true** |string |Merchant ID|
+|clientId |**true**|string |Merchant client ID|
+|[paymentType](data-model/payment-type) |**true**|string |Payment Type|
+|settleAccountBeginDate |**true**|string |Settle account date, like `2025-09-10`|
+|settleAccountEndDate |**true**|string |Settle account date, like `2025-09-12`|
+|start |**true**|int |Start, default 0|
+|limit |**true**|int |Limit, default 100|
+
+### Response Parameters
+| Parameter | Type | Comments|
+|:----- |:-----|----- |
+|list |array&lt;[SettlementOrderType](data-model/settlement-order)&gt; |Settlement order list|
+
+### Request Example
+
+#### Query Settlement Records by Date Range
+```http
+POST /v5/bybitpay/settlement_record HTTP/1.1
+Host: api.bybit.com
+X-BAPI-SIGN: XXXXX
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-RECV-WINDOW: 5000
+Content-Type: application/json
+
+{
+    "merchantId": "305142568",
+    "clientId": "client_001",
+    "paymentType": "E_COMMERCE",
+    "settleAccountBeginDate": "2026-01-01",
+    "settleAccountEndDate": "2026-01-07",
+    "start": 0,
+    "limit": 100
+}
+```
+
+#### Query with Pagination
+```http
+POST /v5/bybitpay/settlement_record HTTP/1.1
+Host: api.bybit.com
+X-BAPI-SIGN: XXXXX
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-RECV-WINDOW: 5000
+Content-Type: application/json
+
+{
+    "merchantId": "305142568",
+    "clientId": "client_001",
+    "paymentType": "E_COMMERCE",
+    "settleAccountBeginDate": "2026-01-01",
+    "settleAccountEndDate": "2026-03-31",
+    "start": 100,
+    "limit": 50
+}
+```
+
+### Response Example
+
+#### Settlement Report with Orders and Refunds
+```json
+{
+    "retCode": 100000,
+    "retMsg": "success",
+    "result": {
+        "list": [
+            {
+                "paymentType": "E_COMMERCE",
+                "settlementTaskNo": "ST20260106001",
+                "orderBusinessDate": "2026-01-05",
+                "settleCreateDate": "2026-01-06",
+                "settleAccountDate": "2026-01-06",
+                "settleAccountAmount": "850.00",
+                "totalPayableAmount": "1000.00",
+                "totalPayAmount": "850.00",
+                "totalPrincipalAmount": "950.00",
+                "totalOrderAmount": "1000.00",
+                "totalRefundAmount": "50.00",
+                "totalFeeAmount": "100.00",
+                "previousRollingReserveAmount": "0.00",
+                "currentRollingReserveDeductionAmount": "0.00",
+                "fixedReserveDeductionAmount": "0.00",
+                "settlementDetails": [
+                    {
+                        "settlementVoucherNumber": "SV20260106001001",
+                        "merchantOrderNumber": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+                        "orderType": "order",
+                        "originalOrderNumberRefund": "",
+                        "orderStartTime": "2026-01-05 10:30:00",
+                        "merchantNumber": "305142568",
+                        "clearingBatchNumber": "CB20260106001",
+                        "orderAmount": "500.00",
+                        "OrderCurrency": "USDT",
+                        "orderClearingCurrencyType": "CRYPTO",
+                        "OrderClearingExchangeRate": "1.0000",
+                        "principalClearingAmount": "500.00",
+                        "principalClearingCurrencyType": "CRYPTO",
+                        "principalClearingCurrency": "USDT",
+                        "principalClearingExchangeRate": "1.0000",
+                        "marginClearingAmount": "0.00",
+                        "marginClearingCurrencyType": "CRYPTO",
+                        "marginClearingCurrency": "USDT",
+                        "marginClearingExchangeRate": "1.0000",
+                        "feeClearingAmount": "50.00",
+                        "feeClearingCurrencyType": "CRYPTO",
+                        "feeClearingCurrency": "USDT",
+                        "feeClearingExchangeRate": "1.0000",
+                        "marginReturnClearingAmount": "0.00",
+                        "marginReturnClearingCurrencyType": "CRYPTO",
+                        "marginReturnClearingCurrency": "USDT",
+                        "marginReturnClearingExchangeRate": "1.0000"
+                    },
+                    {
+                        "settlementVoucherNumber": "SV20260106001002",
+                        "merchantOrderNumber": "bf9d3e2-6c4f-5b0g-c8d9-9e3f2g4b6d7e",
+                        "orderType": "order",
+                        "originalOrderNumberRefund": "",
+                        "orderStartTime": "2026-01-05 14:45:00",
+                        "merchantNumber": "305142568",
+                        "clearingBatchNumber": "CB20260106001",
+                        "orderAmount": "500.00",
+                        "OrderCurrency": "USDT",
+                        "orderClearingCurrencyType": "CRYPTO",
+                        "OrderClearingExchangeRate": "1.0000",
+                        "principalClearingAmount": "500.00",
+                        "principalClearingCurrencyType": "CRYPTO",
+                        "principalClearingCurrency": "USDT",
+                        "principalClearingExchangeRate": "1.0000",
+                        "marginClearingAmount": "0.00",
+                        "marginClearingCurrencyType": "CRYPTO",
+                        "marginClearingCurrency": "USDT",
+                        "marginClearingExchangeRate": "1.0000",
+                        "feeClearingAmount": "50.00",
+                        "feeClearingCurrencyType": "CRYPTO",
+                        "feeClearingCurrency": "USDT",
+                        "feeClearingExchangeRate": "1.0000",
+                        "marginReturnClearingAmount": "0.00",
+                        "marginReturnClearingCurrencyType": "CRYPTO",
+                        "marginReturnClearingCurrency": "USDT",
+                        "marginReturnClearingExchangeRate": "1.0000"
+                    },
+                    {
+                        "settlementVoucherNumber": "SV20260106001003",
+                        "merchantOrderNumber": "RF-2026-0001",
+                        "orderType": "refund",
+                        "originalOrderNumberRefund": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+                        "orderStartTime": "2026-01-05 16:00:00",
+                        "merchantNumber": "305142568",
+                        "clearingBatchNumber": "CB20260106001",
+                        "orderAmount": "-50.00",
+                        "OrderCurrency": "USDT",
+                        "orderClearingCurrencyType": "CRYPTO",
+                        "OrderClearingExchangeRate": "1.0000",
+                        "principalClearingAmount": "-50.00",
+                        "principalClearingCurrencyType": "CRYPTO",
+                        "principalClearingCurrency": "USDT",
+                        "principalClearingExchangeRate": "1.0000",
+                        "marginClearingAmount": "0.00",
+                        "marginClearingCurrencyType": "CRYPTO",
+                        "marginClearingCurrency": "USDT",
+                        "marginClearingExchangeRate": "1.0000",
+                        "feeClearingAmount": "0.00",
+                        "feeClearingCurrencyType": "CRYPTO",
+                        "feeClearingCurrency": "USDT",
+                        "feeClearingExchangeRate": "1.0000",
+                        "marginReturnClearingAmount": "0.00",
+                        "marginReturnClearingCurrencyType": "CRYPTO",
+                        "marginReturnClearingCurrency": "USDT",
+                        "marginReturnClearingExchangeRate": "1.0000"
+                    }
+                ]
+            }
+        ]
+    }
+}
+```
+
+#### Empty Settlement Report
+```json
+{
+    "retCode": 100000,
+    "retMsg": "success",
+    "result": {
+        "list": []
+    }
+}
+```

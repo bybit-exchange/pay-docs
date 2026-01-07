@@ -1,0 +1,81 @@
+---
+title: API Overview
+sidebar_label: API Overview
+sidebar_position: 0
+---
+
+## REST API Endpoints
+
+### Base URL
+| Environment | Base URL |
+|:------------|:---------|
+| Testnet | `https://api-testnet.bybit.com` |
+| Mainnet | `https://api.bybit.com` |
+
+### API List
+
+| Category | API Name | Method | Endpoint | Description |
+|:---------|:---------|:-------|:---------|:------------|
+| **Payment** | [Create Payment](scan-payment/create-payment) | POST | `/v5/bybitpay/create_pay` | Create a new payment order and get QR code for checkout |
+| **Payment** | [Get Payment Result](scan-payment/payment-result) | GET | `/v5/bybitpay/pay_result` | Query order status by merchant order number or pay ID |
+| **Payment** | [Payment Notify](scan-payment/payment-notify) | POST | Webhook URL | Receive payment status callback notifications |
+| **Payment** | [Payment Status Mock](scan-payment/payment-status-mock) | POST | `/v5/bybitpay/paystatus/mock` | Mock order status for sandbox testing |
+| **Payment** | [Payment FxConvert](scan-payment/payment-fx-convert) | POST | `/v5/bybitpay/fx/convert` | Get exchange rate quotation for fiat/crypto conversion |
+| **Refund** | [Order Refund](refund) | POST | `/v5/bybitpay/refund` | Create refund orders (supports batch processing) |
+| **Payout** | [Payout](payout) | POST | `/v5/bybitpay/payout` | Send payout to Bybit users |
+| **Settlement** | [Settlement Report](settlement) | POST | `/v5/bybitpay/settlement_record` | Query settlement records by date range *(Not yet supported)* |
+
+### Authentication
+
+All API requests require the following HTTP headers:
+
+| Header | Required | Description |
+|:-------|:---------|:------------|
+| `X-BAPI-API-KEY` | Yes | Your API key |
+| `X-BAPI-TIMESTAMP` | Yes | UTC timestamp in milliseconds |
+| `X-BAPI-SIGN` | Yes | Request signature |
+| `X-BAPI-RECV-WINDOW` | No | Request validity window (default: 5000ms) |
+| `Content-Type` | Yes | `application/json` |
+
+### Common Response Structure
+
+```json
+{
+    "retCode": 100000,
+    "retMsg": "success",
+    "result": {
+        // Response data
+    }
+}
+```
+
+| Field | Type | Description |
+|:------|:-----|:------------|
+| retCode | number | Return code. `100000` indicates success |
+| retMsg | string | Return message |
+| result | object | Business data |
+
+### Payment Types
+
+| Type | Description |
+|:-----|:------------|
+| `E_COMMERCE` | Bybit QR Pay for e-commerce |
+| `E_COMMERCE_REFUND` | Bybit QR Pay refund for e-commerce |
+| `QR_PAY` | Bybit QR Pay for standard QR code pay |
+| `QR_PAY_REFUND` | Bybit QR Pay refund for standard QR code pay |
+| `MERCHANT_PAYOUT` | Bybit pay payout for merchant |
+
+### Order Status Flow
+
+| Status | Description |
+|:-------|:------------|
+| `INIT` | Order created, waiting for payment |
+| `PAY_SUCCESS` | Payment successful |
+| `PAY_FAILED` | Payment failed |
+| `TIMEOUT` | Order expired |
+| `REFUND_SUCCESS` | Refund successful |
+| `REFUND_FAILED` | Refund failed |
+
+### Rate Limits
+
+Please refer to [Bybit API documentation](https://bybit-exchange.github.io/docs/) for rate limit details.

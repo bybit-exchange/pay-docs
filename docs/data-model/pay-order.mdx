@@ -10,11 +10,12 @@ sidebar_position: 3
 |[paymentType](payment-type#)|false|string|Payment type|
 |merchantTradeNo|**true**|string|Merchant order number|
 |payId|**true**|string|Bybit pay ID|
-|status|**true**|string|Order status|
+|status|**true**|string|Order status, [State Machine](../order-status)|
 |amount|**true**|string|Order amount|
-|currency|**true**|string|Order currency|
+|currency|**true**|string|Order currency. Crypto scale: 8, examples: `9.00000001` USDT|
 |currencyType|**true**|string|Order Type (`fiat` or `crypto`)|
-|createTime|**true**|number|Order creation timestamp, in second|
-|paymentTime|**true**|number|Order payment timestamp, in second|
-|finishTime|**true**|number|Order complete timestamp, in second|
+|createTime|**true**|number|Order creation timestamp (second)|
+|paymentTime|**true**|number|Order payment timestamp (second)|
+|finishTime|**true**|number|Order completion timestamp (second)|
 |refundOrders|**true**|array&lt;[RefundOrderType](../data-model/refund-order)&gt;|Refund orders|
+|remark|false|string|Payment remark, max 50 characters|
