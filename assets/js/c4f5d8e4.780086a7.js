@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocusaurus_docs=self.webpackChunkdocusaurus_docs||[]).push([[195],{62841:(u,e,s)=>{s.r(e),s.d(e,{default:()=>d});var c=s(67294),a=s(76775);function d(){return c.createElement(a.l_,{to:"/pay-docs/guide"})}}}]);
