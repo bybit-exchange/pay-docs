@@ -807,6 +807,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   "message": "ok",
   "data": {
     "agreement_no": "AGR202312230001",
+    "eventType": "UNSIGNED",
     "status": "UNSIGNED",
     "unsign_time": "2023-12-23T15:30:00Z"
   }
@@ -1587,7 +1588,7 @@ All Webhook notifications use a unified three-part structure:
 {
   // Part 1: Common fields
   "notifyId": "NOTIFY202312230001",      // Notification unique identifier (for merchant deduplication)
-  "notifyType": "AGREEMENT_SIGN",         // Notification type
+  "notifyType": "AGREEMENT_STATUS",         // Notification type
   "notifyTime": "2023-12-23 10:30:05",    // Notification send time
   "merchantId": "M123456789",              // Merchant ID
 
@@ -1608,7 +1609,7 @@ All Webhook notifications use a unified three-part structure:
 | --- | --- | --- |
 | notifyId | string | Notification unique identifier (for merchant deduplication) |
 | notifyType | string | Notification type (see enum below) |
-| notifyTime | string | Notification send time (format: yyyy-MM-dd HH:mm:ss) |
+| notifyTime | string | Notification send time (ISO8601 format with timezone: yyyy-MM-dd'T'HH:mm:ssXXX, e.g., 2023-12-23T10:30:05+08:00) |
 | merchantId | string | Merchant ID |
 | data | object | Business data (different structure based on notifyType) |
 | sign | string | Signature value (Base64 encoded) |
@@ -1616,14 +1617,31 @@ All Webhook notifications use a unified three-part structure:
 
 ### Notification Type Enum
 
-| notifyType | Description |
-| --- | --- |
-| AGREEMENT_SIGN | Sign result notification |
-| AGREEMENT_PAY | Deduction result notification |
-| AGREEMENT_REFUND | Refund result notification |
-| AGREEMENT_UNSIGN | Agreement unsign notification |
-| AGREEMENT_SUSPEND | Agreement suspend notification |
-| AGREEMENT_RESUME | Agreement resume notification |
+| notifyType | Description | Applicable Scenarios |
+| --- | --- | --- |
+| AGREEMENT_STATUS | Agreement status result notification | Sign, unsign, suspend, resume, timeout and all agreement status changes |
+| TRANSACTION_RESULT | Transaction result notification | Deduction, refund and all transaction results |
+
+**Description**:
+- `notifyType` only indicates the category (agreement/transaction)
+- Specific event type is distinguished by `data.eventType` field
+- Specific result status is distinguished by `data.status` field
+
+### eventType Event Type Enum (Agreement)
+
+| eventType | Description | Corresponding notifyType |
+| --- | --- | --- |
+| SIGNED | Sign event | AGREEMENT_STATUS |
+| UNSIGNED | Unsign event | AGREEMENT_STATUS |
+| SUSPENDED | Suspend event | AGREEMENT_STATUS |
+| TIMEOUT | Timeout event | AGREEMENT_STATUS |
+
+### eventType Event Type Enum (Transaction)
+
+| eventType | Description | Corresponding notifyType |
+| --- | --- | --- |
+| PAY | Deduction event | TRANSACTION_RESULT |
+| REFUND | Refund event | TRANSACTION_RESULT |
 
 ---
 
@@ -1650,13 +1668,14 @@ All Webhook notifications use a unified three-part structure:
 ```json
 {
   "notifyId": "NOTIFY202312230001",
-  "notifyType": "AGREEMENT_SIGN",
+  "notifyType": "AGREEMENT_STATUS",
   "notifyTime": "2023-12-23 10:30:05",
   "merchantId": "M123456789",
   "data": {
     "agreementNo": "AGR202312230001",
     "externalAgreementNo": "MERCHANT_AGR_001",
     "agreementType": "CYCLE",
+    "eventType": "SIGNED",
     "status": "SIGNED",
     "userId": "U_123456789",
     "merchantUserId": "merchant_user_123",
@@ -1673,13 +1692,16 @@ All Webhook notifications use a unified three-part structure:
 ```json
 {
   "notifyId": "NOTIFY202312230009",
-  "notifyType": "AGREEMENT_SIGN",
+  "notifyType": "AGREEMENT_STATUS",
   "notifyTime": "2023-12-23 10:35:05",
   "merchantId": "M123456789",
   "data": {
     "agreementNo": "AGR202312230002",
     "externalAgreementNo": "MERCHANT_AGR_002",
     "agreementType": "CYCLE",
+    "eventType": "FAILED",
+    "eventType": "PAY",
+    "orderType": "PAY",
     "status": "FAILED",
     "userId": "U_123456789",
     "merchantUserId": "merchant_user_123",
@@ -1716,7 +1738,7 @@ All Webhook notifications use a unified three-part structure:
 ```json
 {
   "notifyId": "NOTIFY202312230002",
-  "notifyType": "AGREEMENT_PAY",
+  "notifyType": "TRANSACTION_RESULT",
   "notifyTime": "2023-12-23 10:30:05",
   "merchantId": "M123456789",
   "data": {
@@ -1724,6 +1746,8 @@ All Webhook notifications use a unified three-part structure:
     "tradeNo": "PAY202312230001",
     "outTradeNo": "TAXI20231223001",
     "agreementNo": "AGR202312230001",
+    "eventType": "PAY",
+    "orderType": "PAY",
     "status": "SUCCESS",
     "amount": {
       "total": "2350",
@@ -1742,7 +1766,7 @@ All Webhook notifications use a unified three-part structure:
 ```json
 {
   "notifyId": "NOTIFY202312230004",
-  "notifyType": "AGREEMENT_PAY",
+  "notifyType": "TRANSACTION_RESULT",
   "notifyTime": "2023-12-23 10:30:05",
   "merchantId": "M123456789",
   "data": {
@@ -1750,6 +1774,8 @@ All Webhook notifications use a unified three-part structure:
     "tradeNo": "PAY202312230003",
     "outTradeNo": "TAXI20231223003",
     "agreementNo": "AGR202312230001",
+    "eventType": "PAY",
+    "orderType": "PAY",
     "status": "FAILED",
     "amount": {
       "total": "5000",
@@ -1782,12 +1808,13 @@ All Webhook notifications use a unified three-part structure:
 ```json
 {
   "notifyId": "NOTIFY202312230010",
-  "notifyType": "AGREEMENT_UNSIGN",
+  "notifyType": "AGREEMENT_STATUS",
   "notifyTime": "2023-12-23 15:30:05",
   "merchantId": "M123456789",
   "data": {
     "agreementNo": "AGR202312230001",
     "externalAgreementNo": "MERCHANT_AGR_001",
+    "eventType": "UNSIGNED",
     "status": "UNSIGNED",
     "unsignType": "USER",
     "unsignTime": "2023-12-23 15:30:00"
@@ -1824,7 +1851,7 @@ All Webhook notifications use a unified three-part structure:
 ```json
 {
   "notifyId": "NOTIFY202312230005",
-  "notifyType": "AGREEMENT_REFUND",
+  "notifyType": "TRANSACTION_RESULT",
   "notifyTime": "2023-12-23 11:30:05",
   "merchantId": "M123456789",
   "data": {
@@ -1834,6 +1861,10 @@ All Webhook notifications use a unified three-part structure:
     "tradeNo": "PAY202312230001",
     "outTradeNo": "TAXI20231223001",
     "agreementNo": "AGR202312230001",
+    "eventType": "PAY",
+    "orderType": "PAY",
+    "eventType": "REFUND",
+    "orderType": "REFUND",
     "status": "SUCCESS",
     "refund_amount": {
       "total": "2350",
@@ -1852,7 +1883,7 @@ All Webhook notifications use a unified three-part structure:
 ```json
 {
   "notifyId": "NOTIFY202312230008",
-  "notifyType": "AGREEMENT_REFUND",
+  "notifyType": "TRANSACTION_RESULT",
   "notifyTime": "2023-12-23 11:30:05",
   "merchantId": "M123456789",
   "data": {
@@ -1862,6 +1893,10 @@ All Webhook notifications use a unified three-part structure:
     "tradeNo": "PAY202312230001",
     "outTradeNo": "TAXI20231223001",
     "agreementNo": "AGR202312230001",
+    "eventType": "PAY",
+    "orderType": "PAY",
+    "eventType": "REFUND",
+    "orderType": "REFUND",
     "status": "FAILED",
     "refund_amount": {
       "total": "2350",
@@ -1894,12 +1929,13 @@ All Webhook notifications use a unified three-part structure:
 ```json
 {
   "notifyId": "NOTIFY202312230006",
-  "notifyType": "AGREEMENT_SUSPEND",
+  "notifyType": "AGREEMENT_STATUS",
   "notifyTime": "2023-12-23 16:30:05",
   "merchantId": "M123456789",
   "data": {
     "agreementNo": "AGR202312230001",
     "externalAgreementNo": "MERCHANT_AGR_001",
+    "eventType": "SUSPENDED",
     "status": "SUSPENDED",
     "suspendReason": "RISK",
     "suspendTime": "2023-12-23 16:30:00"
@@ -1927,12 +1963,13 @@ All Webhook notifications use a unified three-part structure:
 ```json
 {
   "notifyId": "NOTIFY202312230007",
-  "notifyType": "AGREEMENT_RESUME",
+  "notifyType": "AGREEMENT_STATUS",
   "notifyTime": "2023-12-23 18:30:05",
   "merchantId": "M123456789",
   "data": {
     "agreementNo": "AGR202312230001",
     "externalAgreementNo": "MERCHANT_AGR_001",
+    "eventType": "SIGNED",
     "status": "SIGNED",
     "resumeTime": "2023-12-23 18:30:00"
   },
