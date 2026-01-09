@@ -1,0 +1,232 @@
+---
+title: Agreement Webhooks
+sidebar_label: Agreement
+sidebar_position: 1
+---
+
+Agreement webhooks notify merchants about agreement lifecycle changes. All agreement webhooks use `notifyType: AGREEMENT_STATUS`.
+
+---
+
+## Sign Result Notification
+
+Notifies merchant when user completes or fails the sign process.
+
+### data Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| agreementNo | string | Platform agreement number |
+| externalAgreementNo | string | Merchant agreement number |
+| agreementType | string | Sign type: `CYCLE` / `SINGLE` |
+| eventType | string | Event type: `SIGNED` / `FAILED` |
+| status | string | Sign status: `SIGNED` / `FAILED` |
+| userId | string | Platform user ID |
+| merchantUserId | string | Merchant-side user ID |
+| sceneCode | string | Scene code |
+| signTime | string | Sign time (on success) |
+| failureReason | string | Failure reason (on failure) |
+
+### Example (Success)
+
+```json
+{
+  "notifyId": "NOTIFY202601070001",
+  "notifyType": "AGREEMENT_STATUS",
+  "notifyTime": "2026-01-07T10:30:05+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "agreementNo": "AGR202601070001",
+    "externalAgreementNo": "MERCHANT_AGR_001",
+    "agreementType": "CYCLE",
+    "eventType": "SIGNED",
+    "status": "SIGNED",
+    "userId": "U_123456789",
+    "merchantUserId": "merchant_user_123",
+    "sceneCode": "SUBSCRIPTION",
+    "signTime": "2026-01-07 10:30:00"
+  },
+  "sign": "Base64 encoded signature",
+  "signType": "RSA2"
+}
+```
+
+### Example (Failure)
+
+```json
+{
+  "notifyId": "NOTIFY202601070002",
+  "notifyType": "AGREEMENT_STATUS",
+  "notifyTime": "2026-01-07T10:35:05+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "agreementNo": "AGR202601070002",
+    "externalAgreementNo": "MERCHANT_AGR_002",
+    "agreementType": "CYCLE",
+    "eventType": "FAILED",
+    "status": "FAILED",
+    "userId": "U_123456789",
+    "merchantUserId": "merchant_user_123",
+    "sceneCode": "SUBSCRIPTION",
+    "failureReason": "USER_AUTH_TIMEOUT"
+  },
+  "sign": "Base64 encoded signature",
+  "signType": "RSA2"
+}
+```
+
+---
+
+## Unsign Notification
+
+Notifies merchant when an agreement is terminated.
+
+### data Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| agreementNo | string | Platform agreement number |
+| externalAgreementNo | string | Merchant agreement number |
+| eventType | string | Event type: `UNSIGNED` |
+| status | string | Agreement status: `UNSIGNED` |
+| unsignType | string | Unsign type: `USER` / `MERCHANT` / `EXPIRED` / `SYSTEM` |
+| unsignTime | string | Unsign time |
+
+### Example
+
+```json
+{
+  "notifyId": "NOTIFY202601070006",
+  "notifyType": "AGREEMENT_STATUS",
+  "notifyTime": "2026-01-07T15:30:05+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "agreementNo": "AGR202601070001",
+    "externalAgreementNo": "MERCHANT_AGR_001",
+    "eventType": "UNSIGNED",
+    "status": "UNSIGNED",
+    "unsignType": "USER",
+    "unsignTime": "2026-01-07 15:30:00"
+  },
+  "sign": "Base64 encoded signature",
+  "signType": "RSA2"
+}
+```
+
+---
+
+## Suspend Notification
+
+Notifies merchant when an agreement is suspended due to risk control or abnormality.
+
+### data Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| agreementNo | string | Platform agreement number |
+| externalAgreementNo | string | Merchant agreement number |
+| eventType | string | Event type: `SUSPENDED` |
+| status | string | Agreement status: `SUSPENDED` |
+| suspendReason | string | Suspend reason: `RISK` / `ABNORMAL` / `MANUAL` |
+| suspendTime | string | Suspend time |
+
+### Example
+
+```json
+{
+  "notifyId": "NOTIFY202601070007",
+  "notifyType": "AGREEMENT_STATUS",
+  "notifyTime": "2026-01-07T16:30:05+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "agreementNo": "AGR202601070001",
+    "externalAgreementNo": "MERCHANT_AGR_001",
+    "eventType": "SUSPENDED",
+    "status": "SUSPENDED",
+    "suspendReason": "RISK",
+    "suspendTime": "2026-01-07 16:30:00"
+  },
+  "sign": "Base64 encoded signature",
+  "signType": "RSA2"
+}
+```
+
+---
+
+## Resume Notification
+
+Notifies merchant when a suspended agreement returns to normal.
+
+### data Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| agreementNo | string | Platform agreement number |
+| externalAgreementNo | string | Merchant agreement number |
+| eventType | string | Event type: `SIGNED` |
+| status | string | Agreement status: `SIGNED` |
+| resumeTime | string | Resume time |
+
+### Example
+
+```json
+{
+  "notifyId": "NOTIFY202601070008",
+  "notifyType": "AGREEMENT_STATUS",
+  "notifyTime": "2026-01-07T18:30:05+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "agreementNo": "AGR202601070001",
+    "externalAgreementNo": "MERCHANT_AGR_001",
+    "eventType": "SIGNED",
+    "status": "SIGNED",
+    "resumeTime": "2026-01-07 18:30:00"
+  },
+  "sign": "Base64 encoded signature",
+  "signType": "RSA2"
+}
+```
+
+---
+
+## Sign Timeout Notification
+
+Notifies merchant when sign link/QR code expires.
+
+### data Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| agreementNo | string | Platform agreement number |
+| externalAgreementNo | string | Merchant agreement number |
+| agreementType | string | Sign type: `CYCLE` / `SINGLE` |
+| eventType | string | Event type: `TIMEOUT` |
+| status | string | Agreement status: `TIMEOUT` |
+| userId | string | Platform user ID |
+| merchantUserId | string | Merchant-side user ID |
+| sceneCode | string | Scene code |
+| timeoutTime | string | Timeout time |
+
+### Example
+
+```json
+{
+  "notifyId": "NOTIFY202601070011",
+  "notifyType": "AGREEMENT_STATUS",
+  "notifyTime": "2026-01-07T11:00:05+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "agreementNo": "AGR202601070003",
+    "externalAgreementNo": "MERCHANT_AGR_003",
+    "agreementType": "CYCLE",
+    "eventType": "TIMEOUT",
+    "status": "TIMEOUT",
+    "userId": "U_123456789",
+    "merchantUserId": "merchant_user_123",
+    "sceneCode": "SUBSCRIPTION",
+    "timeoutTime": "2026-01-07 11:00:00"
+  },
+  "sign": "Base64 encoded signature",
+  "signType": "RSA2"
+}
+```

@@ -1,0 +1,186 @@
+---
+title: Webhooks Overview
+sidebar_label: Overview
+sidebar_position: 0
+---
+
+## Overview
+
+Platform sends async notifications (webhooks) to merchant's configured URL when key events occur. All webhook notifications follow a unified three-part structure.
+
+---
+
+## Notification Structure
+
+```json
+{
+  // Part 1: Common fields
+  "notifyId": "NOTIFY202601070001",
+  "notifyType": "AGREEMENT_STATUS",
+  "notifyTime": "2026-01-07T10:30:05+08:00",
+  "merchantId": "M123456789",
+
+  // Part 2: Business data
+  "data": {
+    "eventType": "SIGNED",
+    // Other business fields (varies by notifyType and eventType)
+  },
+
+  // Part 3: Signature
+  "sign": "Base64 encoded signature",
+  "signType": "RSA2"
+}
+```
+
+### Common Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| notifyId | string | Notification unique ID (for deduplication) |
+| notifyType | string | Notification type category |
+| notifyTime | string | Notification time (ISO8601 format: yyyy-MM-dd'T'HH:mm:ssXXX) |
+| merchantId | string | Merchant ID |
+| data | object | Business data |
+| sign | string | Signature (Base64 encoded) |
+| signType | string | Signature algorithm: `RSA2` |
+
+### Notification Type Categories
+
+| notifyType | Description | Applicable Scenarios |
+|:-----------|:------------|:---------------------|
+| `AGREEMENT_STATUS` | Agreement status notification | Sign, unsign, suspend, resume, timeout and all agreement status changes |
+| `TRANSACTION_RESULT` | Transaction result notification | Deduction, refund and all transaction results |
+
+**Description**:
+- `notifyType` only indicates the category (agreement/transaction)
+- Specific event type is distinguished by `data.eventType` field
+- Specific result status is distinguished by `data.status` field
+
+### Event Types (Agreement)
+
+| eventType | Description | Corresponding notifyType |
+|:----------|:------------|:-------------------------|
+| `SIGNED` | Sign event | `AGREEMENT_STATUS` |
+| `UNSIGNED` | Unsign event | `AGREEMENT_STATUS` |
+| `SUSPENDED` | Suspend event | `AGREEMENT_STATUS` |
+| `TIMEOUT` | Timeout event | `AGREEMENT_STATUS` |
+
+### Event Types (Transaction)
+
+| eventType | Description | Corresponding notifyType |
+|:----------|:------------|:-------------------------|
+| `PAY` | Deduction event | `TRANSACTION_RESULT` |
+| `REFUND` | Refund event | `TRANSACTION_RESULT` |
+
+---
+
+## Webhook Handling
+
+### Request Headers
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| X-Timestamp | string | Notification timestamp (milliseconds) |
+| X-Signature | string | Notification signature |
+| X-Nonce | string | Random string |
+| Content-Type | string | `application/json` |
+
+### Retry Mechanism
+
+| Configuration | Value |
+|:--------------|:------|
+| Retry count | Maximum 5 retries |
+| Retry interval | 15s, 30s, 1min, 5min, 30min |
+| Success indicator | HTTP 200 with body `success` |
+| Timeout | 10 seconds per request |
+
+### Merchant Response
+
+Return plain text `success` (case insensitive) with HTTP 200:
+
+```
+success
+```
+
+### Handling Code Example (Java)
+
+```java
+@RestController
+@RequestMapping("/webhook")
+public class WebhookController {
+
+    @PostMapping("/agreement")
+    public ResponseEntity<String> handleWebhook(
+            @RequestHeader("X-Timestamp") String timestamp,
+            @RequestBody String body) {
+
+        JSONObject notify = JSON.parseObject(body);
+        String sign = notify.getString("sign");
+
+        // 1. Remove sign and signType for verification
+        notify.remove("sign");
+        notify.remove("signType");
+        String contentToVerify = notify.toJSONString();
+
+        // 2. Verify signature
+        if (!verifySignature(contentToVerify, sign)) {
+            return ResponseEntity.status(400).body("signature_error");
+        }
+
+        // 3. Check timestamp (prevent replay)
+        if (Math.abs(System.currentTimeMillis() - Long.parseLong(timestamp)) > 5 * 60 * 1000) {
+            return ResponseEntity.status(400).body("timestamp_expired");
+        }
+
+        // 4. Idempotency check
+        String notifyId = notify.getString("notifyId");
+        if (isProcessed(notifyId)) {
+            return ResponseEntity.ok("success");
+        }
+
+        // 5. Process business by notifyType and eventType
+        String notifyType = notify.getString("notifyType");
+        JSONObject data = notify.getJSONObject("data");
+        String eventType = data.getString("eventType");
+
+        if ("AGREEMENT_STATUS".equals(notifyType)) {
+            // Handle agreement status changes
+            switch (eventType) {
+                case "SIGNED":
+                    handleSignedNotify(data);
+                    break;
+                case "UNSIGNED":
+                    handleUnsignNotify(data);
+                    break;
+                case "SUSPENDED":
+                    handleSuspendNotify(data);
+                    break;
+                case "TIMEOUT":
+                    handleTimeoutNotify(data);
+                    break;
+            }
+        } else if ("TRANSACTION_RESULT".equals(notifyType)) {
+            // Handle transaction results
+            String orderType = data.getString("orderType");
+            if ("PAY".equals(orderType)) {
+                handlePayNotify(data);
+            } else if ("REFUND".equals(orderType)) {
+                handleRefundNotify(data);
+            }
+        }
+
+        markAsProcessed(notifyId);
+        return ResponseEntity.ok("success");
+    }
+}
+```
+
+---
+
+## Notes
+
+1. **Deduplication**: Use `notifyId` to prevent duplicate processing
+2. **Signature Verification**: Always verify signature before processing
+3. **Idempotency**: Same notification may be sent multiple times; ensure idempotent handling
+4. **Response Quickly**: Return `success` immediately; process business asynchronously if needed
+5. **Event Type Check**: Use `eventType` and `orderType` to distinguish specific events within each notification category

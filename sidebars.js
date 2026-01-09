@@ -118,7 +118,15 @@ const sidebars = {
             },
           ]
         },
-        'recurring-payments/webhooks',
+        {
+          type: 'category',
+          label: 'Webhooks',
+          items: [
+            'recurring-payments/webhooks/overview',
+            'recurring-payments/webhooks/agreement',
+            'recurring-payments/webhooks/transaction',
+          ]
+        },
         {
           type: 'category',
           label: 'Reference',

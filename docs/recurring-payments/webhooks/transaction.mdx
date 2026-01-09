@@ -1,0 +1,227 @@
+---
+title: Transaction Webhooks
+sidebar_label: Transaction
+sidebar_position: 2
+---
+
+Transaction webhooks notify merchants about deduction and refund results. All transaction webhooks use `notifyType: TRANSACTION_RESULT`.
+
+---
+
+## Deduction Result Notification
+
+Notifies merchant when a deduction is completed or fails.
+
+### data Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| orderNo | string | Platform order number |
+| tradeNo | string | Platform trade number |
+| outTradeNo | string | Merchant order number |
+| agreementNo | string | Platform agreement number |
+| eventType | string | Event type: `PAY` |
+| orderType | string | Order type: `PAY` |
+| status | string | Transaction status: `SUCCESS` / `FAILED` |
+| amount | object | Amount object |
+| amount.total | string | Amount (minimum unit) |
+| amount.currency | string | Currency code |
+| amount.currency_type | string | Currency type |
+| payTime | string | Payment time (on success) |
+| failureReason | string | Failure reason (on failure) |
+
+### Example (Success)
+
+```json
+{
+  "notifyId": "NOTIFY202601070003",
+  "notifyType": "TRANSACTION_RESULT",
+  "notifyTime": "2026-01-07T10:30:05+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "orderNo": "ORD202601070001",
+    "tradeNo": "PAY202601070001",
+    "outTradeNo": "ORDER20260107001",
+    "agreementNo": "AGR202601070001",
+    "eventType": "PAY",
+    "orderType": "PAY",
+    "status": "SUCCESS",
+    "amount": {
+      "total": "2350",
+      "currency": "USDT",
+      "currency_type": "CRYPTO"
+    },
+    "payTime": "2026-01-07 10:30:00"
+  },
+  "sign": "Base64 encoded signature",
+  "signType": "RSA2"
+}
+```
+
+### Example (Failure)
+
+```json
+{
+  "notifyId": "NOTIFY202601070004",
+  "notifyType": "TRANSACTION_RESULT",
+  "notifyTime": "2026-01-07T10:30:05+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "orderNo": "ORD202601070002",
+    "tradeNo": "PAY202601070002",
+    "outTradeNo": "ORDER20260107002",
+    "agreementNo": "AGR202601070001",
+    "eventType": "PAY",
+    "orderType": "PAY",
+    "status": "FAILED",
+    "amount": {
+      "total": "5000",
+      "currency": "USDT",
+      "currency_type": "CRYPTO"
+    },
+    "failureReason": "BALANCE_NOT_ENOUGH"
+  },
+  "sign": "Base64 encoded signature",
+  "signType": "RSA2"
+}
+```
+
+---
+
+## Refund Result Notification
+
+Notifies merchant when a refund is completed or fails.
+
+### data Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| orderNo | string | Platform order number |
+| refundNo | string | Platform refund number |
+| outRefundNo | string | Merchant refund number |
+| tradeNo | string | Original trade number |
+| outTradeNo | string | Original merchant order number |
+| agreementNo | string | Platform agreement number |
+| eventType | string | Event type: `REFUND` |
+| orderType | string | Order type: `REFUND` |
+| status | string | Refund status: `SUCCESS` / `FAILED` |
+| refund_amount | object | Refund amount object |
+| refundTime | string | Refund time (on success) |
+| failureReason | string | Failure reason (on failure) |
+
+### Example (Success)
+
+```json
+{
+  "notifyId": "NOTIFY202601070005",
+  "notifyType": "TRANSACTION_RESULT",
+  "notifyTime": "2026-01-07T11:30:05+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "orderNo": "ORD202601070003",
+    "refundNo": "RF202601070001",
+    "outRefundNo": "REFUND20260107001",
+    "tradeNo": "PAY202601070001",
+    "outTradeNo": "ORDER20260107001",
+    "agreementNo": "AGR202601070001",
+    "eventType": "REFUND",
+    "orderType": "REFUND",
+    "status": "SUCCESS",
+    "refund_amount": {
+      "total": "2350",
+      "currency": "USDT",
+      "currency_type": "CRYPTO"
+    },
+    "refundTime": "2026-01-07 11:30:00"
+  },
+  "sign": "Base64 encoded signature",
+  "signType": "RSA2"
+}
+```
+
+### Example (Failure)
+
+```json
+{
+  "notifyId": "NOTIFY202601070010",
+  "notifyType": "TRANSACTION_RESULT",
+  "notifyTime": "2026-01-07T11:30:05+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "orderNo": "ORD202601070004",
+    "refundNo": "RF202601070002",
+    "outRefundNo": "REFUND20260107002",
+    "tradeNo": "PAY202601070001",
+    "outTradeNo": "ORDER20260107001",
+    "agreementNo": "AGR202601070001",
+    "eventType": "REFUND",
+    "orderType": "REFUND",
+    "status": "FAILED",
+    "refund_amount": {
+      "total": "2350",
+      "currency": "USDT",
+      "currency_type": "CRYPTO"
+    },
+    "failureReason": "BALANCE_NOT_ENOUGH"
+  },
+  "sign": "Base64 encoded signature",
+  "signType": "RSA2"
+}
+```
+
+---
+
+## Order Timeout Notification
+
+Notifies merchant when a deduction order times out without completion.
+
+### data Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| orderNo | string | Platform order number |
+| tradeNo | string | Platform trade number |
+| outTradeNo | string | Merchant order number |
+| agreementNo | string | Platform agreement number |
+| eventType | string | Event type: `PAY` |
+| orderType | string | Order type: `PAY` / `REFUND` |
+| status | string | Order status: `TIMEOUT` |
+| userId | string | Platform user ID |
+| merchantUserId | string | Merchant-side user ID |
+| amount | object | Amount object |
+| amount.total | string | Amount (minimum unit) |
+| amount.currency | string | Currency code |
+| amount.currency_type | string | Currency type |
+| failureReason | string | Failure reason |
+| timeoutTime | string | Timeout time |
+
+### Example
+
+```json
+{
+  "notifyId": "NOTIFY202601070012",
+  "notifyType": "TRANSACTION_RESULT",
+  "notifyTime": "2026-01-07T12:00:05+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "orderNo": "ORD202601070010",
+    "tradeNo": "PAY202601070010",
+    "outTradeNo": "ORDER20260107010",
+    "agreementNo": "AGR202601070001",
+    "eventType": "PAY",
+    "orderType": "PAY",
+    "status": "TIMEOUT",
+    "userId": "U_123456789",
+    "merchantUserId": "merchant_user_123",
+    "amount": {
+      "total": "5000",
+      "currency": "USDT",
+      "currency_type": "CRYPTO"
+    },
+    "failureReason": "ORDER_TIMEOUT",
+    "timeoutTime": "2026-01-07 12:00:00"
+  },
+  "sign": "Base64 encoded signature",
+  "signType": "RSA2"
+}
+```
