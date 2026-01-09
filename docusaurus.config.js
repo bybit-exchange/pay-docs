@@ -102,7 +102,7 @@ const config = {
         items: [
           {
             type: 'doc',
-            docId: 'api-overview',
+            docId: 'guide',
             position: 'left',
             label: 'Bybit Pay',
           },

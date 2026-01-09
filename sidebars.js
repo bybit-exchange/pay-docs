@@ -14,7 +14,7 @@
 /** @type {import('@docusaurus/plugin-content-docs').SidebarsConfig} */
 const sidebars = {
   bbyPaySideBar: [
-    'api-overview',
+    'guide',
     {
       type: 'category',
       label: 'QR Payment',
@@ -118,11 +118,11 @@ const sidebars = {
             },
           ]
         },
+        'recurring-payments/webhooks',
         {
           type: 'category',
           label: 'Reference',
           items: [
-            'recurring-payments/webhooks',
             'recurring-payments/signature',
             'recurring-payments/error-codes',
             'recurring-payments/appendix',
