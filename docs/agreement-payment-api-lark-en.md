@@ -1,10 +1,11 @@
 # Agreement Payment API Documentation
 
-**Document Version**: v2.1
+**Document Version**: v2.2
 
-**Update Date**: 2026-01-02
+**Update Date**: 2026-01-13
 
 **Update History**:
+- v2.2: Webhook signature mechanism optimized: Signature parameters moved from request body to HTTP Headers (X-Signature/X-Timestamp/X-Nonce/X-Sign-Type), fresh signature generated for each send/retry, request body remains pure JSON; Fixed document TOC chapter numbering (4.7-4.9)
 - v2.1: Internal optimization of deduction API: Support user-defined limit verification (users can set single/daily limits through cashier), downstream payment uses user-configured paymentType (payNow/payLater)
 - v2.0: Async notification parameter table supplemented with notify_id/notify_time common fields (4.1-4.6); Deduction API supplemented with fiat currency order request example (3.4); Webhook section added complete Java/Python/Node.js handling code examples (4.7); Signature algorithm section added complete cURL request example (5.4)
 - v1.9: binding_info field unified to snake_case naming; refund_amount.total field structure standardized; Added complete status response examples for sign confirmation/unsign/refund APIs; Added sign/refund notification failure examples; Deduction status added TIMEOUT; Added extra_params and scene_info.location field descriptions; Error codes grouped by module; Added chain network list (7.3); Added rate limiting description (2.10); Added sandbox environment description (7.5); Fixed notify_id duplication issue
@@ -45,6 +46,7 @@
   - [3.2 Sign Confirmation API (Optional)](#32-sign-confirmation-api-optional)
   - [3.3 Unsign API](#33-unsign-api)
   - [3.4 Agreement Deduction API (Core)](#34-agreement-deduction-api-core)
+  - [3.4.1 Pay with Sign API (One-Step)](#341-pay-with-sign-api-one-step)
   - [3.5 Sign Status Query API](#35-sign-status-query-api)
   - [3.6 Agreement List Query API](#36-agreement-list-query-api)
   - [3.7 Transaction/Refund Query API (Single)](#37-transactionrefund-query-api-single)
@@ -57,7 +59,9 @@
   - [4.4 Refund Result Notification](#44-refund-result-notification)
   - [4.5 Agreement Suspend Notification](#45-agreement-suspend-notification)
   - [4.6 Agreement Resume Notification](#46-agreement-resume-notification)
-  - [4.7 Webhook General Description](#47-webhook-general-description)
+  - [4.7 Sign Timeout Notification](#47-sign-timeout-notification)
+  - [4.8 Order Timeout Notification](#48-order-timeout-notification)
+  - [4.9 Webhook General Description](#49-webhook-general-description)
 - [5. Security Mechanism](#5-security-mechanism)
   - [5.1 Sign Security](#51-sign-security)
   - [5.2 Deduction Security](#52-deduction-security)
@@ -332,6 +336,7 @@ WHERE status IN ('INIT', 'PENDING')
 | Sign Confirmation | POST | /v5/bybitpay/agreement/confirm |
 | Unsign | POST | /v5/bybitpay/agreement/unsign |
 | Agreement Deduction | POST | /v5/bybitpay/agreement/pay |
+| Pay with Sign | POST | /v5/bybitpay/agreement/pay-with-sign |
 | Deduction Refund | POST | /v5/bybitpay/agreement/refund |
 | Sign Status Query | GET | /v5/bybitpay/agreement/query |
 | Agreement List Query | GET | /v5/bybitpay/agreement/list |
@@ -1049,6 +1054,361 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   }
 }
 ```
+
+---
+
+### 3.4.1 Pay with Sign API (One-Step)
+
+**Request Path**: POST /v5/bybitpay/agreement/pay-with-sign
+
+**Feature Description**: This API supports merchants to complete both agreement signing and deduction payment in a single call. Signing is optional, merchants can choose:
+1. **Sign + Pay Mode**: Pass sign parameters, system creates agreement first, then executes deduction immediately after successful signing
+2. **Pay Only Mode**: Do not pass sign parameters, only pass existing `agreement_no`, execute deduction directly based on signed agreement
+
+**Applicable Scenarios**:
+- First payment scenario: Complete both signing and first payment in one step when user uses the service for the first time
+- Quick payment scenario: Simplify merchant integration, reduce API call count
+
+#### Request Parameters
+
+| Parameter | Type | Required | Description |
+| --- | --- | --- | --- |
+| merchant_id | string | Yes | Merchant ID |
+| user_id | string | Yes | Platform user ID (our platform's user identifier) |
+| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / SINGLE(single authorization) |
+| sign_params | object | No | Sign parameters (required for first sign + payment) |
+| sign_params.merchant_user_id | string | Conditional | Merchant-side user ID (required when passing sign_params) |
+| sign_params.scene_code | string | Conditional | Scene code (required when passing sign_params, see 7.1 Scene Code List) |
+| sign_params.product_code | string | No | Product code, assigned by platform |
+| sign_params.external_agreement_no | string | Conditional | Merchant agreement number (required when passing sign_params, unique on merchant side) |
+| sign_params.sign_valid_time | string | No | Sign validity period, ISO8601 format |
+| sign_params.single_limit | object | No | Single transaction limit configuration |
+| sign_params.single_limit.amount | string | Conditional | Limit amount (required when passing single_limit) |
+| sign_params.single_limit.currency | string | Conditional | Currency code (required when passing single_limit) |
+| sign_params.single_limit.currency_type | string | Conditional | Currency type: FIAT/CRYPTO (required when passing single_limit) |
+| sign_params.single_limit.chain | string | No | Chain network (optional for cryptocurrency) |
+| sign_params.period_limits | array | No | Period limit configuration list |
+| sign_params.period_limits[].period_type | string | Conditional | Period type: DAY/WEEK/MONTH/YEAR (required when passing period_limits) |
+| sign_params.period_limits[].amount | string | Conditional | Period limit amount (required when passing period_limits) |
+| sign_params.period_limits[].currency | string | Conditional | Currency code (required when passing period_limits) |
+| sign_params.period_limits[].currency_type | string | Conditional | Currency type: FIAT/CRYPTO (required when passing period_limits) |
+| sign_params.period_limits[].chain | string | No | Chain network (optional for cryptocurrency) |
+| sign_params.sign_notify_url | string | No | Sign result async notification URL |
+| sign_params.return_url | string | No | Redirect URL after sign completion |
+| sign_params.sign_expire_minutes | int | No | Sign link validity period (minutes), default 30 |
+| sign_params.extra_params | string | No | Extension parameters (JSON string) |
+| pay_params | object | Yes | Deduction payment parameters |
+| pay_params.agreement_no | string | Conditional | Platform agreement number (required when not passing sign_params, use existing agreement) |
+| pay_params.out_trade_no | string | Yes | Merchant order number (unique on merchant side) |
+| pay_params.scene_code | string | Yes | Scene code (see 7.1 Scene Code List) |
+| pay_params.amount | object | Yes | Deduction amount |
+| pay_params.amount.total | string | Yes | Deduction amount (minimum unit) |
+| pay_params.amount.currency | string | Yes | Currency code |
+| pay_params.amount.currency_type | string | Yes | Currency type: FIAT/CRYPTO |
+| pay_params.amount.chain | string | No | Chain network (required for cryptocurrency) |
+| pay_params.order_info | object | Yes | Order information |
+| pay_params.order_info.order_title | string | Yes | Order title |
+| pay_params.order_info.order_desc | string | No | Order description |
+| pay_params.order_info.goods_name | string | No | Goods name |
+| pay_params.order_info.goods_id | string | No | Goods ID |
+| pay_params.order_info.goods_category | string | No | Goods category |
+| pay_params.scene_info | object | No | Scene information |
+| pay_params.scene_info.device_id | string | No | Device ID |
+| pay_params.scene_info.device_ip | string | No | Device IP |
+| pay_params.scene_info.location | object | No | Location information |
+| pay_params.scene_info.location.latitude | string | No | Latitude |
+| pay_params.scene_info.location.longitude | string | No | Longitude |
+| pay_params.scene_info.location.address | string | No | Detailed address |
+| pay_params.pay_notify_url | string | Yes | Payment result async notification URL |
+| pay_params.risk_info | object | No | Risk control information |
+| pay_params.risk_info.user_ip | string | No | User IP address |
+| pay_params.risk_info.device_fingerprint | string | No | Device fingerprint |
+| pay_params.risk_info.user_agent | string | No | User agent string |
+
+#### Response Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| code | string | Response code |
+| message | string | Response message |
+| data | object | Response data |
+| data.sign_result | object | Sign result (if signing was initiated) |
+| data.sign_result.agreement_no | string | Platform agreement number |
+| data.sign_result.external_agreement_no | string | Merchant agreement number |
+| data.sign_result.sign_order_id | string | Platform sign order number |
+| data.sign_result.status | string | Sign status: INIT/PENDING/SIGNED/FAILED |
+| data.sign_result.sign_time | string | Sign success time (returned on success) |
+| data.sign_result.valid_time | string | Agreement validity period |
+| data.sign_result.sign_url | string | Sign page URL (for H5 redirect) |
+| data.sign_result.qr_code | string | Sign QR code content (for user App scan) |
+| data.sign_result.qr_code_url | string | Sign QR code image URL (can be displayed directly) |
+| data.sign_result.expire_time | string | Sign link/QR code expiration time |
+| data.pay_result | object | Deduction result |
+| data.pay_result.trade_no | string | Platform transaction number |
+| data.pay_result.out_trade_no | string | Merchant order number |
+| data.pay_result.status | string | Transaction status: PROCESSING/SUCCESS/FAILED/TIMEOUT |
+| data.pay_result.amount | object | Merchant requested amount |
+| data.pay_result.amount.total | string | Amount (minimum unit) |
+| data.pay_result.amount.currency | string | Currency code |
+| data.pay_result.amount.currency_type | string | Currency type: FIAT/CRYPTO |
+| data.pay_result.crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat order) |
+| data.pay_result.crypto_payment.currency | string | Cryptocurrency currency |
+| data.pay_result.crypto_payment.amount | string | Cryptocurrency amount |
+| data.pay_result.crypto_payment.chain | string | Chain network |
+| data.pay_result.crypto_payment.exchange_rate | string | Exchange rate |
+| data.pay_result.crypto_payment.rate_time | string | Rate lock time |
+| data.pay_result.pay_time | string | Payment success time (returned on success) |
+| data.pay_result.failure_reason | string | Failure reason (returned on failure) |
+
+#### Request Example 1: Sign + Pay (First Use)
+
+```json
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "sign_params": {
+    "merchant_user_id": "merchant_user_123",
+    "scene_code": "TAXI",
+    "external_agreement_no": "MERCHANT_AGR_001",
+    "sign_valid_time": "2026-12-23T10:30:00Z",
+    "single_limit": {
+      "amount": "100000",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    "period_limits": [
+      {
+        "period_type": "DAY",
+        "amount": "500000",
+        "currency": "USDT",
+        "currency_type": "CRYPTO",
+        "chain": "TRC20"
+      }
+    ],
+    "sign_notify_url": "https://merchant.com/notify/sign"
+  },
+  "pay_params": {
+    "out_trade_no": "TAXI20231223001",
+    "scene_code": "TAXI",
+    "amount": {
+      "total": "2350",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    "order_info": {
+      "order_title": "Taxi Fare",
+      "order_desc": "Trip on December 23"
+    },
+    "pay_notify_url": "https://merchant.com/notify/pay",
+    "risk_info": {
+      "user_ip": "203.0.113.45",
+      "device_fingerprint": "fp_abc123xyz"
+    }
+  }
+}
+```
+
+#### Response Example 1: Sign + Pay (Sync Response - Waiting for User Scan)
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "sign_result": {
+      "agreement_no": null,
+      "external_agreement_no": "MERCHANT_AGR_001",
+      "sign_order_id": "SIGN202312230001",
+      "status": "INIT",
+      "sign_time": null,
+      "valid_time": "2026-12-23T10:30:00Z",
+      "sign_url": "https://pay.example.com/sign?token=xxx",
+      "qr_code": "https://pay.example.com/sign?token=xxx",
+      "qr_code_url": "https://pay.example.com/qr/SIGN202312230001.png",
+      "expire_time": "2023-12-23T11:00:00Z"
+    },
+    "pay_result": {
+      "trade_no": null,
+      "out_trade_no": "TAXI20231223001",
+      "status": "PENDING",
+      "amount": {
+        "total": "2350",
+        "currency": "USDT",
+        "currency_type": "CRYPTO",
+        "chain": "TRC20"
+      },
+      "pay_time": null,
+      "failure_reason": null
+    }
+  }
+}
+```
+
+**Notes**:
+- `sign_result.status = "INIT"` - Sign request created, waiting for user scan
+- `pay_result.status = "PENDING"` - Payment order created, waiting for sign completion to auto-execute
+- Merchant should display `qr_code_url` or `sign_url` for user to scan
+- Final result returned via Webhook async notification (see examples below)
+
+#### Request Example 2: Pay Only (Using Existing Agreement)
+
+```json
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "pay_params": {
+    "agreement_no": "AGR202312230001",
+    "out_trade_no": "TAXI20231223002",
+    "scene_code": "TAXI",
+    "amount": {
+      "total": "3500",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    "order_info": {
+      "order_title": "Taxi Fare",
+      "order_desc": "Second trip on December 23"
+    },
+    "pay_notify_url": "https://merchant.com/notify/pay"
+  }
+}
+```
+
+#### Response Example 2: Pay Only (Sync Response - Using Existing Agreement)
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "sign_result": null,
+    "pay_result": {
+      "trade_no": "PAY202312230002",
+      "out_trade_no": "TAXI20231223002",
+      "status": "PROCESSING",
+      "amount": {
+        "total": "3500",
+        "currency": "USDT",
+        "currency_type": "CRYPTO",
+        "chain": "TRC20"
+      },
+      "pay_time": null,
+      "failure_reason": null
+    }
+  }
+}
+```
+
+**Notes**:
+- `sign_result = null` - No sign initiated, using existing agreement
+- `pay_result.status = "PROCESSING"` - Deduction payment processing
+- Final result returned via Webhook async notification
+
+#### Webhook Async Notification Examples
+
+After user completes sign and payment via scanning, system sends async notification to merchant configured `pay_notify_url`.
+
+**Notification Example 1: Sign + Pay Success**
+
+```json
+{
+  "notify_type": "AGREEMENT_PAY_WITH_SIGN",
+  "merchant_id": "M123456789",
+  "sign_result": {
+    "agreement_no": "AGR202312230001",
+    "external_agreement_no": "MERCHANT_AGR_001",
+    "sign_order_id": "SIGN202312230001",
+    "status": "SIGNED",
+    "sign_time": "2023-12-23T10:35:00Z",
+    "valid_time": "2026-12-23T10:30:00Z"
+  },
+  "pay_result": {
+    "trade_no": "PAY202312230001",
+    "out_trade_no": "TAXI20231223001",
+    "status": "SUCCESS",
+    "amount": {
+      "total": "2350",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    "crypto_payment": {
+      "currency": "USDT",
+      "amount": "2350",
+      "chain": "TRC20"
+    },
+    "pay_time": "2023-12-23T10:35:05Z"
+  },
+  "notify_id": "NOTIFY202312230001",
+  "notify_time": "2023-12-23T10:35:06Z"
+}
+```
+
+**Notification Example 2: Sign Failed**
+
+```json
+{
+  "notify_type": "AGREEMENT_PAY_WITH_SIGN",
+  "merchant_id": "M123456789",
+  "sign_result": {
+    "agreement_no": null,
+    "external_agreement_no": "MERCHANT_AGR_003",
+    "sign_order_id": "SIGN202312230003",
+    "status": "FAILED",
+    "sign_time": null,
+    "valid_time": null
+  },
+  "pay_result": null,
+  "notify_id": "NOTIFY202312230003",
+  "notify_time": "2023-12-23T10:45:00Z"
+}
+```
+
+**Webhook Notification Notes**:
+- Notification sent via **POST** to merchant configured `pay_notify_url`
+- Signature verification method: refer to Section 5.4
+- Merchant should return `{"code": "SUCCESS"}` to confirm receipt
+- If sign fails, `pay_result` is `null`, deduction will not be executed
+- If sign succeeds, user completes payment in app, merchant receives notification when payment succeeds
+- Notification includes `notify_id` for deduplication, merchant should save processed `notify_id`
+
+---
+
+**Important Notes**:
+
+1. **Async Flow**
+   - Signing requires user scan confirmation, it's an async flow
+   - Sync response returns sign QR code and initial status (`INIT`/`PENDING`)
+   - Final result returned via Webhook async notification
+
+2. **Business Flow**
+   - ① Call API → Returns sign QR code
+   - ② Merchant displays QR code → User scans with App
+   - ③ User completes sign → System auto-triggers deduction
+   - ④ Webhook notification → Returns sign and payment results
+
+3. **Result Processing**
+   - Results returned separately in `sign_result` and `pay_result`
+   - If sign fails, deduction not executed, `pay_result` is `null`
+   - If sign succeeds, user completes payment in app until success
+
+4. **Webhook Notification Strategy**
+   - Uses **single notification** to return both sign and payment results
+   - Sent to merchant configured `pay_notify_url`
+   - For separate notifications, configure `sign_notify_url` in `sign_params`
+
+5. **Idempotency Guarantee**
+   - Idempotency guaranteed through `external_agreement_no` for signing
+   - Idempotency guaranteed through `out_trade_no` for payment
+
+6. **Optional Signing**
+   - When `sign_params` is empty, must pass existing agreement number in `pay_params.agreement_no`
+   - When using existing agreement, no scan needed, direct deduction execution
 
 ---
 
@@ -2079,10 +2439,19 @@ All Webhook notifications use a unified three-part structure:
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| X-Timestamp | string | Notification timestamp (milliseconds) |
-| X-Signature | string | Notification signature (for verification) |
-| X-Nonce | string | Random string |
+| X-Timestamp | string | Notification timestamp (milliseconds), used for signature generation and replay attack prevention |
+| X-Signature | string | RSA2 signature value (Base64 encoded), regenerated for each send/retry |
+| X-Nonce | string | Random number (5-digit number, range 10000-99999), regenerated for each send/retry |
+| X-Sign-Type | string | Signature algorithm, fixed as `RSA2` |
 | Content-Type | string | application/json |
+
+**Signature Description**:
+- Signature content: `timestamp + nonce + requestBody` (string concatenation, requestBody is pure JSON without sign/signType fields)
+- Signature algorithm: RSA2 (SHA256withRSA)
+- **Current Implementation**: For compatibility, signature parameters exist in both request headers and request body
+  - Request headers: X-Signature, X-Sign-Type, X-Timestamp, X-Nonce
+  - Request body: sign, signType fields
+  - Merchants can choose to get signature parameters from headers or body for verification
 
 #### Notification Common Fields
 
@@ -2107,7 +2476,7 @@ All Webhook notifications include the following common fields:
 
 #### Webhook Request Body Structure
 
-Platform pushes Webhook request body in JSON format, containing the following fields:
+Platform pushes Webhook request body containing business fields and signature fields (for compatibility, signature exists in both headers and body):
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -2116,21 +2485,44 @@ Platform pushes Webhook request body in JSON format, containing the following fi
 | notifyTime | string | Notification send time (ISO8601 format) |
 | merchantId | string | Merchant ID |
 | data | object | Business data (different structure based on notifyType) |
-| sign | string | Signature value (Base64 encoded) |
-| signType | string | Signature algorithm, fixed as `RSA2` |
+| signType | string | Signature algorithm type (fixed as RSA2), also exists in X-Sign-Type header |
+| sign | string | RSA2 signature value (Base64 encoded), also exists in X-Signature header |
+
+**Important Note**:
+- Current implementation: Signature parameters exist in both request body (sign, signType) and HTTP headers (X-Signature, X-Sign-Type)
+- Signature parameters are regenerated for each send/retry, ensuring each request has a fresh signature
+- Merchant should use `timestamp + nonce + requestBody` (original JSON without sign/signType fields) as verification content
+- It is recommended that merchants prioritize getting signature parameters from request headers, signature fields in request body are only for compatibility
 
 #### Notification Type Enum
 
-| notifyType | Description |
-| --- | --- |
-| AGREEMENT_SIGN | Sign result notification |
-| AGREEMENT_PAY | Deduction result notification |
-| AGREEMENT_REFUND | Refund result notification |
-| AGREEMENT_UNSIGN | Agreement unsign notification |
-| AGREEMENT_SUSPEND | Agreement suspend notification |
-| AGREEMENT_RESUME | Agreement resume notification |
-| AGREEMENT_TIMEOUT | Sign timeout notification |
-| ORDER_TIMEOUT | Order timeout notification |
+| notifyType | Description | Applicable Scenarios |
+| --- | --- | --- |
+| AGREEMENT_STATUS | Agreement status result notification | All agreement status changes including sign, unsign, suspend, resume, timeout |
+| TRANSACTION_RESULT | Transaction result notification | All transaction results including deduction and refund |
+
+**Description**:
+- `notifyType` only represents category (agreement/transaction)
+- Specific event type is distinguished by `data.eventType` field
+- Specific result status is distinguished by `data.status` field
+
+### eventType Event Type Enum (Agreement)
+
+| eventType | Description | Corresponding notifyType |
+| --- | --- | --- |
+| SIGNED | Sign event | AGREEMENT_STATUS |
+| UNSIGNED | Unsign event | AGREEMENT_STATUS |
+| SUSPENDED | Suspend event | AGREEMENT_STATUS |
+| TIMEOUT | Timeout event | AGREEMENT_STATUS |
+
+### eventType Event Type Enum (Transaction)
+
+| eventType | Description | Corresponding notifyType |
+| --- | --- | --- |
+| PAY | Deduction event | TRANSACTION_RESULT |
+| REFUND | Refund event | TRANSACTION_RESULT |
+| AGREEMENT_TIMEOUT | Sign timeout notification | |
+| ORDER_TIMEOUT | Order timeout notification | |
 
 #### Merchant Response Format
 
@@ -2157,31 +2549,25 @@ public class WebhookController {
             @RequestHeader("X-Timestamp") String timestamp,
             @RequestHeader("X-Signature") String signature,
             @RequestHeader("X-Nonce") String nonce,
+            @RequestHeader("X-Sign-Type") String signType,
             @RequestBody String body) {
 
-        // 1. Verify signature (verify from sign field in request body)
-        JSONObject notify = JSON.parseObject(body);
-        String sign = notify.getString("sign");
-        String signType = notify.getString("signType");
-
-        // Content for verification after removing sign and signType
-        notify.remove("sign");
-        notify.remove("signType");
-        String contentToVerify = notify.toJSONString();
-
-        if (!verifySignature(contentToVerify, sign)) {
-            log.warn("Webhook signature verification failed");
-            return ResponseEntity.status(400).body("signature_error");
-        }
-
-        // 2. Verify timestamp (prevent replay attack)
+        // 1. Verify timestamp (prevent replay attack)
         long ts = Long.parseLong(timestamp);
         if (Math.abs(System.currentTimeMillis() - ts) > 5 * 60 * 1000) {
             log.warn("Webhook timestamp expired");
             return ResponseEntity.status(400).body("timestamp_expired");
         }
 
-        // 3. Parse notification content
+        // 2. Verify signature (signature content = timestamp + nonce + requestBody)
+        String contentToVerify = timestamp + nonce + body;
+        if (!verifySignature(contentToVerify, signature)) {
+            log.warn("Webhook signature verification failed");
+            return ResponseEntity.status(400).body("signature_error");
+        }
+
+        // 3. Parse notification content (request body is pure JSON, no sign/signType fields)
+        JSONObject notify = JSON.parseObject(body);
         String notifyId = notify.getString("notifyId");
         String notifyType = notify.getString("notifyType");
         JSONObject data = notify.getJSONObject("data");
@@ -2195,23 +2581,11 @@ public class WebhookController {
         // 5. Process business based on notification type
         try {
             switch (notifyType) {
-                case "AGREEMENT_SIGN":
-                    notifyService.handleSignNotify(data);
+                case "AGREEMENT_STATUS":
+                    notifyService.handleAgreementStatusNotify(data);
                     break;
-                case "AGREEMENT_PAY":
-                    notifyService.handlePayNotify(data);
-                    break;
-                case "AGREEMENT_REFUND":
-                    notifyService.handleRefundNotify(data);
-                    break;
-                case "AGREEMENT_UNSIGN":
-                    notifyService.handleUnsignNotify(data);
-                    break;
-                case "AGREEMENT_SUSPEND":
-                    notifyService.handleSuspendNotify(data);
-                    break;
-                case "AGREEMENT_RESUME":
-                    notifyService.handleResumeNotify(data);
+                case "TRANSACTION_RESULT":
+                    notifyService.handleTransactionResultNotify(data);
                     break;
                 default:
                     log.warn("Unknown notification type: {}", notifyType);
@@ -2253,45 +2627,36 @@ processed_notifies = set()
 def handle_webhook():
     # 1. Get request headers
     timestamp = request.headers.get('X-Timestamp')
+    signature = request.headers.get('X-Signature')
+    nonce = request.headers.get('X-Nonce')
+    sign_type = request.headers.get('X-Sign-Type')
     body = request.get_data(as_text=True)
 
-    # 2. Parse notification content
-    notify = json.loads(body)
-    sign = notify.pop('sign', None)
-    sign_type = notify.pop('signType', None)
-
-    # 3. Verify signature (content after removing sign and signType)
-    content_to_verify = json.dumps(notify, separators=(',', ':'), ensure_ascii=False)
-    if not verify_signature(content_to_verify, sign):
-        return make_response("signature_error", 400)
-
-    # 4. Verify timestamp (prevent replay attack)
+    # 2. Verify timestamp (prevent replay attack)
     if abs(int(time.time() * 1000) - int(timestamp)) > 5 * 60 * 1000:
         return make_response("timestamp_expired", 400)
 
-    # 5. Get notification info
+    # 3. Verify signature (signature content = timestamp + nonce + requestBody)
+    content_to_verify = timestamp + nonce + body
+    if not verify_signature(content_to_verify, signature):
+        return make_response("signature_error", 400)
+
+    # 4. Parse notification content (request body is pure JSON, no sign/signType fields)
+    notify = json.loads(body)
     notify_id = notify.get('notifyId')
     notify_type = notify.get('notifyType')
     data = notify.get('data', {})
 
-    # 6. Idempotency check
+    # 5. Idempotency check
     if notify_id in processed_notifies:
         return make_response("success", 200)
 
-    # 7. Process business
+    # 6. Process business
     try:
-        if notify_type == 'AGREEMENT_SIGN':
-            handle_sign_notify(data)
-        elif notify_type == 'AGREEMENT_PAY':
-            handle_pay_notify(data)
-        elif notify_type == 'AGREEMENT_REFUND':
-            handle_refund_notify(data)
-        elif notify_type == 'AGREEMENT_UNSIGN':
-            handle_unsign_notify(data)
-        elif notify_type == 'AGREEMENT_SUSPEND':
-            handle_suspend_notify(data)
-        elif notify_type == 'AGREEMENT_RESUME':
-            handle_resume_notify(data)
+        if notify_type == 'AGREEMENT_STATUS':
+            handle_agreement_status_notify(data)
+        elif notify_type == 'TRANSACTION_RESULT':
+            handle_transaction_result_notify(data)
 
         processed_notifies.add(notify_id)
         return make_response("success", 200)
@@ -2329,51 +2694,39 @@ const processedNotifies = new Set();
 
 app.post('/webhook/agreement', async (req, res) => {
   const timestamp = req.headers['x-timestamp'];
+  const signature = req.headers['x-signature'];
+  const nonce = req.headers['x-nonce'];
+  const signType = req.headers['x-sign-type'];
   const body = req.rawBody.toString();
 
-  // 1. Parse notification content
-  const notify = JSON.parse(body);
-  const { sign, signType, ...contentObj } = notify;
-
-  // 2. Verify signature (content after removing sign and signType)
-  const contentToVerify = JSON.stringify(contentObj);
-  if (!verifySignature(contentToVerify, sign)) {
-    return res.status(400).send('signature_error');
-  }
-
-  // 3. Verify timestamp (prevent replay attack)
+  // 1. Verify timestamp (prevent replay attack)
   if (Math.abs(Date.now() - parseInt(timestamp)) > 5 * 60 * 1000) {
     return res.status(400).send('timestamp_expired');
   }
 
-  // 4. Get notification info
-  const { notifyId, notifyType, data } = contentObj;
+  // 2. Verify signature (signature content = timestamp + nonce + requestBody)
+  const contentToVerify = timestamp + nonce + body;
+  if (!verifySignature(contentToVerify, signature)) {
+    return res.status(400).send('signature_error');
+  }
 
-  // 5. Idempotency check
+  // 3. Parse notification content (request body is pure JSON, no sign/signType fields)
+  const notify = JSON.parse(body);
+  const { notifyId, notifyType, data } = notify;
+
+  // 4. Idempotency check
   if (processedNotifies.has(notifyId)) {
     return res.status(200).send('success');
   }
 
-  // 6. Process business
+  // 5. Process business
   try {
     switch (notifyType) {
-      case 'AGREEMENT_SIGN':
-        await handleSignNotify(data);
+      case 'AGREEMENT_STATUS':
+        await handleAgreementStatusNotify(data);
         break;
-      case 'AGREEMENT_PAY':
-        await handlePayNotify(data);
-        break;
-      case 'AGREEMENT_REFUND':
-        await handleRefundNotify(data);
-        break;
-      case 'AGREEMENT_UNSIGN':
-        await handleUnsignNotify(data);
-        break;
-      case 'AGREEMENT_SUSPEND':
-        await handleSuspendNotify(data);
-        break;
-      case 'AGREEMENT_RESUME':
-        await handleResumeNotify(data);
+      case 'TRANSACTION_RESULT':
+        await handleTransactionResultNotify(data);
         break;
     }
 
@@ -2657,10 +3010,11 @@ Merchant needs to verify signature after receiving Webhook notification to preve
 
 **Verification Steps**:
 
-1. Get `sign` and `signType` fields from request body
-2. Remove `sign` and `signType` fields from request body to get content to verify
-3. Use platform public key to verify signature (RSA2/SHA256withRSA)
-4. Get `X-Timestamp` from request header, verify timestamp is within 5 minutes
+1. Get signature-related parameters from HTTP request headers: `X-Timestamp`, `X-Signature`, `X-Nonce`, `X-Sign-Type`
+2. Verify timestamp: Check if `X-Timestamp` is within 5 minutes of current server time (prevent replay attack)
+3. Construct content to verify: `timestamp + nonce + requestBody` (string concatenation, not JSON format)
+4. Request body is pure JSON: Contains only business fields (notifyId, notifyType, notifyTime, merchantId, data), no signature fields need to be removed
+5. Use platform public key to verify signature (RSA2/SHA256withRSA)
 
 **Code Example (Java)**:
 
@@ -2668,18 +3022,19 @@ Merchant needs to verify signature after receiving Webhook notification to preve
 import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import com.alibaba.fastjson.JSONObject;
 
 public class WebhookVerifier {
 
     /**
      * Verify Webhook signature
-     * @param body Original request body JSON string
+     * @param body Original request body JSON string (pure JSON, only business fields)
      * @param timestamp X-Timestamp from request header
-     * @param platformPublicKey Platform public key (PEM format or Base64 encoded)
+     * @param nonce X-Nonce from request header
+     * @param signature X-Signature from request header
+     * @param platformPublicKey Platform public key (PEM format)
      */
-    public boolean verifyWebhook(String body, String timestamp,
-                                  String platformPublicKey) throws Exception {
+    public boolean verifyWebhook(String body, String timestamp, String nonce,
+                                  String signature, String platformPublicKey) throws Exception {
         // 1. Check timestamp (prevent replay attack)
         long now = System.currentTimeMillis();
         long ts = Long.parseLong(timestamp);
@@ -2687,18 +3042,11 @@ public class WebhookVerifier {
             return false; // Timestamp expired
         }
 
-        // 2. Parse request body, extract signature
-        JSONObject notify = JSONObject.parseObject(body);
-        String sign = notify.getString("sign");
-        String signType = notify.getString("signType");
+        // 2. Construct content to verify: timestamp + nonce + requestBody
+        String contentToVerify = timestamp + nonce + body;
 
-        // 3. Remove sign and signType, construct content to verify
-        notify.remove("sign");
-        notify.remove("signType");
-        String contentToVerify = notify.toJSONString();
-
-        // 4. Use RSA2 to verify signature (SHA256withRSA)
-        return verifyRSA2(contentToVerify, sign, platformPublicKey);
+        // 3. Use platform public key to verify RSA2 signature (SHA256withRSA)
+        return verifyRSA2(contentToVerify, signature, platformPublicKey);
     }
 
     /**

@@ -111,6 +111,7 @@ const sidebars = {
               label: 'Transaction',
               items: [
                 'recurring-payments/deduction',
+                'recurring-payments/pay-with-sign',
                 'recurring-payments/refund',
                 'recurring-payments/query-transaction',
                 'recurring-payments/list-transactions',

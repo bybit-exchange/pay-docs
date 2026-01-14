@@ -1,0 +1,302 @@
+---
+title: Pay with Sign API (One-Step)
+sidebar_label: Pay with Sign
+sidebar_position: 6
+---
+
+## HTTP Request
+
+POST `/v5/bybitpay/agreement/pay-with-sign`
+
+Complete both agreement signing and deduction payment in a single API call. This API supports two modes: Sign + Pay (for first-time users) and Pay Only (using existing agreement).
+
+---
+
+## Feature Description
+
+This API supports merchants to complete both agreement signing and deduction payment in a single call. Signing is optional, merchants can choose:
+
+1. **Sign + Pay Mode**: Pass sign parameters, system creates agreement first, then executes deduction immediately after successful signing
+2. **Pay Only Mode**: Do not pass sign parameters, only pass existing `agreement_no`, execute deduction directly based on signed agreement
+
+**Applicable Scenarios**:
+- First payment scenario: Complete both signing and first payment in one step when user uses the service for the first time
+- Quick payment scenario: Simplify merchant integration, reduce API call count
+
+---
+
+## Request Parameters
+
+| Parameter | Type | Required | Description |
+|:----------|:-----|:---------|:------------|
+| merchant_id | string | **Yes** | Merchant ID |
+| user_id | string | **Yes** | Platform user ID |
+| agreement_type | string | **Yes** | Sign type: `CYCLE` / `SINGLE` |
+| sign_params | object | No | Sign parameters (required for first sign + payment) |
+| sign_params.merchant_user_id | string | Conditional | Merchant-side user ID (required when passing sign_params) |
+| sign_params.scene_code | string | Conditional | [Scene code](appendix#scene-codes) (required when passing sign_params) |
+| sign_params.product_code | string | No | Product code, assigned by platform |
+| sign_params.external_agreement_no | string | Conditional | Merchant agreement number (required when passing sign_params, unique) |
+| sign_params.sign_valid_time | string | No | Sign validity period, ISO8601 format |
+| sign_params.single_limit | object | No | Single transaction limit configuration |
+| sign_params.single_limit.amount | string | Conditional | Limit amount (required when passing single_limit) |
+| sign_params.single_limit.currency | string | Conditional | Currency code (required when passing single_limit) |
+| sign_params.single_limit.currency_type | string | Conditional | `FIAT` or `CRYPTO` (required when passing single_limit) |
+| sign_params.single_limit.chain | string | No | Chain network (optional for cryptocurrency) |
+| sign_params.period_limits | array | No | Period limit configuration list |
+| sign_params.period_limits[].period_type | string | Conditional | Period type: `DAY`/`WEEK`/`MONTH`/`YEAR` |
+| sign_params.period_limits[].amount | string | Conditional | Period limit amount |
+| sign_params.period_limits[].currency | string | Conditional | Currency code |
+| sign_params.period_limits[].currency_type | string | Conditional | `FIAT` or `CRYPTO` |
+| sign_params.period_limits[].chain | string | No | Chain network (optional for cryptocurrency) |
+| sign_params.sign_notify_url | string | No | Sign result async notification URL |
+| sign_params.return_url | string | No | Redirect URL after sign completion |
+| sign_params.sign_expire_minutes | int | No | Sign link validity period (minutes), default 30 |
+| sign_params.extra_params | string | No | Extension parameters (JSON string) |
+| pay_params | object | **Yes** | Deduction payment parameters |
+| pay_params.agreement_no | string | Conditional | Platform agreement number (required when not passing sign_params) |
+| pay_params.out_trade_no | string | **Yes** | Merchant order number (unique) |
+| pay_params.scene_code | string | **Yes** | [Scene code](appendix#scene-codes) |
+| pay_params.amount | object | **Yes** | Deduction amount |
+| pay_params.amount.total | string | **Yes** | Amount (minimum unit) |
+| pay_params.amount.currency | string | **Yes** | Currency code |
+| pay_params.amount.currency_type | string | **Yes** | `FIAT` or `CRYPTO` |
+| pay_params.amount.chain | string | No | Chain network (required for crypto) |
+| pay_params.order_info | object | **Yes** | Order information |
+| pay_params.order_info.order_title | string | **Yes** | Order title |
+| pay_params.order_info.order_desc | string | No | Order description |
+| pay_params.order_info.goods_name | string | No | Goods name |
+| pay_params.order_info.goods_id | string | No | Goods ID |
+| pay_params.order_info.goods_category | string | No | Goods category |
+| pay_params.scene_info | object | No | Scene information |
+| pay_params.scene_info.device_id | string | No | Device ID |
+| pay_params.scene_info.device_ip | string | No | Device IP |
+| pay_params.scene_info.location | object | No | Location information |
+| pay_params.scene_info.location.latitude | string | No | Latitude |
+| pay_params.scene_info.location.longitude | string | No | Longitude |
+| pay_params.scene_info.location.address | string | No | Detailed address |
+| pay_params.pay_notify_url | string | **Yes** | Payment result async notification URL |
+| pay_params.risk_info | object | No | Risk control information |
+| pay_params.risk_info.user_ip | string | No | User IP address |
+| pay_params.risk_info.device_fingerprint | string | No | Device fingerprint |
+| pay_params.risk_info.user_agent | string | No | User agent string |
+
+---
+
+## Response Parameters
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| code | string | Response code |
+| message | string | Response message |
+| data | object | Response data |
+| data.sign_result | object | Sign result (if signing was initiated) |
+| data.sign_result.agreement_no | string | Platform agreement number |
+| data.sign_result.external_agreement_no | string | Merchant agreement number |
+| data.sign_result.sign_order_id | string | Platform sign order number |
+| data.sign_result.status | string | Sign status: `INIT`/`PENDING`/`SIGNED`/`FAILED` |
+| data.sign_result.sign_time | string | Sign success time (returned on success) |
+| data.sign_result.valid_time | string | Agreement validity period |
+| data.sign_result.sign_url | string | Sign page URL (for H5 redirect) |
+| data.sign_result.qr_code | string | Sign QR code content (for user App scan) |
+| data.sign_result.qr_code_url | string | Sign QR code image URL |
+| data.sign_result.expire_time | string | Sign link/QR code expiration time |
+| data.pay_result | object | Deduction result |
+| data.pay_result.trade_no | string | Platform transaction number |
+| data.pay_result.out_trade_no | string | Merchant order number |
+| data.pay_result.status | string | Transaction status: `PROCESSING`/`SUCCESS`/`FAILED`/`TIMEOUT` |
+| data.pay_result.amount | object | Merchant requested amount |
+| data.pay_result.crypto_payment | object | User's actual cryptocurrency payment info (for fiat orders) |
+| data.pay_result.crypto_payment.currency | string | Cryptocurrency currency |
+| data.pay_result.crypto_payment.amount | string | Cryptocurrency amount |
+| data.pay_result.crypto_payment.chain | string | Chain network |
+| data.pay_result.crypto_payment.exchange_rate | string | Exchange rate |
+| data.pay_result.crypto_payment.rate_time | string | Rate lock time |
+| data.pay_result.pay_time | string | Payment success time (returned on success) |
+| data.pay_result.failure_reason | string | Failure reason (returned on failure) |
+
+---
+
+## Request Example 1: Sign + Pay (First Use)
+
+```json
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "sign_params": {
+    "merchant_user_id": "merchant_user_123",
+    "scene_code": "TAXI",
+    "external_agreement_no": "MERCHANT_AGR_001",
+    "sign_valid_time": "2026-12-23T10:30:00Z",
+    "single_limit": {
+      "amount": "100000",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    "period_limits": [
+      {
+        "period_type": "DAY",
+        "amount": "500000",
+        "currency": "USDT",
+        "currency_type": "CRYPTO",
+        "chain": "TRC20"
+      }
+    ],
+    "sign_notify_url": "https://merchant.com/notify/sign"
+  },
+  "pay_params": {
+    "out_trade_no": "TAXI20231223001",
+    "scene_code": "TAXI",
+    "amount": {
+      "total": "2350",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    "order_info": {
+      "order_title": "Taxi Fare",
+      "order_desc": "Trip on December 23"
+    },
+    "pay_notify_url": "https://merchant.com/notify/pay",
+    "risk_info": {
+      "user_ip": "203.0.113.45",
+      "device_fingerprint": "fp_abc123xyz"
+    }
+  }
+}
+```
+
+## Response Example 1: Sign + Pay (Waiting for User Scan)
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "sign_result": {
+      "agreement_no": null,
+      "external_agreement_no": "MERCHANT_AGR_001",
+      "sign_order_id": "SIGN202312230001",
+      "status": "INIT",
+      "sign_time": null,
+      "valid_time": "2026-12-23T10:30:00Z",
+      "sign_url": "https://pay.example.com/sign?token=xxx",
+      "qr_code": "https://pay.example.com/sign?token=xxx",
+      "qr_code_url": "https://pay.example.com/qr/SIGN202312230001.png",
+      "expire_time": "2023-12-23T11:00:00Z"
+    },
+    "pay_result": {
+      "trade_no": null,
+      "out_trade_no": "TAXI20231223001",
+      "status": "PENDING",
+      "amount": {
+        "total": "2350",
+        "currency": "USDT",
+        "currency_type": "CRYPTO",
+        "chain": "TRC20"
+      },
+      "pay_time": null,
+      "failure_reason": null
+    }
+  }
+}
+```
+
+**Notes**:
+- `sign_result.status = "INIT"` - Sign request created, waiting for user scan
+- `pay_result.status = "PENDING"` - Payment order created, waiting for sign completion to auto-execute
+- Merchant should display `qr_code_url` or `sign_url` for user to scan
+- Final result returned via Webhook async notification
+
+---
+
+## Request Example 2: Pay Only (Using Existing Agreement)
+
+```json
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "pay_params": {
+    "agreement_no": "AGR202312230001",
+    "out_trade_no": "TAXI20231223002",
+    "scene_code": "TAXI",
+    "amount": {
+      "total": "3500",
+      "currency": "USDT",
+      "currency_type": "CRYPTO",
+      "chain": "TRC20"
+    },
+    "order_info": {
+      "order_title": "Taxi Fare",
+      "order_desc": "Second trip on December 23"
+    },
+    "pay_notify_url": "https://merchant.com/notify/pay"
+  }
+}
+```
+
+## Response Example 2: Pay Only (Using Existing Agreement)
+
+```json
+{
+  "code": "SUCCESS",
+  "message": "ok",
+  "data": {
+    "sign_result": null,
+    "pay_result": {
+      "trade_no": "PAY202312230002",
+      "out_trade_no": "TAXI20231223002",
+      "status": "PROCESSING",
+      "amount": {
+        "total": "3500",
+        "currency": "USDT",
+        "currency_type": "CRYPTO",
+        "chain": "TRC20"
+      },
+      "pay_time": null,
+      "failure_reason": null
+    }
+  }
+}
+```
+
+**Notes**:
+- `sign_result = null` - No sign initiated, using existing agreement
+- `pay_result.status = "PROCESSING"` - Deduction payment processing
+- Final result returned via Webhook async notification
+
+---
+
+## Important Notes
+
+### Async Flow
+- Signing requires user scan confirmation, it's an async flow
+- Sync response returns sign QR code and initial status (`INIT`/`PENDING`)
+- Final result returned via Webhook async notification
+
+### Business Flow
+1. Call API → Returns sign QR code
+2. Merchant displays QR code → User scans with App
+3. User completes sign → System auto-triggers deduction
+4. Webhook notification → Returns sign and payment results
+
+### Result Processing
+- Results returned separately in `sign_result` and `pay_result`
+- If sign fails, deduction not executed, `pay_result` is `null`
+- If sign succeeds, user completes payment in app until success
+
+### Webhook Notification Strategy
+- Uses **single notification** to return both sign and payment results
+- Sent to merchant configured `pay_notify_url`
+- For separate notifications, configure `sign_notify_url` in `sign_params`
+
+### Idempotency Guarantee
+- Idempotency guaranteed through `external_agreement_no` for signing
+- Idempotency guaranteed through `out_trade_no` for payment
+
+### Optional Signing
+- When `sign_params` is empty, must pass existing agreement number in `pay_params.agreement_no`
+- When using existing agreement, no scan needed, direct deduction execution

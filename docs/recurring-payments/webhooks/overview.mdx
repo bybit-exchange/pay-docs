@@ -24,11 +24,9 @@ Platform sends async notifications (webhooks) to merchant's configured URL when 
   "data": {
     "eventType": "SIGNED",
     // Other business fields (varies by notifyType and eventType)
-  },
+  }
 
-  // Part 3: Signature
-  "sign": "Base64 encoded signature",
-  "signType": "RSA2"
+  // Note: Signature parameters (sign, signType, timestamp, nonce) are in HTTP Headers, not in request body
 }
 ```
 
@@ -41,19 +39,23 @@ Platform sends async notifications (webhooks) to merchant's configured URL when 
 | notifyTime | string | Notification time (ISO8601 format: yyyy-MM-dd'T'HH:mm:ssXXX) |
 | merchantId | string | Merchant ID |
 | data | object | Business data |
-| sign | string | Signature (Base64 encoded) |
-| signType | string | Signature algorithm: `RSA2` |
+
+:::info Signature Location
+Signature parameters (X-Signature, X-Sign-Type, X-Timestamp, X-Nonce) are provided in HTTP request headers, not in the request body. See [Request Headers](#request-headers) section below.
+:::
 
 ### Notification Type Categories
 
 | notifyType | Description | Applicable Scenarios |
 |:-----------|:------------|:---------------------|
-| `AGREEMENT_STATUS` | Agreement status notification | Sign, unsign, suspend, resume, timeout and all agreement status changes |
+| `AGREEMENT_STATUS` | Agreement status notification | Sign, unsign, suspend, resume and all agreement status changes |
 | `TRANSACTION_RESULT` | Transaction result notification | Deduction, refund and all transaction results |
+| `AGREEMENT_TIMEOUT` | Sign timeout notification | Sign link/QR code expires without completion |
+| `ORDER_TIMEOUT` | Order timeout notification | Deduction order times out without completion |
 
 **Description**:
-- `notifyType` only indicates the category (agreement/transaction)
-- Specific event type is distinguished by `data.eventType` field
+- For `AGREEMENT_STATUS` and `TRANSACTION_RESULT`, specific event type is distinguished by `data.eventType` field
+- For `AGREEMENT_TIMEOUT` and `ORDER_TIMEOUT`, they are standalone notification types without eventType subdivision
 - Specific result status is distinguished by `data.status` field
 
 ### Event Types (Agreement)
@@ -64,6 +66,10 @@ Platform sends async notifications (webhooks) to merchant's configured URL when 
 | `UNSIGNED` | Unsign event | `AGREEMENT_STATUS` |
 | `SUSPENDED` | Suspend event | `AGREEMENT_STATUS` |
 | `TIMEOUT` | Timeout event | `AGREEMENT_STATUS` |
+
+:::note
+The `TIMEOUT` eventType is used when agreement enters timeout status. This is different from `AGREEMENT_TIMEOUT` notifyType which is for sign link/QR code expiration.
+:::
 
 ### Event Types (Transaction)
 
@@ -80,10 +86,16 @@ Platform sends async notifications (webhooks) to merchant's configured URL when 
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| X-Timestamp | string | Notification timestamp (milliseconds) |
-| X-Signature | string | Notification signature |
-| X-Nonce | string | Random string |
+| X-Timestamp | string | Notification timestamp (milliseconds), used for signature generation and replay attack prevention |
+| X-Signature | string | RSA2 signature value (Base64 encoded), regenerated for each send/retry |
+| X-Nonce | string | Random number (5-digit number, range 10000-99999), regenerated for each send/retry |
+| X-Sign-Type | string | Signature algorithm, fixed as `RSA2` |
 | Content-Type | string | `application/json` |
+
+**Signature Description**:
+- Signature content: `timestamp + nonce + requestBody` (string concatenation, not JSON format)
+- Signature algorithm: RSA2 (SHA256withRSA)
+- Request body remains pure JSON format, does not contain signature fields
 
 ### Retry Mechanism
 
@@ -112,65 +124,61 @@ public class WebhookController {
     @PostMapping("/agreement")
     public ResponseEntity<String> handleWebhook(
             @RequestHeader("X-Timestamp") String timestamp,
+            @RequestHeader("X-Signature") String signature,
+            @RequestHeader("X-Nonce") String nonce,
+            @RequestHeader("X-Sign-Type") String signType,
             @RequestBody String body) {
 
-        JSONObject notify = JSON.parseObject(body);
-        String sign = notify.getString("sign");
-
-        // 1. Remove sign and signType for verification
-        notify.remove("sign");
-        notify.remove("signType");
-        String contentToVerify = notify.toJSONString();
-
-        // 2. Verify signature
-        if (!verifySignature(contentToVerify, sign)) {
-            return ResponseEntity.status(400).body("signature_error");
-        }
-
-        // 3. Check timestamp (prevent replay)
-        if (Math.abs(System.currentTimeMillis() - Long.parseLong(timestamp)) > 5 * 60 * 1000) {
+        // 1. Verify timestamp (prevent replay attack)
+        long ts = Long.parseLong(timestamp);
+        if (Math.abs(System.currentTimeMillis() - ts) > 5 * 60 * 1000) {
+            log.warn("Webhook timestamp expired");
             return ResponseEntity.status(400).body("timestamp_expired");
         }
 
-        // 4. Idempotency check
+        // 2. Verify signature (signature content = timestamp + nonce + requestBody)
+        String contentToVerify = timestamp + nonce + body;
+        if (!verifySignature(contentToVerify, signature)) {
+            log.warn("Webhook signature verification failed");
+            return ResponseEntity.status(400).body("signature_error");
+        }
+
+        // 3. Parse notification content (request body is pure JSON, no sign/signType fields)
+        JSONObject notify = JSON.parseObject(body);
         String notifyId = notify.getString("notifyId");
+        String notifyType = notify.getString("notifyType");
+        JSONObject data = notify.getJSONObject("data");
+
+        // 4. Idempotency check
         if (isProcessed(notifyId)) {
             return ResponseEntity.ok("success");
         }
 
-        // 5. Process business by notifyType and eventType
-        String notifyType = notify.getString("notifyType");
-        JSONObject data = notify.getJSONObject("data");
-        String eventType = data.getString("eventType");
+        // 5. Process business based on notification type
+        try {
+            switch (notifyType) {
+                case "AGREEMENT_STATUS":
+                    handleAgreementStatusNotify(data);
+                    break;
+                case "TRANSACTION_RESULT":
+                    handleTransactionResultNotify(data);
+                    break;
+                case "AGREEMENT_TIMEOUT":
+                    handleAgreementTimeoutNotify(data);
+                    break;
+                case "ORDER_TIMEOUT":
+                    handleOrderTimeoutNotify(data);
+                    break;
+                default:
+                    log.warn("Unknown notification type: {}", notifyType);
+            }
 
-        if ("AGREEMENT_STATUS".equals(notifyType)) {
-            // Handle agreement status changes
-            switch (eventType) {
-                case "SIGNED":
-                    handleSignedNotify(data);
-                    break;
-                case "UNSIGNED":
-                    handleUnsignNotify(data);
-                    break;
-                case "SUSPENDED":
-                    handleSuspendNotify(data);
-                    break;
-                case "TIMEOUT":
-                    handleTimeoutNotify(data);
-                    break;
-            }
-        } else if ("TRANSACTION_RESULT".equals(notifyType)) {
-            // Handle transaction results
-            String orderType = data.getString("orderType");
-            if ("PAY".equals(orderType)) {
-                handlePayNotify(data);
-            } else if ("REFUND".equals(orderType)) {
-                handleRefundNotify(data);
-            }
+            markAsProcessed(notifyId);
+            return ResponseEntity.ok("success");
+        } catch (Exception e) {
+            log.error("Error processing webhook", e);
+            return ResponseEntity.status(500).body("processing_error");
         }
-
-        markAsProcessed(notifyId);
-        return ResponseEntity.ok("success");
     }
 }
 ```
