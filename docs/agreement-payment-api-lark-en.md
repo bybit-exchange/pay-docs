@@ -43,15 +43,14 @@
   - [2.10 Rate Limiting Description](#210-rate-limiting-description)
 - [3. API Details](#3-api-details)
   - [3.1 Sign Request API](#31-sign-request-api)
-  - [3.2 Sign Confirmation API (Optional)](#32-sign-confirmation-api-optional)
-  - [3.3 Unsign API](#33-unsign-api)
-  - [3.4 Agreement Deduction API (Core)](#34-agreement-deduction-api-core)
-  - [3.4.1 Pay with Sign API (One-Step)](#341-pay-with-sign-api-one-step)
-  - [3.5 Sign Status Query API](#35-sign-status-query-api)
-  - [3.6 Agreement List Query API](#36-agreement-list-query-api)
-  - [3.7 Transaction/Refund Query API (Single)](#37-transactionrefund-query-api-single)
-  - [3.8 Deduction Transaction List API](#38-deduction-transaction-list-api)
-  - [3.9 Deduction Refund API](#39-deduction-refund-api)
+  - [3.2 Unsign API](#32-unsign-api)
+  - [3.3 Agreement Deduction API (Core)](#33-agreement-deduction-api-core)
+  - [3.3.1 Pay with Sign API (One-Step)](#331-pay-with-sign-api-one-step)
+  - [3.4 Sign Status Query API](#34-sign-status-query-api)
+  - [3.5 Agreement List Query API](#35-agreement-list-query-api)
+  - [3.6 Transaction/Refund Query API (Single)](#36-transactionrefund-query-api-single)
+  - [3.7 Deduction Transaction List API](#37-deduction-transaction-list-api)
+  - [3.8 Deduction Refund API](#38-deduction-refund-api)
 - [4. Async Notifications](#4-async-notifications)
   - [4.1 Sign Result Notification](#41-sign-result-notification)
   - [4.2 Deduction Result Notification](#42-deduction-result-notification)
@@ -333,7 +332,6 @@ WHERE status IN ('INIT', 'PENDING')
 | API Name | Request Method | Path |
 | --- | --- | --- |
 | Sign Request | POST | /v5/bybitpay/agreement/sign |
-| Sign Confirmation | POST | /v5/bybitpay/agreement/confirm |
 | Unsign | POST | /v5/bybitpay/agreement/unsign |
 | Agreement Deduction | POST | /v5/bybitpay/agreement/pay |
 | Pay with Sign | POST | /v5/bybitpay/agreement/pay-with-sign |
@@ -560,7 +558,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | --- | --- | --- | --- |
 | merchant_id | string | Yes | Merchant ID |
 | user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / SINGLE(single authorization) |
+| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
 | merchant_user_id | string | Yes | Merchant-side user ID (user identifier in merchant system, used for establishing mapping) |
 | scene_code | string | Yes | Scene code (see 7.1 Scene Code List): TAXI/PARKING/SUBSCRIPTION/UTILITY/TOLL/TRANSIT/FOOD/ENTERTAINMENT/EDUCATION/MEMBERSHIP/RENT/FITNESS/TELECOM/CLOUD/INSURANCE/LOAN/OTHERS |
 | product_code | string | No | Product code, assigned by platform (optional) |
@@ -656,115 +654,9 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ---
 
-### 3.2 Sign Confirmation API (Optional)
-
-**Request Path**: POST /v5/bybitpay/agreement/confirm
-
-**Description**: After user completes identity verification by scanning QR code in App, platform will automatically complete sign and notify merchant via Webhook. This API is optional, used for merchant to actively query/confirm sign status.
-
-#### Request Parameters
-
-| Parameter | Type | Required | Description |
-| --- | --- | --- | --- |
-| merchant_id | string | Yes | Merchant ID |
-| user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / SINGLE(single authorization) |
-| sign_order_id | string | Yes | Platform sign order number |
-
-#### Request Example
-
-```json
-{
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "sign_order_id": "AGR202312230001"
-}
-```
-
-#### Response Parameters
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| code | string | Response code |
-| message | string | Response message |
-| data | object | Response data |
-| data.agreement_no | string | Platform agreement number (used for deduction) |
-| data.external_agreement_no | string | Merchant agreement number |
-| data.user_id | string | Platform user ID |
-| data.merchant_user_id | string | Merchant-side user ID |
-| data.status | string | Sign status: INIT/PENDING/SIGNED/FAILED |
-| data.sign_time | string | Sign success time (returned on success) |
-| data.valid_time | string | Agreement validity period |
-| data.binding_info | object | User binding information |
-| data.binding_info.bind_time | string | Binding time |
-| data.binding_info.bind_status | string | Binding status: BOUND (bound) / UNBOUND (unbound) |
-
-#### Response Example (Signed)
-
-```json
-{
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
-    "agreement_no": "AGR202312230001",
-    "external_agreement_no": "MERCHANT_AGR_001",
-    "user_id": "U_123456789",
-    "merchant_user_id": "merchant_user_123",
-    "status": "SIGNED",
-    "sign_time": "2023-12-23T10:30:00Z",
-    "valid_time": "2024-12-23T10:30:00Z",
-    "binding_info": {
-      "bind_time": "2023-12-23T10:30:00Z",
-      "bind_status": "BOUND"
-    }
-  }
-}
-```
-
-#### Response Example (Pending Confirmation)
-
-```json
-{
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
-    "agreement_no": "AGR202312230001",
-    "external_agreement_no": "MERCHANT_AGR_001",
-    "user_id": "U_123456789",
-    "merchant_user_id": "merchant_user_123",
-    "status": "PENDING",
-    "valid_time": "2024-12-23T10:30:00Z",
-    "binding_info": {
-      "bind_time": "2023-12-23T10:28:00Z",
-      "bind_status": "BOUND"
-    }
-  }
-}
-```
-
-#### Response Example (Sign Failed)
-
-```json
-{
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
-    "agreement_no": "AGR202312230001",
-    "external_agreement_no": "MERCHANT_AGR_001",
-    "user_id": "U_123456789",
-    "merchant_user_id": "merchant_user_123",
-    "status": "FAILED",
-    "binding_info": {
-      "bind_status": "UNBOUND"
-    }
-  }
-}
-```
-
 ---
 
-### 3.3 Unsign API
+### 3.2 Unsign API
 
 **Request Path**: POST /v5/bybitpay/agreement/unsign
 
@@ -774,7 +666,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | --- | --- | --- | --- |
 | merchant_id | string | Yes | Merchant ID |
 | user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / SINGLE(single authorization) |
+| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
 | agreement_no | string | Either | Platform agreement number |
 | external_agreement_no | string | Either | Merchant agreement number |
 | unsign_type | string | No | Unsign type: USER(user active)/MERCHANT(merchant initiated)/SYSTEM(system unsign) |
@@ -851,7 +743,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | --- | --- | --- | --- |
 | merchant_id | string | Yes | Merchant ID |
 | user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / SINGLE(single authorization) |
+| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
 | agreement_no | string | Yes | Platform agreement number |
 | out_trade_no | string | Yes | Merchant order number (unique on merchant side) |
 | scene_code | string | Yes | Scene code (see 7.1 Scene Code List): TAXI/PARKING/SUBSCRIPTION/UTILITY/TOLL/TRANSIT/FOOD/ENTERTAINMENT/EDUCATION/MEMBERSHIP/RENT/FITNESS/TELECOM/CLOUD/INSURANCE/LOAN/OTHERS |
@@ -1075,7 +967,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | --- | --- | --- | --- |
 | merchant_id | string | Yes | Merchant ID |
 | user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / SINGLE(single authorization) |
+| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
 | sign_params | object | No | Sign parameters (required for first sign + payment) |
 | sign_params.merchant_user_id | string | Conditional | Merchant-side user ID (required when passing sign_params) |
 | sign_params.scene_code | string | Conditional | Scene code (required when passing sign_params, see 7.1 Scene Code List) |
@@ -1422,7 +1314,7 @@ After user completes sign and payment via scanning, system sends async notificat
 | --- | --- | --- | --- |
 | merchant_id | string | Yes | Merchant ID |
 | user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / SINGLE(single authorization) |
+| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
 | agreement_no | string | Either | Platform agreement number |
 | external_agreement_no | string | Either | Merchant agreement number |
 
@@ -1501,7 +1393,7 @@ GET /v5/bybitpay/agreement/query?merchant_id=M123456789&user_id=U_123456789&agre
 | --- | --- | --- | --- |
 | merchant_id | string | Yes | Merchant ID |
 | user_id | string | No | Platform user ID (filter agreements for specified user) |
-| agreement_type | string | No | Sign type: CYCLE/SINGLE (query all if not passed) |
+| agreement_type | string | No | Sign type: CYCLE/NON_CYCLE/SINGLE (query all if not passed) |
 | status | string | No | Agreement status filter: INIT/PENDING/SIGNED/SUSPENDED/UNSIGNED/EXPIRED/FAILED |
 | scene_code | string | No | Scene code filter |
 | start_time | string | No | Sign start time (ISO8601 format) |
@@ -1576,7 +1468,7 @@ GET /v5/bybitpay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&p
 | --- | --- | --- | --- |
 | merchant_id | string | Yes | Merchant ID |
 | user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / SINGLE(single authorization) |
+| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
 | record_type | string | No | Record type: PAY(deduction transaction)/REFUND(refund record), default PAY |
 | trade_no | string | Conditional | Platform trade number (when record_type=PAY, either this or out_trade_no) |
 | out_trade_no | string | Conditional | Merchant order number (when record_type=PAY, either this or trade_no) |
@@ -1691,7 +1583,7 @@ GET /v5/bybitpay/agreement/pay/query?merchant_id=M123456789&user_id=U_123456789&
 | --- | --- | --- | --- |
 | merchant_id | string | Yes | Merchant ID |
 | user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / SINGLE(single authorization) |
+| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
 | agreement_no | string | Yes | Platform agreement number |
 | record_type | string | No | Record type: PAY(deduction transaction)/REFUND(refund record), default PAY |
 | status | string | No | Status filter: SUCCESS/FAILED/PROCESSING |
@@ -1824,7 +1716,7 @@ GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&a
 | --- | --- | --- | --- |
 | merchant_id | string | Yes | Merchant ID |
 | user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / SINGLE(single authorization) |
+| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
 | trade_no | string | Either | Platform trade number |
 | out_trade_no | string | Either | Merchant order number |
 | out_refund_no | string | Yes | Merchant refund number (unique on merchant side) |
@@ -2015,13 +1907,14 @@ All Webhook notifications use a unified three-part structure:
 | --- | --- | --- |
 | agreementNo | string | Platform agreement number |
 | externalAgreementNo | string | Merchant agreement number |
-| agreementType | string | Sign type: CYCLE/SINGLE |
+| agreementType | string | Sign type: CYCLE/NON_CYCLE/SINGLE |
 | status | string | Sign status: SIGNED/FAILED |
 | userId | string | Platform user ID |
 | merchantUserId | string | Merchant-side user ID |
 | sceneCode | string | Scene code |
 | signTime | string | Sign time |
-| failureReason | string | Failure reason (returned on failure) |
+| failureCode | string | Failure error code (returned on failure, 9-digit string) |
+| failureReason | string | Failure reason description (returned on failure) |
 
 #### Notification Example (Success)
 
@@ -2066,7 +1959,8 @@ All Webhook notifications use a unified three-part structure:
     "userId": "U_123456789",
     "merchantUserId": "merchant_user_123",
     "sceneCode": "TAXI",
-    "failureReason": "USER_AUTH_TIMEOUT"
+    "failureCode": "139001001",
+    "failureReason": "User authentication timeout (downstream code=300100002, msg=User auth timeout)"
   },
   "sign": "Base64 encoded signature",
   "signType": "RSA2"
@@ -2091,7 +1985,8 @@ All Webhook notifications use a unified three-part structure:
 | amount.currency | string | Currency code |
 | amount.currency_type | string | Currency type: FIAT/CRYPTO |
 | payTime | string | Payment time |
-| failureReason | string | Failure reason (returned on failure) |
+| failureCode | string | Failure error code (returned on failure, 9-digit string) |
+| failureReason | string | Failure reason description (returned on failure) |
 
 #### Notification Example (Success)
 
@@ -2142,7 +2037,8 @@ All Webhook notifications use a unified three-part structure:
       "currency": "USDT",
       "currency_type": "CRYPTO"
     },
-    "failureReason": "BALANCE_NOT_ENOUGH"
+    "failureCode": "139002003",
+    "failureReason": "Insufficient balance (downstream code=120100006, msg=Balance insufficient)"
   },
   "sign": "Base64 encoded signature",
   "signType": "RSA2"
@@ -2204,7 +2100,8 @@ All Webhook notifications use a unified three-part structure:
 | refund_amount.currency | string | Currency code |
 | refund_amount.currency_type | string | Currency type: FIAT/CRYPTO |
 | refundTime | string | Refund success time |
-| failureReason | string | Failure reason (returned on failure) |
+| failureCode | string | Failure error code (returned on failure, 9-digit string) |
+| failureReason | string | Failure reason description (returned on failure) |
 
 #### Notification Example (Success)
 
@@ -2263,7 +2160,8 @@ All Webhook notifications use a unified three-part structure:
       "currency": "USDT",
       "currency_type": "CRYPTO"
     },
-    "failureReason": "BALANCE_NOT_ENOUGH"
+    "failureCode": "139002003",
+    "failureReason": "Insufficient balance (downstream code=120100006, msg=Balance insufficient)"
   },
   "sign": "Base64 encoded signature",
   "signType": "RSA2"
@@ -2348,7 +2246,7 @@ All Webhook notifications use a unified three-part structure:
 | --- | --- | --- |
 | agreementNo | string | Platform agreement number |
 | externalAgreementNo | string | Merchant agreement number |
-| agreementType | string | Sign type: CYCLE/SINGLE |
+| agreementType | string | Sign type: CYCLE/NON_CYCLE/SINGLE |
 | status | string | Agreement status: TIMEOUT |
 | userId | string | Platform user ID |
 | merchantUserId | string | Merchant-side user ID |
@@ -2430,6 +2328,47 @@ All Webhook notifications use a unified three-part structure:
   "signType": "RSA2"
 }
 ```
+
+---
+
+## Error Code Description (failureCode)
+
+When `status` is `FAILED`, the `data` object contains the following error information fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| failureCode | string | Error code (9-digit string) for programmatic error type identification |
+| failureReason | string | Detailed error description, including mapped English description and downstream error info |
+
+### Common Error Codes
+
+| Error Code | English Description | Chinese Description | Applicable Scenarios |
+| --- | --- | --- | --- |
+| 139002003 | BALANCE_NOT_ENOUGH | Insufficient balance | Payment, Refund |
+| 139004005 | AMOUNT_EXCEED_SINGLE_LIMIT | Single transaction limit exceeded | Payment |
+| 139004006 | AMOUNT_EXCEED_PERIOD_LIMIT | Period limit exceeded | Payment |
+| 139005001 | RISK_REJECT | Rejected by risk control | Sign, Payment, Refund |
+| 139004003 | EXCHANGE_RATE_EXPIRED | Exchange rate expired | Payment |
+| 139001002 | TRADE_NOT_EXIST | Trade does not exist | Refund |
+| 40001 | PARAM_INVALID | Parameter validation failed | All APIs |
+| 50002 | DOWNSTREAM_ERROR | Downstream service error | All APIs |
+
+For complete error code list, please refer to the Error Code Documentation.
+
+### failureReason Format
+
+```
+{Mapped English Description} (downstream code={Downstream Error Code}, msg={Downstream Error Message})
+```
+
+Example:
+```
+Insufficient balance (downstream code=120100006, msg=Balance insufficient)
+```
+
+**Notes**:
+- `failureCode` is for programmatic handling - merchants can implement automated error processing
+- `failureReason` provides detailed error description including downstream original error info for troubleshooting
 
 ---
 
@@ -3143,7 +3082,7 @@ MIIEvgIBADANBgkq...(Base64 encoded content)
 | 139001010 | USER_ID_MISMATCH | User ID mismatch | User ID mismatch | Check if user ID matches the one used at sign time |
 | 139001011 | AGREEMENT_USER_MISMATCH | Agreement user mismatch | Agreement user mismatch | Check binding relationship between user and agreement |
 | 139001012 | SIGN_URL_EXPIRED | Sign URL has expired | Sign URL has expired | Re-initiate sign request to get new link |
-| 139001013 | AGREEMENT_TYPE_MISMATCH | Agreement type mismatch | Agreement type mismatch | Check if agreement type (CYCLE/SINGLE) is correct |
+| 139001013 | AGREEMENT_TYPE_MISMATCH | Agreement type mismatch | Agreement type mismatch | Check if agreement type (CYCLE/NON_CYCLE/SINGLE) is correct |
 
 ### 6.3 Transaction Related Error Codes
 
