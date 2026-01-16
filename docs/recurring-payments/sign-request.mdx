@@ -18,7 +18,7 @@ Create a sign request to initiate the agreement signing process. Returns a QR co
 |:----------|:-----|:---------|:------------|
 | merchant_id | string | **Yes** | Merchant ID |
 | user_id | string | **Yes** | Platform user ID |
-| agreement_type | string | **Yes** | Sign type: `CYCLE` (periodic) / `SINGLE` (one-time) |
+| agreement_type | string | **Yes** | Sign type: `CYCLE` (periodic) / `NON_CYCLE` (non-periodic) / `SINGLE` (one-time) |
 | merchant_user_id | string | **Yes** | Merchant-side user ID (for mapping) |
 | scene_code | string | **Yes** | [Scene code](appendix#scene-codes): TAXI, PARKING, SUBSCRIPTION, etc. |
 | product_code | string | No | Product code (assigned by platform) |

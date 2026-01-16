@@ -31,7 +31,7 @@ This API supports merchants to complete both agreement signing and deduction pay
 |:----------|:-----|:---------|:------------|
 | merchant_id | string | **Yes** | Merchant ID |
 | user_id | string | **Yes** | Platform user ID |
-| agreement_type | string | **Yes** | Sign type: `CYCLE` / `SINGLE` |
+| agreement_type | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
 | sign_params | object | No | Sign parameters (required for first sign + payment) |
 | sign_params.merchant_user_id | string | Conditional | Merchant-side user ID (required when passing sign_params) |
 | sign_params.scene_code | string | Conditional | [Scene code](appendix#scene-codes) (required when passing sign_params) |

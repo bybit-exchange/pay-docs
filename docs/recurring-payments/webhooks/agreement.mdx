@@ -18,14 +18,15 @@ Notifies merchant when user completes or fails the sign process.
 |:----------|:-----|:------------|
 | agreementNo | string | Platform agreement number |
 | externalAgreementNo | string | Merchant agreement number |
-| agreementType | string | Sign type: `CYCLE` / `SINGLE` |
+| agreementType | string | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
 | eventType | string | Event type: `SIGNED` / `FAILED` |
 | status | string | Sign status: `SIGNED` / `FAILED` |
 | userId | string | Platform user ID |
 | merchantUserId | string | Merchant-side user ID |
 | sceneCode | string | Scene code |
 | signTime | string | Sign time (on success) |
-| failureReason | string | Failure reason (on failure) |
+| failureCode | string | Failure error code (on failure, 9-digit string) |
+| failureReason | string | Failure reason description (on failure) |
 
 ### Example (Success)
 
@@ -66,7 +67,8 @@ Notifies merchant when user completes or fails the sign process.
     "userId": "U_123456789",
     "merchantUserId": "merchant_user_123",
     "sceneCode": "SUBSCRIPTION",
-    "failureReason": "USER_AUTH_TIMEOUT"
+    "failureCode": "139001001",
+    "failureReason": "User authentication timeout (downstream code=300100002, msg=User auth timeout)"
   },
 }
 ```
@@ -189,7 +191,7 @@ Notifies merchant when sign link/QR code expires.
 |:----------|:-----|:------------|
 | agreementNo | string | Platform agreement number |
 | externalAgreementNo | string | Merchant agreement number |
-| agreementType | string | Sign type: `CYCLE` / `SINGLE` |
+| agreementType | string | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
 | eventType | string | Event type: `TIMEOUT` |
 | status | string | Agreement status: `TIMEOUT` |
 | userId | string | Platform user ID |

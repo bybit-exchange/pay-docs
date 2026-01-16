@@ -28,7 +28,8 @@ Notifies merchant when a deduction is completed or fails.
 | amount.currency | string | Currency code |
 | amount.currency_type | string | Currency type |
 | payTime | string | Payment time (on success) |
-| failureReason | string | Failure reason (on failure) |
+| failureCode | string | Failure error code (on failure, 9-digit string) |
+| failureReason | string | Failure reason description (on failure) |
 
 ### Example (Success)
 
@@ -77,7 +78,8 @@ Notifies merchant when a deduction is completed or fails.
       "currency": "USDT",
       "currency_type": "CRYPTO"
     },
-    "failureReason": "BALANCE_NOT_ENOUGH"
+    "failureCode": "139002003",
+    "failureReason": "Insufficient balance (downstream code=120100006, msg=Balance insufficient)"
   },
 }
 ```
@@ -103,7 +105,8 @@ Notifies merchant when a refund is completed or fails.
 | status | string | Refund status: `SUCCESS` / `FAILED` |
 | refund_amount | object | Refund amount object |
 | refundTime | string | Refund time (on success) |
-| failureReason | string | Failure reason (on failure) |
+| failureCode | string | Failure error code (on failure, 9-digit string) |
+| failureReason | string | Failure reason description (on failure) |
 
 ### Example (Success)
 
@@ -156,7 +159,8 @@ Notifies merchant when a refund is completed or fails.
       "currency": "USDT",
       "currency_type": "CRYPTO"
     },
-    "failureReason": "BALANCE_NOT_ENOUGH"
+    "failureCode": "139002003",
+    "failureReason": "Insufficient balance (downstream code=120100006, msg=Balance insufficient)"
   },
 }
 ```

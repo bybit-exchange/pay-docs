@@ -18,7 +18,7 @@ Query single deduction transaction or refund record details.
 |:----------|:-----|:---------|:------------|
 | merchant_id | string | **Yes** | Merchant ID |
 | user_id | string | **Yes** | Platform user ID |
-| agreement_type | string | **Yes** | Sign type: `CYCLE` / `SINGLE` |
+| agreement_type | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
 | record_type | string | No | Record type: `PAY` (default) / `REFUND` |
 | trade_no | string | Conditional | Platform trade number (for `record_type=PAY`) |
 | out_trade_no | string | Conditional | Merchant order number (for `record_type=PAY`) |

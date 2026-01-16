@@ -100,7 +100,6 @@ const sidebars = {
               label: 'Agreement',
               items: [
                 'recurring-payments/sign-request',
-                'recurring-payments/sign-confirm',
                 'recurring-payments/unsign',
                 'recurring-payments/query-agreement',
                 'recurring-payments/list-agreements',
