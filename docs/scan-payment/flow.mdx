@@ -3,10 +3,78 @@ title: Flowchart
 sidebar_label: Flowchart
 ---
 
-![flowchar1](/img/flowchart1.png)
+## E-Commerce Payment Flow
 
+```mermaid
+graph TD
+  Merchant[E-commerce] -->|Create pay order| BybitPay[Bybit Pay]
+  User[User] -->|Create order| Merchant
+  BybitPay -->|Pay notify and settlement| Merchant
+  User -->|Pay| BybitPay
+```
 
-![flowchar2](/img/flowchart2.png)
+## Users' Guide After Creating Payment Order
+
+```mermaid
+graph TD
+  CreateOrder([Create Payment Order])
+  GetResponse(Get Response)
+  ClickPay(User click 'Pay' button)
+  CheckTerminal{User's terminal type}
+  ShowQR(Show the QR code to user)
+  OpenLink(Open the 'result.checkoutLink')
+
+  CreateOrder --> GetResponse
+  GetResponse --> ClickPay
+  ClickPay --> CheckTerminal
+  CheckTerminal -->|WEB, OTHERS| ShowQR
+  CheckTerminal -->|APP, WAP, MINIAPP| OpenLink
+```
 
 ## Payout Flowchart
-![flowchar3](/img/payout_flowchart.png)
+
+```mermaid
+graph TD
+  Payer[Payer]
+  BybitPay[Bybit Pay]
+  Payee[Payee]
+
+  Payer -->|1. Confirm the contract, agreement, or other whitelist requirements| Payee
+  Payer -->|2. Call 'payout' API| BybitPay
+  BybitPay -->|3. Create Payment Order| BybitPay
+  BybitPay -->|4. Risk check| BybitPay
+  BybitPay -->|5. Debit balance| Payer
+  BybitPay -->|6. Credit Balance| Payee
+  BybitPay -->|7. Response the result| Payee
+```
+
+## Order Status State Machine
+
+```mermaid
+graph TD
+  CREATE[CREATE] -->|1. Order create success| INIT[INIT]
+  INIT -->|2. User's payment order is under 'PAY_PROCESS'| PAY_PROCESS[PAY_PROCESS]
+
+  PAY_PROCESS -->|2.1 User's payment order failed| INIT
+  PAY_PROCESS -->|2.2 After 1 hour no success payment| TIMEOUT[TIMEOUT]
+  PAY_PROCESS -->|2.3 Merchant call the cancel API| CANCEL[CANCEL]
+  PAY_PROCESS -->|2.4 User's payment order is under 'PAY_SUCCESS'| PAY_SUCCESS[PAY_SUCCESS]
+  PAY_PROCESS --> PAY_FAILED[PAY_FAILED]
+
+  PAY_SUCCESS -->|4. Partial refund success| PARTIAL_REFUND[PARTIAL_REFUND]
+  PARTIAL_REFUND -->|5. The whole order was refunded| REFUND[REFUND]
+
+  REFUND -->|1. Refund order create success| REFUND_PROCESS[REFUND_PROCESS]
+  REFUND_PROCESS -->|1.1 Merchant call the cancel API| REFUND_CANCEL[REFUND_CANCEL]
+  REFUND_PROCESS -->|1.2 Refund failed| REFUND_FAILED[REFUND_FAILED]
+  REFUND_PROCESS -->|2. Order proceed successfully| REFUND_SUCCESS[REFUND_SUCCESS]
+  REFUND_SUCCESS --> PARTIAL_REFUND
+
+  PayoutInit[INIT - Payout] -->|Create order| PAY_PROCESS_Payout[PAY_PROCESS]
+  PAY_PROCESS_Payout --> PAY_FAILED_Payout[FAILED]
+  PAY_PROCESS_Payout --> PAY_SUCCESS_Payout[PAY_SUCCESS]
+```
+
+:::info
+For detailed status descriptions, see [Order Status](order-status).
+:::

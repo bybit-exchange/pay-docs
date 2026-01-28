@@ -4,6 +4,29 @@ sidebar_label: Introduction
 sidebar_position: 0
 ---
 
+## Version History
+
+| Version | Date | Changes |
+|:--------|:-----|:--------|
+| 1.0 | 2025-02-10 | Initial release |
+| 5.0 | 2025-02-17 | <li>Modified the state machine</li><li>Added "Pay Id" to Payment Notify</li><li>Added "Authentication" description to Payment Notify</li><li>Added "MccCodes" explanation for goods details</li> |
+| 5.0 | 2025-03-03 | <li>Changed `clientId` to optional when initiating refund or querying order status</li><li>Moved field `goods` into `PayOrder` structure</li><li>Moved field `customer` from `PayOrder` structure</li><li>Renamed `orderAmount` to `amount` for all `PayOrder` types</li><li>Changed request body type from JSON array to JSON object when creating a refund order</li><li>Added `merchantRefundNo` when creating a refund order</li><li>Added error codes: `50000` (Bybit internal error), `400004` (Order not found), `500105` (Order not paid)</li><li>Changed `regionTime` to `registerTime` in Customer type</li><li>Added Type RefundOrder, removed refund fields from PayOrder</li><li>Removed all Customer and Good data from response structure</li><li>Added Signature Algorithm description</li><li>Changed notify request body</li><li>Changed timestamp from millisecond to second precision</li> |
+| 5.0 | 2025-03-31 | <li>Added Payment Status Mock API</li><li>Added Payout API</li> |
+| 5.0 | 2025-04-16 | <li>Added Settlement Report API</li> |
+| 5.0 | 2025-05-09 | <li>Added payout status</li> |
+| 5.0 | 2025-05-13 | <li>Refactored payment status mock path from `/v5/bybitpay/pay-status/mock` to `/v5/bybitpay/paystatus/mock`</li> |
+| 5.0 | 2025-05-21 | <li>Added webhook support for merchant public key</li> |
+| 5.0 | 2025-05-27 | <li>Refactored payment type from `BYBIT_PAY_MERCHANT_PAYOUT` to `MERCHANT_PAYOUT`</li> |
+| 5.0 | 2025-05-28 | <li>Added customer uid in `/v5/bybitpay/pay_result` API and Payment Notify</li> |
+| 5.0 | 2025-06-01 | <li>Added crypto scale (8 decimal places for crypto currencies)</li> |
+| 5.0 | 2025-06-30 | <li>Updated signature algorithm</li> |
+| 5.01 | 2025-07-04 | <li>Added Payment FxConvert API</li><li>Support fiat or crypto to create order with different settlement currency</li> |
+| 5.01 | 2025-07-04 | <li>Made payout mccCode required</li> |
+| 5.01 | 2025-09-03 | <li>Added additional error codes</li> |
+| 5.01 | 2025-09-09 | <li>Added `remarks` field in `/v5/bybitpay/create_pay` and `/v5/bybitpay/pay_result` APIs</li> |
+
+---
+
 ## Overview
 
 QR Payment is a one-time payment method where users scan a merchant-generated QR code to complete payment through the Bybit App.
