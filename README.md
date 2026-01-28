@@ -86,4 +86,44 @@ Ensure you have set the `GIT_USER` environment variable before trying to deploy.
 yarn deploy
 ```
 
+### Documentation Sync Workflow
+
+This project includes an automated workflow for syncing documentation from Lark wiki and deploying to GitHub Pages.
+
+#### Using Claude Code (Recommended)
+
+Tell Claude Code to sync and deploy:
+
+```
+同步 <Lark_URL> 并部署到远程
+```
+
+Claude will automatically:
+1. Fetch the latest documentation from Lark
+2. Compare with local files and identify differences
+3. Update all changed files
+4. Commit and push to GitHub
+5. Deploy to GitHub Pages (if token provided)
+
+See [SKILL-sync-deploy.md](./SKILL-sync-deploy.md) for detailed workflow documentation.
+
+#### Using the Script Manually
+
+```bash
+# Basic sync (no deploy)
+./scripts/sync-lark-and-deploy.sh --url "<lark_url>"
+
+# Sync and deploy
+./scripts/sync-lark-and-deploy.sh --url "<lark_url>" --token "<github_token>"
+
+# Custom documentation path
+./scripts/sync-lark-and-deploy.sh --url "<lark_url>" --path "./docs/custom-path"
+```
+
+#### GitHub Actions Auto-Deployment
+
+Every push to `master` branch automatically deploys to GitHub Pages via GitHub Actions.
+
+Configuration: [.github/workflows/deploy.yml](./.github/workflows/deploy.yml)
+
 
