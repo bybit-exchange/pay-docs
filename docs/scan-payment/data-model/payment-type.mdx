@@ -7,6 +7,11 @@ sidebar_position: 7.1
 |:----- |:-----|------ |
 |E_COMMERCE|string|Bybit QR Pay for e-commerce|
 |E_COMMERCE_REFUND|string|Bybit QR Pay refund for e-commerce|
-|QR_PAY|string|Bybit QR Pay for standard QR code pay|
-|QR_PAY_REFUND|string|Bybit QR Pay refund for standard QR code pay|
+|~~QR_PAY~~|~~string~~|~~Bybit QR Pay for standard QR code pay~~ **Not supported**|
+|~~QR_PAY_REFUND~~|~~string~~|~~Bybit QR Pay refund for standard QR code pay~~ **Not supported**|
 |MERCHANT_PAYOUT|string|Bybit pay payout for merchant|
+|BROKER_PREFUND|string|Broker prefund order for fiat-crypto conversion|
+
+:::warning QR_PAY Not Supported
+`QR_PAY` and `QR_PAY_REFUND` payment types are currently not supported by the API. Use `E_COMMERCE` for payment and `E_COMMERCE_REFUND` for refund operations.
+:::
