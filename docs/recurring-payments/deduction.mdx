@@ -21,7 +21,7 @@ Execute automatic deduction from user's account using a signed agreement. This i
 | agreement_type | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
 | agreement_no | string | **Yes** | Platform agreement number |
 | out_trade_no | string | **Yes** | Merchant order number (unique) |
-| scene_code | string | **Yes** | [Scene code](appendix#scene-codes) |
+| scene_code | string | **Yes** | [Scene code](appendix#scene-codes) - Supports 17 scenarios including TAXI, PARKING, SUBSCRIPTION, FOOD, ENTERTAINMENT, EDUCATION, etc. |
 | amount | object | **Yes** | Deduction amount |
 | amount.total | string | **Yes** | Amount (minimum unit) |
 | amount.currency | string | **Yes** | Currency code |
@@ -52,22 +52,22 @@ Execute automatic deduction from user's account using a signed agreement. This i
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| code | string | Response code |
-| message | string | Response message |
-| data | object | Response data |
-| data.order_no | string | Platform order number |
-| data.trade_no | string | Platform trade number |
-| data.out_trade_no | string | Merchant order number |
-| data.status | string | Transaction status: `PROCESSING` / `SUCCESS` / `FAILED` / `TIMEOUT` |
-| data.amount | object | Requested amount |
-| data.crypto_payment | object | Actual crypto payment info (for fiat orders) |
-| data.crypto_payment.currency | string | Cryptocurrency (e.g., USDT) |
-| data.crypto_payment.amount | string | Cryptocurrency amount |
-| data.crypto_payment.chain | string | Chain network |
-| data.crypto_payment.exchange_rate | string | Exchange rate |
-| data.crypto_payment.rate_time | string | Rate lock time |
-| data.pay_time | string | Payment time (on success) |
-| data.failure_reason | string | Failure reason (on failure) |
+| retCode | int | Response code |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.order_no | string | Platform order number |
+| result.trade_no | string | Platform trade number |
+| result.out_trade_no | string | Merchant order number |
+| result.status | string | Transaction status: `PROCESSING` / `SUCCESS` / `FAILED` / `TIMEOUT` |
+| result.amount | object | Requested amount |
+| result.crypto_payment | object | Actual crypto payment info (for fiat orders) |
+| result.crypto_payment.currency | string | Cryptocurrency (e.g., USDT) |
+| result.crypto_payment.amount | string | Cryptocurrency amount |
+| result.crypto_payment.chain | string | Chain network |
+| result.crypto_payment.exchange_rate | string | Exchange rate |
+| result.crypto_payment.rate_time | string | Rate lock time |
+| result.pay_time | string | Payment time (on success) |
+| result.failure_reason | string | Failure reason (on failure) |
 
 ---
 
@@ -159,9 +159,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "order_no": "ORD202601070001",
     "trade_no": "PAY202601070001",
     "out_trade_no": "ORDER20260107001",
@@ -181,9 +181,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "order_no": "ORD202601070002",
     "trade_no": "PAY202601070002",
     "out_trade_no": "ORDER20260107002",
@@ -209,9 +209,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "order_no": "ORD202601070003",
     "trade_no": "PAY202601070003",
     "out_trade_no": "ORDER20260107003",
@@ -230,9 +230,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "order_no": "ORD202601070004",
     "trade_no": "PAY202601070004",
     "out_trade_no": "ORDER20260107004",

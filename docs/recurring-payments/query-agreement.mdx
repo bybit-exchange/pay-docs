@@ -1,7 +1,7 @@
 ---
 title: Query Agreement API
 sidebar_label: Query Agreement
-sidebar_position: 7
+sidebar_position: 8
 ---
 
 ## HTTP Request
@@ -32,18 +32,19 @@ Either `agreement_no` or `external_agreement_no` must be provided.
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| code | string | Response code |
-| data | object | Response data |
-| data.agreement_no | string | Platform agreement number |
-| data.external_agreement_no | string | Merchant agreement number |
-| data.user_id | string | Platform user ID |
-| data.merchant_user_id | string | Merchant-side user ID |
-| data.status | string | Agreement status |
-| data.sign_time | string | Sign time |
-| data.valid_time | string | Validity period |
-| data.single_limit | object | Single transaction limit |
-| data.period_limits | array | Period limits list |
-| data.used_quota | object | Used quota |
+| retCode | int | Response code |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.agreement_no | string | Platform agreement number |
+| result.external_agreement_no | string | Merchant agreement number |
+| result.user_id | string | Platform user ID |
+| result.merchant_user_id | string | Merchant-side user ID |
+| result.status | string | Agreement status |
+| result.sign_time | string | Sign time |
+| result.valid_time | string | Validity period |
+| result.single_limit | object | Single transaction limit |
+| result.period_limits | array | Period limits list |
+| result.used_quota | object | Used quota |
 
 ---
 
@@ -64,9 +65,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "agreement_no": "AGR202601070001",
     "external_agreement_no": "MERCHANT_AGR_001",
     "user_id": "U_123456789",

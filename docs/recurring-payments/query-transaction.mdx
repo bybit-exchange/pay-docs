@@ -1,7 +1,7 @@
 ---
 title: Query Transaction API
 sidebar_label: Query Transaction
-sidebar_position: 9
+sidebar_position: 10
 ---
 
 ## HTTP Request
@@ -36,29 +36,31 @@ Query single deduction transaction or refund record details.
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| code | string | Response code |
-| data | object | Transaction details |
-| data.trade_no | string | Platform trade number |
-| data.out_trade_no | string | Merchant order number |
-| data.status | string | Transaction status |
-| data.amount | object | Requested amount |
-| data.crypto_payment | object | Actual crypto payment (for fiat orders) |
-| data.pay_time | string | Payment time |
-| data.refund_amount | object | Refunded amount |
+| retCode | int | Response code |
+| retMsg | string | Response message |
+| result | object | Transaction details |
+| result.trade_no | string | Platform trade number |
+| result.out_trade_no | string | Merchant order number |
+| result.status | string | Transaction status |
+| result.amount | object | Requested amount |
+| result.crypto_payment | object | Actual crypto payment (for fiat orders) |
+| result.pay_time | string | Payment time |
+| result.refund_amount | object | Refunded amount |
 
 ## Response Parameters (Refund Record)
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| code | string | Response code |
-| data | object | Refund details |
-| data.refund_no | string | Platform refund number |
-| data.out_refund_no | string | Merchant refund number |
-| data.trade_no | string | Original trade number |
-| data.status | string | Refund status: `PROCESSING` / `SUCCESS` / `FAILED` |
-| data.refund_amount | object | Refund amount |
-| data.refund_time | string | Refund success time |
-| data.failure_reason | string | Failure reason |
+| retCode | int | Response code |
+| retMsg | string | Response message |
+| result | object | Refund details |
+| result.refund_no | string | Platform refund number |
+| result.out_refund_no | string | Merchant refund number |
+| result.trade_no | string | Original trade number |
+| result.status | string | Refund status: `PROCESSING` / `SUCCESS` / `FAILED` |
+| result.refund_amount | object | Refund amount |
+| result.refund_time | string | Refund success time |
+| result.failure_reason | string | Failure reason |
 
 ---
 
@@ -94,9 +96,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "trade_no": "PAY202601070002",
     "out_trade_no": "ORDER20260107002",
     "status": "SUCCESS",
@@ -126,9 +128,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "refund_no": "RF202601070001",
     "out_refund_no": "REFUND20260107001",
     "trade_no": "PAY202601070001",

@@ -20,10 +20,10 @@ Create a sign request to initiate the agreement signing process. Returns a QR co
 | user_id | string | **Yes** | Platform user ID |
 | agreement_type | string | **Yes** | Sign type: `CYCLE` (periodic) / `NON_CYCLE` (non-periodic) / `SINGLE` (one-time) |
 | merchant_user_id | string | **Yes** | Merchant-side user ID (for mapping) |
-| scene_code | string | **Yes** | [Scene code](appendix#scene-codes): TAXI, PARKING, SUBSCRIPTION, etc. |
-| product_code | string | No | Product code (assigned by platform) |
+| scene_code | string | **Yes** | [Scene code](appendix#scene-codes) - Supports 17 scenarios including TAXI, PARKING, SUBSCRIPTION, FOOD, ENTERTAINMENT, EDUCATION, etc. |
+| product_code | string | **Yes** | Product code (assigned by platform) |
 | external_agreement_no | string | **Yes** | Merchant agreement number (unique) |
-| sign_valid_time | string | No | Sign validity period (ISO8601 format) |
+| sign_valid_time | string | No | Sign validity period (ISO8601 format, must be at least 24 hours after current time) |
 | single_limit | object | No | Single transaction limit |
 | single_limit.amount | string | Conditional | Limit amount (required if single_limit provided) |
 | single_limit.currency | string | Conditional | Currency code |
@@ -38,7 +38,7 @@ Create a sign request to initiate the agreement signing process. Returns a QR co
 | notify_url | string | **Yes** | Sign result webhook URL |
 | return_url | string | No | Redirect URL after sign completion |
 | sign_expire_minutes | int | No | Sign link validity (minutes), default 30, max 1440 |
-| extra_params | object | No | Extension parameters (passed through) |
+| extra_params | string | No | Extension parameters (JSON string, passed through) |
 
 ---
 
@@ -46,14 +46,14 @@ Create a sign request to initiate the agreement signing process. Returns a QR co
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| code | string | Response code |
-| message | string | Response message |
-| data | object | Response data |
-| data.sign_order_id | string | Platform sign order number |
-| data.sign_url | string | Sign page URL (for H5 redirect) |
-| data.qr_code | string | Sign QR code content (for App scan) |
-| data.qr_code_url | string | Sign QR code image URL |
-| data.expire_time | string | Sign link expiration time |
+| retCode | int | Response code |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.sign_order_id | string | Platform sign order number |
+| result.sign_url | string | Sign page URL (for H5 redirect) |
+| result.qr_code | string | Sign QR code content (for App scan) |
+| result.qr_code_url | string | Sign QR code image URL |
+| result.expire_time | string | Sign link expiration time |
 
 ---
 
@@ -137,9 +137,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "sign_order_id": "AGR202601070001",
     "sign_url": "https://pay.bybit.com/sign?token=xxx",
     "qr_code": "https://pay.bybit.com/sign?token=xxx",
@@ -153,9 +153,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "PARAM_ERROR",
-  "message": "Parameter error: external_agreement_no already exists",
-  "data": null
+  "retCode": 40001,
+  "retMsg": "Parameter error: external_agreement_no already exists",
+  "result": null
 }
 ```
 

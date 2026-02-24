@@ -24,9 +24,9 @@ All API requests must include the following headers:
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     // Business data
   }
 }
@@ -36,9 +36,9 @@ All API requests must include the following headers:
 
 ```json
 {
-  "code": "ERROR_CODE",
-  "message": "Error description",
-  "data": null
+  "retCode": 40001,
+  "retMsg": "Error description",
+  "result": null
 }
 ```
 
@@ -46,9 +46,9 @@ All API requests must include the following headers:
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| code | string | Response code, `SUCCESS` indicates success |
-| message | string | Response message |
-| data | object/null | Response data, `null` on failure |
+| retCode | int | Response code, `20000` indicates success |
+| retMsg | string | Response message |
+| result | object/null | Response data, `null` on failure |
 
 ---
 
@@ -56,7 +56,7 @@ All API requests must include the following headers:
 
 | HTTP Status | Description | Scenario |
 |:------------|:------------|:---------|
-| 200 | Success | Business success or failure (distinguished by `code`) |
+| 200 | Success | Business success or failure (distinguished by `retCode`) |
 | 400 | Bad Request | Parameter format error, missing required field |
 | 401 | Unauthorized | Token invalid or expired |
 | 403 | Forbidden | IP not in whitelist, no API permission |
@@ -206,9 +206,9 @@ HTTP status `429` with body:
 
 ```json
 {
-  "code": "RATE_LIMIT_EXCEEDED",
-  "message": "Too many requests, please try again later",
-  "data": {
+  "retCode": 42900,
+  "retMsg": "Too many requests, please try again later",
+  "result": {
     "retry_after": 1000
   }
 }
