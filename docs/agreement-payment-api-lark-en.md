@@ -1,10 +1,16 @@
 # Agreement Payment API Documentation
 
-**Document Version**: v2.2
+**Document Version**: v2.8
 
-**Update Date**: 2026-01-13
+**Update Date**: 2026-02-11
 
 **Update History**:
+- v2.8: Expanded agreement pay API supported scene codes from 6 to 17 (added FOOD/ENTERTAINMENT/EDUCATION/MEMBERSHIP/RENT/FITNESS/TELECOM/CLOUD/INSURANCE/LOAN/OTHERS), fully consistent with sign API scene codes
+- v2.7: Fixed unsign API failure response example field names (code→retCode, message→retMsg); Fixed rate limiting response format field names
+- v2.6: Fixed failure response format field names (code→retCode, message→retMsg); Fixed extra_params type description (object→string JSON string); Adjusted section order (3.5 deduction refund API moved to correct position)
+- v2.5: Fixed success response code from 0 to 20000 (aligned with ResultCode.SUCCESS); Fixed success response message from "success" to "Success"; All API response examples fully consistent with actual code implementation
+- v2.4: Fixed response format field names (code→retCode, message→retMsg, data→result); Fixed error code numbers (UNAUTHORIZED=40002, PARAM_INVALID=40001); Removed redundant user_id field from sign request example; Added NON_CYCLE type description; All API examples fully aligned with Proto definition
+- v2.3: Fixed chapter numbering (3.3-3.9), refund API number adjusted to 3.5; Added agreement_no and external_agreement_no fields in sign request response; Added sign_valid_time validation requirement (must be at least 24 hours after current time); Optimized product_code field description; Chinese and English documentation fully aligned
 - v2.2: Webhook signature mechanism optimized: Signature parameters moved from request body to HTTP Headers (X-Signature/X-Timestamp/X-Nonce/X-Sign-Type), fresh signature generated for each send/retry, request body remains pure JSON; Fixed document TOC chapter numbering (4.7-4.9)
 - v2.1: Internal optimization of deduction API: Support user-defined limit verification (users can set single/daily limits through cashier), downstream payment uses user-configured paymentType (payNow/payLater)
 - v2.0: Async notification parameter table supplemented with notify_id/notify_time common fields (4.1-4.6); Deduction API supplemented with fiat currency order request example (3.4); Webhook section added complete Java/Python/Node.js handling code examples (4.7); Signature algorithm section added complete cURL request example (5.4)
@@ -45,12 +51,12 @@
   - [3.1 Sign Request API](#31-sign-request-api)
   - [3.2 Unsign API](#32-unsign-api)
   - [3.3 Agreement Deduction API (Core)](#33-agreement-deduction-api-core)
-  - [3.3.1 Pay with Sign API (One-Step)](#331-pay-with-sign-api-one-step)
-  - [3.4 Sign Status Query API](#34-sign-status-query-api)
-  - [3.5 Agreement List Query API](#35-agreement-list-query-api)
-  - [3.6 Transaction/Refund Query API (Single)](#36-transactionrefund-query-api-single)
-  - [3.7 Deduction Transaction List API](#37-deduction-transaction-list-api)
-  - [3.8 Deduction Refund API](#38-deduction-refund-api)
+  - [3.4 Pay with Sign API (One-Step)](#34-pay-with-sign-api-one-step)
+  - [3.5 Deduction Refund API](#35-deduction-refund-api)
+  - [3.6 Sign Status Query API](#36-sign-status-query-api)
+  - [3.7 Agreement List Query API](#37-agreement-list-query-api)
+  - [3.8 Transaction/Refund Query API (Single)](#38-transactionrefund-query-api-single)
+  - [3.9 Deduction Transaction List API](#39-deduction-transaction-list-api)
 - [4. Async Notifications](#4-async-notifications)
   - [4.1 Sign Result Notification](#41-sign-result-notification)
   - [4.2 Deduction Result Notification](#42-deduction-result-notification)
@@ -359,9 +365,9 @@ All API requests must include the following request headers:
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     // Business data
   }
 }
@@ -371,9 +377,9 @@ All API requests must include the following request headers:
 
 ```json
 {
-  "code": "ERROR_CODE",
-  "message": "Error description",
-  "data": null
+  "retCode": 40000,
+  "retMsg": "Error description",
+  "result": null
 }
 ```
 
@@ -381,9 +387,9 @@ All API requests must include the following request headers:
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| code | string | Response code, SUCCESS indicates success, others are error codes |
-| message | string | Response message, "ok" on success, error description on failure |
-| data | object/null | Response data, null on failure |
+| retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message, "Success" on success, error description on failure |
+| result | object/null | Response data, null on failure |
 
 ### 2.3 HTTP Status Code Mapping
 
@@ -525,9 +531,9 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ```json
 {
-  "code": "RATE_LIMIT_EXCEEDED",
-  "message": "Too many requests, please try again later",
-  "data": {
+  "retCode": 42900,
+  "retMsg": "Too many requests, please try again later",
+  "result": {
     "retry_after": 1000
   }
 }
@@ -561,9 +567,9 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
 | merchant_user_id | string | Yes | Merchant-side user ID (user identifier in merchant system, used for establishing mapping) |
 | scene_code | string | Yes | Scene code (see 7.1 Scene Code List): TAXI/PARKING/SUBSCRIPTION/UTILITY/TOLL/TRANSIT/FOOD/ENTERTAINMENT/EDUCATION/MEMBERSHIP/RENT/FITNESS/TELECOM/CLOUD/INSURANCE/LOAN/OTHERS |
-| product_code | string | No | Product code, assigned by platform (optional) |
+| product_code | string | Yes | Product code, assigned by platform |
 | external_agreement_no | string | Yes | Merchant agreement number (unique on merchant side) |
-| sign_valid_time | string | No | Sign validity period, ISO8601 format |
+| sign_valid_time | string | No | Sign validity period, ISO8601 format (UTC timezone), **must be at least 24 hours after current time** |
 | single_limit | object | No | Single transaction limit configuration |
 | single_limit.amount | string | No | Limit amount (required when passing single_limit) |
 | single_limit.currency | string | No | Currency code (required when passing single_limit) |
@@ -578,7 +584,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | notify_url | string | Yes | Sign result async notification URL |
 | return_url | string | No | Redirect URL after sign completion (can be omitted for App scan scenario) |
 | sign_expire_minutes | int | No | Sign link validity period (minutes), default 30, max 1440 (24 hours) |
-| extra_params | object | No | Extension parameters (JSON object, used for passing business custom data, platform passes through without processing) |
+| extra_params | string | No | Extension parameters (JSON string, used for passing business custom data, platform passes through without processing) |
 
 #### Request Example
 
@@ -617,22 +623,22 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| code | string | Response code, SUCCESS/FAIL |
-| message | string | Response message |
-| data | object | Response data |
-| data.sign_order_id | string | Platform sign order number |
-| data.sign_url | string | Sign page URL (for H5 redirect) |
-| data.qr_code | string | Sign QR code content (for user App scan) |
-| data.qr_code_url | string | Sign QR code image URL (can be displayed directly) |
-| data.expire_time | string | Sign link/QR code expiration time |
+| retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.sign_order_id | string | Platform sign order number |
+| result.sign_url | string | Sign page URL (for H5 redirect) |
+| result.qr_code | string | Sign QR code content (for user App scan) |
+| result.qr_code_url | string | Sign QR code image URL (can be displayed directly) |
+| result.expire_time | string | Sign link/QR code expiration time |
 
 #### Response Example (Success)
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "sign_order_id": "AGR202312230001",
     "sign_url": "https://pay.example.com/sign?token=xxx",
     "qr_code": "https://pay.example.com/sign?token=xxx",
@@ -646,9 +652,9 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ```json
 {
-  "code": "PARAM_ERROR",
-  "message": "Parameter error: external_agreement_no already exists",
-  "data": null
+  "retCode": 40001,
+  "retMsg": "Parameter error: external_agreement_no already exists",
+  "result": null
 }
 ```
 
@@ -689,20 +695,20 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| code | string | Response code |
-| message | string | Response message |
-| data | object | Response data |
-| data.agreement_no | string | Platform agreement number |
-| data.status | string | Status: UNSIGNED |
-| data.unsign_time | string | Unsign time |
+| retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.agreement_no | string | Platform agreement number |
+| result.status | string | Status: UNSIGNED |
+| result.unsign_time | string | Unsign time |
 
 #### Response Example (Success)
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "agreement_no": "AGR202312230001",
     "eventType": "UNSIGNED",
     "status": "UNSIGNED",
@@ -715,9 +721,9 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ```json
 {
-  "code": "AGREEMENT_NOT_EXIST",
-  "message": "Agreement does not exist",
-  "data": null
+  "retCode": 40003,
+  "retMsg": "Agreement does not exist",
+  "result": null
 }
 ```
 
@@ -725,15 +731,15 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ```json
 {
-  "code": "AGREEMENT_UNSIGNED",
-  "message": "Agreement already unsigned, no need to repeat",
-  "data": null
+  "retCode": 40004,
+  "retMsg": "Agreement already unsigned, no need to repeat",
+  "result": null
 }
 ```
 
 ---
 
-### 3.4 Agreement Deduction API (Core)
+### 3.3 Agreement Deduction API (Core)
 
 **Request Path**: POST /v5/bybitpay/agreement/pay
 
@@ -775,25 +781,25 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| code | string | Response code |
-| message | string | Response message |
-| data | object | Response data |
-| data.order_no | string | Platform order number (internal use) |
-| data.trade_no | string | Platform trade number (external display) |
-| data.out_trade_no | string | Merchant order number |
-| data.status | string | Transaction status: PROCESSING/SUCCESS/FAILED/TIMEOUT |
-| data.amount | object | Merchant requested amount (same as request) |
-| data.amount.total | string | Amount (minimum unit) |
-| data.amount.currency | string | Currency code |
-| data.amount.currency_type | string | Currency type: FIAT/CRYPTO |
-| data.crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
-| data.crypto_payment.currency | string | Cryptocurrency currency (e.g.: USDT/BTC/ETH) |
-| data.crypto_payment.amount | string | Cryptocurrency amount |
-| data.crypto_payment.chain | string | Chain network (e.g.: TRC20/ERC20) |
-| data.crypto_payment.exchange_rate | string | Exchange rate (1 fiat = ? cryptocurrency) |
-| data.crypto_payment.rate_time | string | Exchange rate lock time |
-| data.pay_time | string | Payment success time (returned on success) |
-| data.failure_reason | string | Failure reason (returned on failure) |
+| retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.order_no | string | Platform order number (internal use) |
+| result.trade_no | string | Platform trade number (external display) |
+| result.out_trade_no | string | Merchant order number |
+| result.status | string | Transaction status: PROCESSING/SUCCESS/FAILED/TIMEOUT |
+| result.amount | object | Merchant requested amount (same as request) |
+| result.amount.total | string | Amount (minimum unit) |
+| result.amount.currency | string | Currency code |
+| result.amount.currency_type | string | Currency type: FIAT/CRYPTO |
+| result.crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
+| result.crypto_payment.currency | string | Cryptocurrency currency (e.g.: USDT/BTC/ETH) |
+| result.crypto_payment.amount | string | Cryptocurrency amount |
+| result.crypto_payment.chain | string | Chain network (e.g.: TRC20/ERC20) |
+| result.crypto_payment.exchange_rate | string | Exchange rate (1 fiat = ? cryptocurrency) |
+| result.crypto_payment.rate_time | string | Exchange rate lock time |
+| result.pay_time | string | Payment success time (returned on success) |
+| result.failure_reason | string | Failure reason (returned on failure) |
 
 #### Request Example (Cryptocurrency Order)
 
@@ -858,9 +864,9 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "order_no": "ORD202312230001",
     "trade_no": "PAY202312230001",
     "out_trade_no": "TAXI20231223001",
@@ -880,9 +886,9 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "order_no": "ORD202312230002",
     "trade_no": "PAY202312230002",
     "out_trade_no": "TAXI20231223002",
@@ -908,9 +914,9 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "order_no": "ORD202312230003",
     "trade_no": "PAY202312230003",
     "out_trade_no": "TAXI20231223003",
@@ -929,9 +935,9 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "order_no": "ORD202312230004",
     "trade_no": "PAY202312230004",
     "out_trade_no": "TAXI20231223004",
@@ -949,7 +955,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ---
 
-### 3.4.1 Pay with Sign API (One-Step)
+### 3.4 Pay with Sign API (One-Step)
 
 **Request Path**: POST /v5/bybitpay/agreement/pay-with-sign
 
@@ -1021,36 +1027,36 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| code | string | Response code |
-| message | string | Response message |
-| data | object | Response data |
-| data.sign_result | object | Sign result (if signing was initiated) |
-| data.sign_result.agreement_no | string | Platform agreement number |
-| data.sign_result.external_agreement_no | string | Merchant agreement number |
-| data.sign_result.sign_order_id | string | Platform sign order number |
-| data.sign_result.status | string | Sign status: INIT/PENDING/SIGNED/FAILED |
-| data.sign_result.sign_time | string | Sign success time (returned on success) |
-| data.sign_result.valid_time | string | Agreement validity period |
-| data.sign_result.sign_url | string | Sign page URL (for H5 redirect) |
-| data.sign_result.qr_code | string | Sign QR code content (for user App scan) |
-| data.sign_result.qr_code_url | string | Sign QR code image URL (can be displayed directly) |
-| data.sign_result.expire_time | string | Sign link/QR code expiration time |
-| data.pay_result | object | Deduction result |
-| data.pay_result.trade_no | string | Platform transaction number |
-| data.pay_result.out_trade_no | string | Merchant order number |
-| data.pay_result.status | string | Transaction status: PROCESSING/SUCCESS/FAILED/TIMEOUT |
-| data.pay_result.amount | object | Merchant requested amount |
-| data.pay_result.amount.total | string | Amount (minimum unit) |
-| data.pay_result.amount.currency | string | Currency code |
-| data.pay_result.amount.currency_type | string | Currency type: FIAT/CRYPTO |
-| data.pay_result.crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat order) |
-| data.pay_result.crypto_payment.currency | string | Cryptocurrency currency |
-| data.pay_result.crypto_payment.amount | string | Cryptocurrency amount |
-| data.pay_result.crypto_payment.chain | string | Chain network |
-| data.pay_result.crypto_payment.exchange_rate | string | Exchange rate |
-| data.pay_result.crypto_payment.rate_time | string | Rate lock time |
-| data.pay_result.pay_time | string | Payment success time (returned on success) |
-| data.pay_result.failure_reason | string | Failure reason (returned on failure) |
+| retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.sign_result | object | Sign result (if signing was initiated) |
+| result.sign_result.agreement_no | string | Platform agreement number |
+| result.sign_result.external_agreement_no | string | Merchant agreement number |
+| result.sign_result.sign_order_id | string | Platform sign order number |
+| result.sign_result.status | string | Sign status: INIT/PENDING/SIGNED/FAILED |
+| result.sign_result.sign_time | string | Sign success time (returned on success) |
+| result.sign_result.valid_time | string | Agreement validity period |
+| result.sign_result.sign_url | string | Sign page URL (for H5 redirect) |
+| result.sign_result.qr_code | string | Sign QR code content (for user App scan) |
+| result.sign_result.qr_code_url | string | Sign QR code image URL (can be displayed directly) |
+| result.sign_result.expire_time | string | Sign link/QR code expiration time |
+| result.pay_result | object | Deduction result |
+| result.pay_result.trade_no | string | Platform transaction number |
+| result.pay_result.out_trade_no | string | Merchant order number |
+| result.pay_result.status | string | Transaction status: PROCESSING/SUCCESS/FAILED/TIMEOUT |
+| result.pay_result.amount | object | Merchant requested amount |
+| result.pay_result.amount.total | string | Amount (minimum unit) |
+| result.pay_result.amount.currency | string | Currency code |
+| result.pay_result.amount.currency_type | string | Currency type: FIAT/CRYPTO |
+| result.pay_result.crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat order) |
+| result.pay_result.crypto_payment.currency | string | Cryptocurrency currency |
+| result.pay_result.crypto_payment.amount | string | Cryptocurrency amount |
+| result.pay_result.crypto_payment.chain | string | Chain network |
+| result.pay_result.crypto_payment.exchange_rate | string | Exchange rate |
+| result.pay_result.crypto_payment.rate_time | string | Rate lock time |
+| result.pay_result.pay_time | string | Payment success time (returned on success) |
+| result.pay_result.failure_reason | string | Failure reason (returned on failure) |
 
 #### Request Example 1: Sign + Pay (First Use)
 
@@ -1107,9 +1113,9 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "sign_result": {
       "agreement_no": null,
       "external_agreement_no": "MERCHANT_AGR_001",
@@ -1175,9 +1181,9 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "sign_result": null,
     "pay_result": {
       "trade_no": "PAY202312230002",
@@ -1304,7 +1310,7 @@ After user completes sign and payment via scanning, system sends async notificat
 
 ---
 
-### 3.5 Sign Status Query API
+### 3.6 Sign Status Query API
 
 **Request Path**: GET /v5/bybitpay/agreement/query
 
@@ -1328,26 +1334,27 @@ GET /v5/bybitpay/agreement/query?merchant_id=M123456789&user_id=U_123456789&agre
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| code | string | Response code |
-| data | object | Response data |
-| data.agreement_no | string | Platform agreement number |
-| data.external_agreement_no | string | Merchant agreement number |
-| data.user_id | string | Platform user ID |
-| data.merchant_user_id | string | Merchant-side user ID |
-| data.status | string | Status: INIT/PENDING/SIGNED/SUSPENDED/UNSIGNED/EXPIRED/FAILED |
-| data.sign_time | string | Sign time |
-| data.valid_time | string | Validity period |
-| data.single_limit | object | Single transaction limit |
-| data.period_limits | array | Period limits list (supports multiple period types) |
-| data.used_quota | object | Used quota |
+| retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.agreement_no | string | Platform agreement number |
+| result.external_agreement_no | string | Merchant agreement number |
+| result.user_id | string | Platform user ID |
+| result.merchant_user_id | string | Merchant-side user ID |
+| result.status | string | Status: INIT/PENDING/SIGNED/SUSPENDED/UNSIGNED/EXPIRED/FAILED |
+| result.sign_time | string | Sign time |
+| result.valid_time | string | Validity period |
+| result.single_limit | object | Single transaction limit |
+| result.period_limits | array | Period limits list (supports multiple period types) |
+| result.used_quota | object | Used quota |
 
 #### Response Example
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "agreement_no": "AGR202312230001",
     "external_agreement_no": "MERCHANT_AGR_001",
     "user_id": "U_123456789",
@@ -1381,7 +1388,7 @@ GET /v5/bybitpay/agreement/query?merchant_id=M123456789&user_id=U_123456789&agre
 
 ---
 
-### 3.6 Agreement List Query API
+### 3.7 Agreement List Query API
 
 **Request Path**: GET /v5/bybitpay/agreement/list
 
@@ -1393,7 +1400,7 @@ GET /v5/bybitpay/agreement/query?merchant_id=M123456789&user_id=U_123456789&agre
 | --- | --- | --- | --- |
 | merchant_id | string | Yes | Merchant ID |
 | user_id | string | No | Platform user ID (filter agreements for specified user) |
-| agreement_type | string | No | Sign type: CYCLE/NON_CYCLE/SINGLE (query all if not passed) |
+| agreement_type | string | No | Sign type: CYCLE/SINGLE (query all if not passed) |
 | status | string | No | Agreement status filter: INIT/PENDING/SIGNED/SUSPENDED/UNSIGNED/EXPIRED/FAILED |
 | scene_code | string | No | Scene code filter |
 | start_time | string | No | Sign start time (ISO8601 format) |
@@ -1411,29 +1418,30 @@ GET /v5/bybitpay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&p
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| code | string | Response code |
-| data | object | Response data |
-| data.total | int | Total record count |
-| data.page_no | int | Current page number |
-| data.page_size | int | Page size |
-| data.list | array | Agreement list |
-| data.list[].agreement_no | string | Platform agreement number |
-| data.list[].external_agreement_no | string | Merchant agreement number |
-| data.list[].user_id | string | Platform user ID |
-| data.list[].merchant_user_id | string | Merchant-side user ID |
-| data.list[].agreement_type | string | Sign type |
-| data.list[].scene_code | string | Scene code |
-| data.list[].status | string | Agreement status |
-| data.list[].sign_time | string | Sign time |
-| data.list[].valid_time | string | Validity period |
+| retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.total | int | Total record count |
+| result.page_no | int | Current page number |
+| result.page_size | int | Page size |
+| result.list | array | Agreement list |
+| result.list[].agreement_no | string | Platform agreement number |
+| result.list[].external_agreement_no | string | Merchant agreement number |
+| result.list[].user_id | string | Platform user ID |
+| result.list[].merchant_user_id | string | Merchant-side user ID |
+| result.list[].agreement_type | string | Sign type |
+| result.list[].scene_code | string | Scene code |
+| result.list[].status | string | Agreement status |
+| result.list[].sign_time | string | Sign time |
+| result.list[].valid_time | string | Validity period |
 
 #### Response Example
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "total": 100,
     "page_no": 1,
     "page_size": 20,
@@ -1456,7 +1464,7 @@ GET /v5/bybitpay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&p
 
 ---
 
-### 3.7 Transaction/Refund Query API (Single)
+### 3.8 Transaction/Refund Query API (Single)
 
 **Request Path**: GET /v5/bybitpay/agreement/pay/query
 
@@ -1491,37 +1499,39 @@ GET /v5/bybitpay/agreement/pay/query?merchant_id=M123456789&user_id=U_123456789&
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| code | string | Response code |
-| data | object | Transaction details |
-| data.trade_no | string | Platform trade number |
-| data.out_trade_no | string | Merchant order number |
-| data.status | string | Transaction status |
-| data.amount | object | Merchant requested amount |
-| data.crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
-| data.pay_time | string | Payment time |
-| data.refund_amount | object | Refunded amount |
+| retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message |
+| result | object | Transaction details |
+| result.trade_no | string | Platform trade number |
+| result.out_trade_no | string | Merchant order number |
+| result.status | string | Transaction status |
+| result.amount | object | Merchant requested amount |
+| result.crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
+| result.pay_time | string | Payment time |
+| result.refund_amount | object | Refunded amount |
 
 #### Response Parameters (Refund Record record_type=REFUND)
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| code | string | Response code |
-| data | object | Refund details |
-| data.refund_no | string | Platform refund number |
-| data.out_refund_no | string | Merchant refund number |
-| data.trade_no | string | Original trade number |
-| data.status | string | Refund status: PROCESSING/SUCCESS/FAILED |
-| data.refund_amount | object | Refund amount |
-| data.refund_time | string | Refund success time |
-| data.failure_reason | string | Failure reason |
+| retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message |
+| result | object | Refund details |
+| result.refund_no | string | Platform refund number |
+| result.out_refund_no | string | Merchant refund number |
+| result.trade_no | string | Original trade number |
+| result.status | string | Refund status: PROCESSING/SUCCESS/FAILED |
+| result.refund_amount | object | Refund amount |
+| result.refund_time | string | Refund success time |
+| result.failure_reason | string | Failure reason |
 
 #### Response Example (Deduction Transaction)
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "trade_no": "PAY202312230002",
     "out_trade_no": "TAXI20231223002",
     "status": "SUCCESS",
@@ -1551,9 +1561,9 @@ GET /v5/bybitpay/agreement/pay/query?merchant_id=M123456789&user_id=U_123456789&
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "refund_no": "RF202312230001",
     "out_refund_no": "TAXI_RF20231223001",
     "trade_no": "PAY202312230001",
@@ -1571,7 +1581,7 @@ GET /v5/bybitpay/agreement/pay/query?merchant_id=M123456789&user_id=U_123456789&
 
 ---
 
-### 3.8 Deduction Transaction List API
+### 3.9 Deduction Transaction List API
 
 **Request Path**: GET /v5/bybitpay/agreement/pay/list
 
@@ -1602,45 +1612,47 @@ GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&a
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| code | string | Response code |
-| data | object | Response data |
-| data.total | int | Total record count |
-| data.page_no | int | Current page number |
-| data.page_size | int | Page size |
-| data.list | array | Transaction list |
-| data.list[].trade_no | string | Platform trade number |
-| data.list[].out_trade_no | string | Merchant order number |
-| data.list[].status | string | Transaction status |
-| data.list[].amount | object | Merchant requested amount |
-| data.list[].crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
-| data.list[].pay_time | string | Payment time |
-| data.list[].refund_amount | object | Refunded amount |
+| retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.total | int | Total record count |
+| result.page_no | int | Current page number |
+| result.page_size | int | Page size |
+| result.list | array | Transaction list |
+| result.list[].trade_no | string | Platform trade number |
+| result.list[].out_trade_no | string | Merchant order number |
+| result.list[].status | string | Transaction status |
+| result.list[].amount | object | Merchant requested amount |
+| result.list[].crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
+| result.list[].pay_time | string | Payment time |
+| result.list[].refund_amount | object | Refunded amount |
 
 #### Response Parameters (Refund Record record_type=REFUND)
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| code | string | Response code |
-| data | object | Response data |
-| data.total | int | Total record count |
-| data.page_no | int | Current page number |
-| data.page_size | int | Page size |
-| data.list | array | Refund list |
-| data.list[].refund_no | string | Platform refund number |
-| data.list[].out_refund_no | string | Merchant refund number |
-| data.list[].trade_no | string | Original trade number |
-| data.list[].status | string | Refund status: PROCESSING/SUCCESS/FAILED |
-| data.list[].refund_amount | object | Refund amount |
-| data.list[].refund_time | string | Refund success time |
-| data.list[].failure_reason | string | Failure reason (returned on failure) |
+| retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.total | int | Total record count |
+| result.page_no | int | Current page number |
+| result.page_size | int | Page size |
+| result.list | array | Refund list |
+| result.list[].refund_no | string | Platform refund number |
+| result.list[].out_refund_no | string | Merchant refund number |
+| result.list[].trade_no | string | Original trade number |
+| result.list[].status | string | Refund status: PROCESSING/SUCCESS/FAILED |
+| result.list[].refund_amount | object | Refund amount |
+| result.list[].refund_time | string | Refund success time |
+| result.list[].failure_reason | string | Failure reason (returned on failure) |
 
 #### Response Example (Deduction Transaction record_type=PAY)
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "total": 50,
     "page_no": 1,
     "page_size": 20,
@@ -1677,9 +1689,9 @@ GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&a
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "total": 10,
     "page_no": 1,
     "page_size": 20,
@@ -1704,7 +1716,7 @@ GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&a
 
 ---
 
-### 3.9 Deduction Refund API
+### 3.5 Deduction Refund API
 
 **Request Path**: POST /v5/bybitpay/agreement/refund
 
@@ -1752,24 +1764,24 @@ GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&a
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| code | string | Response code |
-| message | string | Response message |
-| data | object | Response data |
-| data.refund_no | string | Platform refund number |
-| data.out_refund_no | string | Merchant refund number |
-| data.trade_no | string | Original trade number |
-| data.status | string | Refund status: PROCESSING/SUCCESS/FAILED |
-| data.refund_amount | object | Refund amount |
-| data.refund_time | string | Refund success time (returned on success) |
-| data.failure_reason | string | Failure reason (returned on failure) |
+| retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.refund_no | string | Platform refund number |
+| result.out_refund_no | string | Merchant refund number |
+| result.trade_no | string | Original trade number |
+| result.status | string | Refund status: PROCESSING/SUCCESS/FAILED |
+| result.refund_amount | object | Refund amount |
+| result.refund_time | string | Refund success time (returned on success) |
+| result.failure_reason | string | Failure reason (returned on failure) |
 
 #### Response Example (Success)
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "refund_no": "RF202312230001",
     "out_refund_no": "TAXI_RF20231223001",
     "trade_no": "PAY202312230001",
@@ -1789,9 +1801,9 @@ GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&a
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "refund_no": "RF202312230002",
     "out_refund_no": "TAXI_RF20231223002",
     "trade_no": "PAY202312230001",
@@ -1810,9 +1822,9 @@ GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&a
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "refund_no": "RF202312230003",
     "out_refund_no": "TAXI_RF20231223003",
     "trade_no": "PAY202312230001",
@@ -1907,7 +1919,7 @@ All Webhook notifications use a unified three-part structure:
 | --- | --- | --- |
 | agreementNo | string | Platform agreement number |
 | externalAgreementNo | string | Merchant agreement number |
-| agreementType | string | Sign type: CYCLE/NON_CYCLE/SINGLE |
+| agreementType | string | Sign type: CYCLE/SINGLE |
 | status | string | Sign status: SIGNED/FAILED |
 | userId | string | Platform user ID |
 | merchantUserId | string | Merchant-side user ID |
@@ -2246,7 +2258,7 @@ All Webhook notifications use a unified three-part structure:
 | --- | --- | --- |
 | agreementNo | string | Platform agreement number |
 | externalAgreementNo | string | Merchant agreement number |
-| agreementType | string | Sign type: CYCLE/NON_CYCLE/SINGLE |
+| agreementType | string | Sign type: CYCLE/SINGLE |
 | status | string | Agreement status: TIMEOUT |
 | userId | string | Platform user ID |
 | merchantUserId | string | Merchant-side user ID |
@@ -2927,9 +2939,9 @@ curl -X POST "${API_HOST}${API_PATH}" \
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "trade_no": "PAY202312240001",
     "out_trade_no": "TAXI20231224001",
     "status": "PROCESSING",
@@ -3082,7 +3094,7 @@ MIIEvgIBADANBgkq...(Base64 encoded content)
 | 139001010 | USER_ID_MISMATCH | User ID mismatch | User ID mismatch | Check if user ID matches the one used at sign time |
 | 139001011 | AGREEMENT_USER_MISMATCH | Agreement user mismatch | Agreement user mismatch | Check binding relationship between user and agreement |
 | 139001012 | SIGN_URL_EXPIRED | Sign URL has expired | Sign URL has expired | Re-initiate sign request to get new link |
-| 139001013 | AGREEMENT_TYPE_MISMATCH | Agreement type mismatch | Agreement type mismatch | Check if agreement type (CYCLE/NON_CYCLE/SINGLE) is correct |
+| 139001013 | AGREEMENT_TYPE_MISMATCH | Agreement type mismatch | Agreement type mismatch | Check if agreement type (CYCLE/SINGLE) is correct |
 
 ### 6.3 Transaction Related Error Codes
 
@@ -3137,6 +3149,41 @@ MIIEvgIBADANBgkq...(Base64 encoded content)
 | 50000 | SYSTEM_ERROR | System error | System error | Please retry later or contact technical support |
 | 50001 | SERVICE_UNAVAILABLE | Service unavailable | Service unavailable | System under maintenance, please retry later |
 | 50002 | DOWNSTREAM_ERROR | Downstream service error | Downstream service error | Please retry later or contact technical support |
+
+### 6.9 Downstream Error Code Mapping
+
+**Description**: The system maps downstream transaction-service error codes to system error codes, while preserving original error information in the `failureReason` field for troubleshooting.
+
+#### Error Information Format
+
+The error information in the response contains two parts:
+- `retCode`: System error code (numeric type)
+- `retMsg`: Detailed error message, format: `{System error description} (downstream code={downstream error code}, msg={downstream error message})`
+
+**Example**:
+```json
+{
+  "retCode": 139002003,
+  "retMsg": "Insufficient balance (downstream code=120100006, msg=可用余额不足)",
+  "result": null
+}
+```
+
+#### Common Downstream Error Code Mapping Table
+
+| Downstream Code | Downstream Description | System Error Code | System Error Identifier | Handling Suggestion |
+|----------|------------|------------|--------------|---------|
+| 120100006 | Insufficient balance | 139002003 | BALANCE_NOT_ENOUGH | Prompt user to top up |
+| 300200071 | Single transaction limit exceeded | 139004005 | AMOUNT_EXCEED_SINGLE_LIMIT | Reduce transaction amount |
+| 300200038 | Security limit exceeded | 139005001 | RISK_REJECT | Guide user to active payment |
+| 120100031 | Quote expired | 139004003 | EXCHANGE_RATE_EXPIRED | Retrieve exchange rate again |
+| 300xxx series | Risk control errors | 139005001 | RISK_REJECT | Guide user to active payment and identity verification |
+| Others | Unknown errors | 50002 | DOWNSTREAM_ERROR | Contact technical support with complete error information |
+
+**Important Notes**:
+1. Merchants should handle business based on system error code (retCode) first
+2. Downstream error information is for troubleshooting and logging only
+3. For unmapped downstream error codes, please contact technical support
 
 ---
 

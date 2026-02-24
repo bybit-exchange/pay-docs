@@ -1,7 +1,7 @@
 ---
 title: List Transactions API
 sidebar_label: List Transactions
-sidebar_position: 10
+sidebar_position: 11
 ---
 
 ## HTTP Request
@@ -33,37 +33,39 @@ Query deduction transaction or refund record list under an agreement with pagina
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| code | string | Response code |
-| data | object | Response data |
-| data.total | int | Total record count |
-| data.page_no | int | Current page number |
-| data.page_size | int | Page size |
-| data.list | array | Transaction list |
-| data.list[].trade_no | string | Platform trade number |
-| data.list[].out_trade_no | string | Merchant order number |
-| data.list[].status | string | Transaction status |
-| data.list[].amount | object | Requested amount |
-| data.list[].crypto_payment | object | Actual crypto payment (for fiat orders) |
-| data.list[].pay_time | string | Payment time |
-| data.list[].refund_amount | object | Refunded amount |
+| retCode | int | Response code |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.total | int | Total record count |
+| result.page_no | int | Current page number |
+| result.page_size | int | Page size |
+| result.list | array | Transaction list |
+| result.list[].trade_no | string | Platform trade number |
+| result.list[].out_trade_no | string | Merchant order number |
+| result.list[].status | string | Transaction status |
+| result.list[].amount | object | Requested amount |
+| result.list[].crypto_payment | object | Actual crypto payment (for fiat orders) |
+| result.list[].pay_time | string | Payment time |
+| result.list[].refund_amount | object | Refunded amount |
 
 ## Response Parameters (Refund Records)
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| code | string | Response code |
-| data | object | Response data |
-| data.total | int | Total record count |
-| data.page_no | int | Current page number |
-| data.page_size | int | Page size |
-| data.list | array | Refund list |
-| data.list[].refund_no | string | Platform refund number |
-| data.list[].out_refund_no | string | Merchant refund number |
-| data.list[].trade_no | string | Original trade number |
-| data.list[].status | string | Refund status |
-| data.list[].refund_amount | object | Refund amount |
-| data.list[].refund_time | string | Refund success time |
-| data.list[].failure_reason | string | Failure reason |
+| retCode | int | Response code |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.total | int | Total record count |
+| result.page_no | int | Current page number |
+| result.page_size | int | Page size |
+| result.list | array | Refund list |
+| result.list[].refund_no | string | Platform refund number |
+| result.list[].out_refund_no | string | Merchant refund number |
+| result.list[].trade_no | string | Original trade number |
+| result.list[].status | string | Refund status |
+| result.list[].refund_amount | object | Refund amount |
+| result.list[].refund_time | string | Refund success time |
+| result.list[].failure_reason | string | Failure reason |
 
 ---
 
@@ -110,9 +112,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "total": 50,
     "page_no": 1,
     "page_size": 20,
@@ -166,9 +168,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "total": 10,
     "page_no": 1,
     "page_size": 20,

@@ -87,33 +87,33 @@ This API supports merchants to complete both agreement signing and deduction pay
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| code | string | Response code |
-| message | string | Response message |
-| data | object | Response data |
-| data.sign_result | object | Sign result (if signing was initiated) |
-| data.sign_result.agreement_no | string | Platform agreement number |
-| data.sign_result.external_agreement_no | string | Merchant agreement number |
-| data.sign_result.sign_order_id | string | Platform sign order number |
-| data.sign_result.status | string | Sign status: `INIT`/`PENDING`/`SIGNED`/`FAILED` |
-| data.sign_result.sign_time | string | Sign success time (returned on success) |
-| data.sign_result.valid_time | string | Agreement validity period |
-| data.sign_result.sign_url | string | Sign page URL (for H5 redirect) |
-| data.sign_result.qr_code | string | Sign QR code content (for user App scan) |
-| data.sign_result.qr_code_url | string | Sign QR code image URL |
-| data.sign_result.expire_time | string | Sign link/QR code expiration time |
-| data.pay_result | object | Deduction result |
-| data.pay_result.trade_no | string | Platform transaction number |
-| data.pay_result.out_trade_no | string | Merchant order number |
-| data.pay_result.status | string | Transaction status: `PROCESSING`/`SUCCESS`/`FAILED`/`TIMEOUT` |
-| data.pay_result.amount | object | Merchant requested amount |
-| data.pay_result.crypto_payment | object | User's actual cryptocurrency payment info (for fiat orders) |
-| data.pay_result.crypto_payment.currency | string | Cryptocurrency currency |
-| data.pay_result.crypto_payment.amount | string | Cryptocurrency amount |
-| data.pay_result.crypto_payment.chain | string | Chain network |
-| data.pay_result.crypto_payment.exchange_rate | string | Exchange rate |
-| data.pay_result.crypto_payment.rate_time | string | Rate lock time |
-| data.pay_result.pay_time | string | Payment success time (returned on success) |
-| data.pay_result.failure_reason | string | Failure reason (returned on failure) |
+| retCode | int | Response code |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.sign_result | object | Sign result (if signing was initiated) |
+| result.sign_result.agreement_no | string | Platform agreement number |
+| result.sign_result.external_agreement_no | string | Merchant agreement number |
+| result.sign_result.sign_order_id | string | Platform sign order number |
+| result.sign_result.status | string | Sign status: `INIT`/`PENDING`/`SIGNED`/`FAILED` |
+| result.sign_result.sign_time | string | Sign success time (returned on success) |
+| result.sign_result.valid_time | string | Agreement validity period |
+| result.sign_result.sign_url | string | Sign page URL (for H5 redirect) |
+| result.sign_result.qr_code | string | Sign QR code content (for user App scan) |
+| result.sign_result.qr_code_url | string | Sign QR code image URL |
+| result.sign_result.expire_time | string | Sign link/QR code expiration time |
+| result.pay_result | object | Deduction result |
+| result.pay_result.trade_no | string | Platform transaction number |
+| result.pay_result.out_trade_no | string | Merchant order number |
+| result.pay_result.status | string | Transaction status: `PROCESSING`/`SUCCESS`/`FAILED`/`TIMEOUT` |
+| result.pay_result.amount | object | Merchant requested amount |
+| result.pay_result.crypto_payment | object | User's actual cryptocurrency payment info (for fiat orders) |
+| result.pay_result.crypto_payment.currency | string | Cryptocurrency currency |
+| result.pay_result.crypto_payment.amount | string | Cryptocurrency amount |
+| result.pay_result.crypto_payment.chain | string | Chain network |
+| result.pay_result.crypto_payment.exchange_rate | string | Exchange rate |
+| result.pay_result.crypto_payment.rate_time | string | Rate lock time |
+| result.pay_result.pay_time | string | Payment success time (returned on success) |
+| result.pay_result.failure_reason | string | Failure reason (returned on failure) |
 
 ---
 
@@ -172,9 +172,9 @@ This API supports merchants to complete both agreement signing and deduction pay
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "sign_result": {
       "agreement_no": null,
       "external_agreement_no": "MERCHANT_AGR_001",
@@ -242,9 +242,9 @@ This API supports merchants to complete both agreement signing and deduction pay
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "sign_result": null,
     "pay_result": {
       "trade_no": "PAY202312230002",

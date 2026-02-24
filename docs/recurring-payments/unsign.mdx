@@ -34,12 +34,12 @@ Either `agreement_no` or `external_agreement_no` must be provided.
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| code | string | Response code |
-| message | string | Response message |
-| data | object | Response data |
-| data.agreement_no | string | Platform agreement number |
-| data.status | string | Status: `UNSIGNED` |
-| data.unsign_time | string | Unsign time |
+| retCode | int | Response code |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.agreement_no | string | Platform agreement number |
+| result.status | string | Status: `UNSIGNED` |
+| result.unsign_time | string | Unsign time |
 
 ---
 
@@ -95,9 +95,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "agreement_no": "AGR202601070001",
     "status": "UNSIGNED",
     "unsign_time": "2026-01-07T15:30:00Z"
@@ -109,9 +109,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "AGREEMENT_NOT_EXIST",
-  "message": "Agreement does not exist",
-  "data": null
+  "retCode": 40003,
+  "retMsg": "Agreement does not exist",
+  "result": null
 }
 ```
 
@@ -119,9 +119,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "AGREEMENT_UNSIGNED",
-  "message": "Agreement already unsigned, no need to repeat",
-  "data": null
+  "retCode": 40004,
+  "retMsg": "Agreement already unsigned, no need to repeat",
+  "result": null
 }
 ```
 

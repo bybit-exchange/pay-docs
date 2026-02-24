@@ -1,7 +1,7 @@
 ---
 title: List Agreements API
 sidebar_label: List Agreements
-sidebar_position: 8
+sidebar_position: 9
 ---
 
 ## HTTP Request
@@ -18,7 +18,7 @@ Query agreement list under merchant with pagination and filtering support.
 |:----------|:-----|:---------|:------------|
 | merchant_id | string | **Yes** | Merchant ID |
 | user_id | string | No | Platform user ID (filter by user) |
-| agreement_type | string | No | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` (query all if not provided) |
+| agreement_type | string | No | Sign type: `CYCLE` / `SINGLE` (query all if not provided) |
 | status | string | No | Status filter: `INIT` / `PENDING` / `SIGNED` / `SUSPENDED` / `UNSIGNED` / `EXPIRED` / `FAILED` |
 | scene_code | string | No | Scene code filter |
 | start_time | string | No | Sign start time (ISO8601) |
@@ -32,21 +32,22 @@ Query agreement list under merchant with pagination and filtering support.
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| code | string | Response code |
-| data | object | Response data |
-| data.total | int | Total record count |
-| data.page_no | int | Current page number |
-| data.page_size | int | Page size |
-| data.list | array | Agreement list |
-| data.list[].agreement_no | string | Platform agreement number |
-| data.list[].external_agreement_no | string | Merchant agreement number |
-| data.list[].user_id | string | Platform user ID |
-| data.list[].merchant_user_id | string | Merchant-side user ID |
-| data.list[].agreement_type | string | Sign type |
-| data.list[].scene_code | string | Scene code |
-| data.list[].status | string | Agreement status |
-| data.list[].sign_time | string | Sign time |
-| data.list[].valid_time | string | Validity period |
+| retCode | int | Response code |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.total | int | Total record count |
+| result.page_no | int | Current page number |
+| result.page_size | int | Page size |
+| result.list | array | Agreement list |
+| result.list[].agreement_no | string | Platform agreement number |
+| result.list[].external_agreement_no | string | Merchant agreement number |
+| result.list[].user_id | string | Platform user ID |
+| result.list[].merchant_user_id | string | Merchant-side user ID |
+| result.list[].agreement_type | string | Sign type |
+| result.list[].scene_code | string | Scene code |
+| result.list[].status | string | Agreement status |
+| result.list[].sign_time | string | Sign time |
+| result.list[].valid_time | string | Validity period |
 
 ---
 
@@ -91,9 +92,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "total": 150,
     "page_no": 1,
     "page_size": 20,

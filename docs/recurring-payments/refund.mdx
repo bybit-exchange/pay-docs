@@ -1,7 +1,7 @@
 ---
 title: Deduction Refund API
 sidebar_label: Refund
-sidebar_position: 6
+sidebar_position: 7
 ---
 
 ## HTTP Request
@@ -40,16 +40,16 @@ Either `trade_no` or `out_trade_no` must be provided.
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
-| code | string | Response code |
-| message | string | Response message |
-| data | object | Response data |
-| data.refund_no | string | Platform refund number |
-| data.out_refund_no | string | Merchant refund number |
-| data.trade_no | string | Original trade number |
-| data.status | string | Refund status: `PROCESSING` / `SUCCESS` / `FAILED` |
-| data.refund_amount | object | Refund amount |
-| data.refund_time | string | Refund success time (on success) |
-| data.failure_reason | string | Failure reason (on failure) |
+| retCode | int | Response code |
+| retMsg | string | Response message |
+| result | object | Response data |
+| result.refund_no | string | Platform refund number |
+| result.out_refund_no | string | Merchant refund number |
+| result.trade_no | string | Original trade number |
+| result.status | string | Refund status: `PROCESSING` / `SUCCESS` / `FAILED` |
+| result.refund_amount | object | Refund amount |
+| result.refund_time | string | Refund success time (on success) |
+| result.failure_reason | string | Failure reason (on failure) |
 
 ---
 
@@ -119,9 +119,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "refund_no": "RF202601070001",
     "out_refund_no": "REFUND20260107001",
     "trade_no": "PAY202601070001",
@@ -141,9 +141,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "refund_no": "RF202601070002",
     "out_refund_no": "REFUND20260107002",
     "trade_no": "PAY202601070001",
@@ -162,9 +162,9 @@ Authorization: Bearer {access_token}
 
 ```json
 {
-  "code": "SUCCESS",
-  "message": "ok",
-  "data": {
+  "retCode": 20000,
+  "retMsg": "Success",
+  "result": {
     "refund_no": "RF202601070003",
     "out_refund_no": "REFUND20260107003",
     "trade_no": "PAY202601070001",
