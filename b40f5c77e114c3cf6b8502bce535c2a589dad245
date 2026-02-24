@@ -1,0 +1,44 @@
+docs/recurring-payments/introduction.mdx
+  807b62b31e245c1f 15,18
+docs/recurring-payments/specifications.mdx
+  807b62b31e245c1f 223-298
+docs/recurring-payments/list-agreements.mdx
+  807b62b31e245c1f 21
+docs/recurring-payments/webhooks/agreement.mdx
+  807b62b31e245c1f 21,194
+docs/recurring-payments/sign-request.mdx
+  88ce49cd47afb83f 20,166
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.36-bit.9",
+  "base_commit_sha": "b40f5c77e114c3cf6b8502bce535c2a589dad245",
+  "prompts": {
+    "807b62b31e245c1f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0b554878-80c3-44d1-a3aa-8226b7a38773",
+        "model": "claude-sonnet-4-5-20250929"
+      },
+      "human_author": "dawson.hou <dawson.hou@lunarax.io>",
+      "messages": [],
+      "total_additions": 81,
+      "total_deletions": 4,
+      "accepted_lines": 81,
+      "overriden_lines": 0
+    },
+    "88ce49cd47afb83f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1929d6f7-91dc-4f24-a673-0449dbb555c9",
+        "model": "claude-sonnet-4-5-20250929"
+      },
+      "human_author": "dawson.hou <dawson.hou@lunarax.io>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 8,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
