@@ -220,3 +220,79 @@ HTTP status `429` with body:
 2. **Request Merging**: Use list query API instead of multiple single queries
 3. **Async Processing**: Use message queue for peak shaving in high concurrency
 4. **Monitoring**: Monitor 429 response ratio, adjust strategy accordingly
+
+---
+
+## Agreement Type Description
+
+Agreement type (`agreement_type`) defines the deduction mode of agreement payment, affecting deduction frequency, limit configuration, and agreement lifecycle.
+
+### Agreement Type Comparison
+
+| Type | Description | Applicable Scenarios | Deduction Frequency | Limit Configuration Support | Agreement Lifecycle |
+|:-----|:------------|:--------------------|:-------------------|:---------------------------|:-------------------|
+| **CYCLE** | Periodic deduction | Fixed periodic deduction for subscription scenarios | Periodic deduction (e.g., monthly) | Single limit + Period limits (DAY/WEEK/MONTH/YEAR) | Long-term validity, expires upon term end or cancellation |
+| **NON_CYCLE** | Non-periodic deduction | Non-fixed deduction cycle, merchant can initiate anytime | Irregular deduction (triggered by actual consumption) | Single limit + Period limits (DAY/WEEK/MONTH/YEAR) | Long-term validity, expires upon term end or cancellation |
+| **SINGLE** | Single authorization | One-time valid, agreement automatically expires after deduction | One-time deduction only | Single limit only | Short-term validity, automatically expires after successful deduction |
+
+### Typical Scenario Examples
+
+**CYCLE - Periodic Deduction**
+- **Membership Subscription**: Video membership, music subscription, gym monthly card, cloud service annual fee
+- **Bill Payment**: Monthly utility bills, property fees, monthly mobile plan fees
+- **Characteristics**: Fixed deduction time, amounts may be same or different
+
+**NON_CYCLE - Non-Periodic Deduction**
+- **Transportation Services**: Ride-hailing, parking fees, ETC tolls, public transit
+- **Food & Beverage**: Food delivery orders, restaurant membership deduction
+- **Lifestyle Services**: Laundry, repair, car rental
+- **Characteristics**: Triggered by actual consumption, irregular deduction frequency and amounts
+
+**SINGLE - Single Authorization**
+- **Pre-authorization Scenarios**: Hotel deposits, car rental deposits
+- **One-time Deduction**: One-time authorized payment, temporary deduction
+- **Characteristics**: Agreement automatically expires after deduction, no manual cancellation needed
+
+### Limit Configuration Description
+
+**CYCLE and NON_CYCLE Types**:
+- Support **Single Limit** (`single_limit`): Maximum amount per deduction
+- Support **Period Limits** (`period_limits`):
+  - DAY: Daily accumulated deduction limit
+  - WEEK: Weekly accumulated deduction limit
+  - MONTH: Monthly accumulated deduction limit
+  - YEAR: Yearly accumulated deduction limit
+- Multiple period limits can be configured simultaneously, platform validates all limits
+
+**SINGLE Type**:
+- Only supports **Single Limit** (`single_limit`)
+- Period limits not supported (as agreement expires after deduction)
+
+### Agreement Lifecycle Comparison
+
+| Operation | CYCLE | NON_CYCLE | SINGLE |
+|:----------|:------|:----------|:-------|
+| **After Sign** | SIGNED status, can deduct | SIGNED status, can deduct | SIGNED status, can deduct |
+| **First Deduction** | Remains SIGNED | Remains SIGNED | Automatically becomes UNSIGNED (agreement expires) |
+| **Multiple Deductions** | Supported | Supported | Not supported (expires after first deduction) |
+| **User Cancellation** | Supported | Supported | Not applicable (auto-expires after deduction) |
+| **Merchant Cancellation** | Supported | Supported | Not applicable (auto-expires after deduction) |
+| **Agreement Expiration** | Becomes EXPIRED | Becomes EXPIRED | Not applicable (auto-expires after deduction) |
+
+### Usage Recommendations
+
+1. **Choose Appropriate Type**:
+   - Subscription-based business: Choose **CYCLE**
+   - On-demand consumption business: Choose **NON_CYCLE**
+   - One-time authorization: Choose **SINGLE**
+
+2. **Limit Configuration Principles**:
+   - Single limit should cover most transaction scenarios
+   - Period limits prevent excessive short-term deductions
+   - CYCLE type recommended to configure monthly limit
+   - NON_CYCLE type recommended to configure daily limit
+
+3. **Agreement Management**:
+   - CYCLE/NON_CYCLE agreements require active cancellation or await expiration
+   - SINGLE agreements auto-expire after deduction, no management needed
+   - Recommend setting reasonable validity period (`sign_valid_time`) for long-term agreements

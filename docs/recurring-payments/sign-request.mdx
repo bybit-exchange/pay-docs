@@ -17,8 +17,7 @@ Create a sign request to initiate the agreement signing process. Returns a QR co
 | Parameter | Type | Required | Description |
 |:----------|:-----|:---------|:------------|
 | merchant_id | string | **Yes** | Merchant ID |
-| user_id | string | **Yes** | Platform user ID |
-| agreement_type | string | **Yes** | Sign type: `CYCLE` (periodic) / `NON_CYCLE` (non-periodic) / `SINGLE` (one-time) |
+| agreement_type | string | **Yes** | Sign type: `CYCLE` (periodic deduction) / `NON_CYCLE` (non-periodic deduction) / `SINGLE` (single authorization) |
 | merchant_user_id | string | **Yes** | Merchant-side user ID (for mapping) |
 | scene_code | string | **Yes** | [Scene code](appendix#scene-codes) - Supports 17 scenarios including TAXI, PARKING, SUBSCRIPTION, FOOD, ENTERTAINMENT, EDUCATION, etc. |
 | product_code | string | **Yes** | Product code (assigned by platform) |
@@ -72,7 +71,6 @@ Authorization: Bearer {access_token}
 
 {
   "merchant_id": "M123456789",
-  "user_id": "U_123456789",
   "agreement_type": "CYCLE",
   "merchant_user_id": "merchant_user_123",
   "scene_code": "SUBSCRIPTION",
@@ -94,7 +92,6 @@ Authorization: Bearer {access_token}
 
 {
   "merchant_id": "M123456789",
-  "user_id": "U_123456789",
   "agreement_type": "CYCLE",
   "merchant_user_id": "merchant_user_123",
   "scene_code": "SUBSCRIPTION",
@@ -166,6 +163,7 @@ Authorization: Bearer {access_token}
 | Type | Description | Use Case |
 |:-----|:------------|:---------|
 | `CYCLE` | Periodic deduction | Subscriptions, recurring payments |
+| `NON_CYCLE` | Non-periodic deduction | On-demand payments (e.g., ride-hailing, parking) |
 | `SINGLE` | Single authorization | One-time pre-authorization |
 
 ---

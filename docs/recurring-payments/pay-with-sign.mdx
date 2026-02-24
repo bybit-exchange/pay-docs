@@ -30,7 +30,6 @@ This API supports merchants to complete both agreement signing and deduction pay
 | Parameter | Type | Required | Description |
 |:----------|:-----|:---------|:------------|
 | merchant_id | string | **Yes** | Merchant ID |
-| user_id | string | **Yes** | Platform user ID |
 | agreement_type | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
 | sign_params | object | No | Sign parameters (required for first sign + payment) |
 | sign_params.merchant_user_id | string | Conditional | Merchant-side user ID (required when passing sign_params) |
@@ -122,7 +121,6 @@ This API supports merchants to complete both agreement signing and deduction pay
 ```json
 {
   "merchant_id": "M123456789",
-  "user_id": "U_123456789",
   "agreement_type": "CYCLE",
   "sign_params": {
     "merchant_user_id": "merchant_user_123",
@@ -217,7 +215,6 @@ This API supports merchants to complete both agreement signing and deduction pay
 ```json
 {
   "merchant_id": "M123456789",
-  "user_id": "U_123456789",
   "agreement_type": "CYCLE",
   "pay_params": {
     "agreement_no": "AGR202312230001",
