@@ -18,7 +18,7 @@ Create a sign request to initiate the agreement signing process. Returns a QR co
 |:----------|:-----|:---------|:------------|
 | merchant_id | string | **Yes** | Merchant ID |
 | agreement_type | string | **Yes** | Sign type: `CYCLE` (periodic deduction) / `NON_CYCLE` (non-periodic deduction) / `SINGLE` (single authorization) |
-| merchant_user_id | string | **Yes** | Merchant-side user ID (for mapping) |
+| merchant_user_id | string | No | Merchant-side user ID (optional, used for merchant internal user association. If not provided, agreement will only be bound to platform userId) |
 | scene_code | string | **Yes** | [Scene code](appendix#scene-codes) - Supports 17 scenarios including TAXI, PARKING, SUBSCRIPTION, FOOD, ENTERTAINMENT, EDUCATION, etc. |
 | product_code | string | **Yes** | Product code (assigned by platform) |
 | external_agreement_no | string | **Yes** | Merchant agreement number (unique) |
@@ -170,7 +170,7 @@ Authorization: Bearer {access_token}
 
 ## Notes
 
-1. **User Identity Mapping**: `merchant_user_id` establishes the mapping between merchant's user system and Bybit platform
+1. **User Identity Mapping**: `merchant_user_id` is optional and can be used to establish mapping between merchant's user system and Bybit platform. If not provided, agreement will only be bound to platform userId
 2. **Limit Configuration**: If not provided, platform default limits apply
 3. **Sign Expiration**: Default 30 minutes, can be extended up to 24 hours
 4. **Idempotency**: Same `external_agreement_no` returns existing sign request result

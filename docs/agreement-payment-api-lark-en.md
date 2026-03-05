@@ -577,7 +577,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | --- | --- | --- | --- |
 | merchant_id | string | Yes | Merchant ID |
 | agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
-| merchant_user_id | string | Yes | Merchant-side user ID (user identifier in merchant system, used for establishing mapping) |
+| merchant_user_id | string | No | Merchant-side user ID (optional, used for merchant internal user association. If not provided, agreement will only be bound to platform userId) |
 | scene_code | string | Yes | Scene code (see 7.1 Scene Code List): TAXI/PARKING/SUBSCRIPTION/UTILITY/TOLL/TRANSIT/FOOD/ENTERTAINMENT/EDUCATION/MEMBERSHIP/RENT/FITNESS/TELECOM/CLOUD/INSURANCE/LOAN/OTHERS |
 | product_code | string | Yes | Product code, assigned by platform |
 | external_agreement_no | string | Yes | Merchant agreement number (unique on merchant side) |
@@ -985,7 +985,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | merchant_id | string | Yes | Merchant ID |
 | agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
 | sign_params | object | No | Sign parameters (required for first sign + payment) |
-| sign_params.merchant_user_id | string | Conditional | Merchant-side user ID (required when passing sign_params) |
+| sign_params.merchant_user_id | string | No | Merchant-side user ID (optional, used for merchant internal user association) |
 | sign_params.scene_code | string | Conditional | Scene code (required when passing sign_params, see 7.1 Scene Code List) |
 | sign_params.product_code | string | No | Product code, assigned by platform |
 | sign_params.external_agreement_no | string | Conditional | Merchant agreement number (required when passing sign_params, unique on merchant side) |
