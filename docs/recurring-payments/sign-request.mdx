@@ -18,10 +18,11 @@ Create a sign request to initiate the agreement signing process. Returns a QR co
 |:----------|:-----|:---------|:------------|
 | merchant_id | string | **Yes** | Merchant ID |
 | agreement_type | string | **Yes** | Sign type: `CYCLE` (periodic deduction) / `NON_CYCLE` (non-periodic deduction) / `SINGLE` (single authorization) |
-| merchant_user_id | string | No | Merchant-side user ID (optional, used for merchant internal user association. If not provided, agreement will only be bound to platform userId) |
 | scene_code | string | **Yes** | [Scene code](appendix#scene-codes) - Supports 17 scenarios including TAXI, PARKING, SUBSCRIPTION, FOOD, ENTERTAINMENT, EDUCATION, etc. |
 | product_code | string | **Yes** | Product code (assigned by platform) |
 | external_agreement_no | string | **Yes** | Merchant agreement number (unique) |
+| notify_url | string | **Yes** | Sign result webhook URL |
+| merchant_user_id | string | No | Merchant-side user ID (optional, used for merchant internal user association. If not provided, agreement will only be bound to platform userId) |
 | sign_valid_time | string | No | Sign validity period (ISO8601 format, must be at least 24 hours after current time) |
 | single_limit | object | No | Single transaction limit |
 | single_limit.amount | string | Conditional | Limit amount (required if single_limit provided) |
@@ -34,7 +35,6 @@ Create a sign request to initiate the agreement signing process. Returns a QR co
 | period_limits[].currency | string | Conditional | Currency code |
 | period_limits[].currency_type | string | Conditional | `FIAT` or `CRYPTO` |
 | period_limits[].chain | string | No | Chain network |
-| notify_url | string | **Yes** | Sign result webhook URL |
 | return_url | string | No | Redirect URL after sign completion |
 | sign_expire_minutes | int | No | Sign link validity (minutes), default 30, max 1440 |
 | extra_params | string | No | Extension parameters (JSON string, passed through) |
