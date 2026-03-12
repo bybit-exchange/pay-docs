@@ -1,0 +1,25 @@
+docs/recurring-payments/pay-with-sign.mdx
+  ed9cc3323c0043bf 35
+docs/recurring-payments/sign-request.mdx
+  ed9cc3323c0043bf 21,173
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.6-bit.1+4dcd1b1",
+  "base_commit_sha": "89521eeac755bfa8ed3f659667a143db03e99f35",
+  "prompts": {
+    "ed9cc3323c0043bf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1153e991-ee0c-4bb5-a727-3b8097c5b993",
+        "model": "claude-sonnet-4-5-20250929"
+      },
+      "human_author": "dawson.hou <dawson.hou@lunarax.io>",
+      "messages": [],
+      "total_additions": 3,
+      "total_deletions": 3,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    }
+  }
+}
