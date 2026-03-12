@@ -113,8 +113,8 @@ const config = {
             label: 'Other Bybit API docs',
           },
           {
-            type: 'doc',
-            docId: 'skills/SKILL',
+            type: 'docSidebar',
+            sidebarId: 'skillsSidebar',
             position: 'right',
             label: 'AI Skill',
           },
