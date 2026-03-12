@@ -35,8 +35,9 @@ X-BAPI-TIMESTAMP:   {unix_ms}          # milliseconds, e.g. 1736233200000
 X-BAPI-SIGN:        {signature}
 X-BAPI-RECV-WINDOW: 5000               # default 5000ms, max 10000ms
 Content-Type:       application/json
-Version:            5.00               # QR Payment only
 ```
+
+> **QR Payment only:** also add `Version: 5.00` header.
 
 ### Signature Construction
 
@@ -100,11 +101,22 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
 5. POST /v5/bybitpay/refund            → if refund needed (supports partial & batch)
 ```
 
-**Key params:**
-- `paymentType`: `E_COMMERCE`
-- `currencyType`: `crypto` (e.g., USDT) or `fiat`
-- `merchantTradeNo`: your unique order ID (idempotency key)
-- `orderExpireTime`: max 1 hour from now (Unix seconds)
+**Minimal request body:**
+```json
+{
+  "merchantId": "305142568",
+  "paymentType": "E_COMMERCE",
+  "merchantTradeNo": "ORDER-20260107-001",
+  "orderAmount": "23.50",
+  "currency": "USDT",
+  "currencyType": "crypto",
+  "orderExpireTime": 1736236800,
+  "webhookUrl": "https://merchant.com/webhook/pay",
+  "env": { "terminalType": "WEB", "device": "Chrome/133", "browserVersion": "133.0", "ip": "203.0.113.50" }
+}
+```
+
+> **Amount format (QR Payment):** decimal string, e.g. `"23.50"` = 23.50 USDT
 
 ---
 
@@ -123,6 +135,24 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
 7. POST /v5/bybitpay/agreement/refund  → refund if needed
 8. POST /v5/bybitpay/agreement/unsign  → terminate when user cancels
 ```
+
+**Minimal deduction request body:**
+```json
+{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "agreement_no": "AGR202601070001",
+  "out_trade_no": "ORDER-20260107-001",
+  "scene_code": "SUBSCRIPTION",
+  "amount": { "total": "2350", "currency": "USDT", "currency_type": "CRYPTO", "chain": "TRC20" },
+  "order_info": { "order_title": "Monthly subscription - Jan 2026" },
+  "notify_url": "https://merchant.com/webhook/deduction"
+}
+```
+
+> **Amount format (Recurring Payments):** minimum unit integer string, e.g. `"2350"` = 23.50 USDT (2 decimals)。
+> Verify agreement `status == SIGNED` via `GET /v5/bybitpay/agreement/query` before deducting.
 
 ---
 
@@ -199,8 +229,9 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
 | POST | `/v5/bybitpay/agreement/sign` | Create sign request (get QR for user) |
 | POST | `/v5/bybitpay/agreement/unsign` | Terminate agreement |
 | POST | `/v5/bybitpay/agreement/pay` | Execute deduction |
+| POST | `/v5/bybitpay/agreement/pay-with-sign` | Sign + deduct in one step (NON_CYCLE / SINGLE) |
 | POST | `/v5/bybitpay/agreement/refund` | Refund deduction |
-| GET | `/v5/bybitpay/agreement/query` | Query single agreement |
+| GET | `/v5/bybitpay/agreement/query` | Query single agreement (check SIGNED status) |
 | GET | `/v5/bybitpay/agreement/list` | List agreements (paginated) |
 | GET | `/v5/bybitpay/agreement/pay/query` | Query single transaction/refund |
 | GET | `/v5/bybitpay/agreement/pay/list` | List transactions (paginated) |
@@ -255,6 +286,8 @@ public boolean verifyRecurringWebhook(String timestamp, String nonce,
 ```
 
 **Webhook response:** Always return HTTP 200 with plain text body `success`. Bybit retries up to 5 times (15s → 30s → 1min → 5min → 30min).
+
+> **Platform public key:** Download from Bybit Merchant Portal → API Management → Platform Public Key. Required for webhook signature verification.
 
 ---
 

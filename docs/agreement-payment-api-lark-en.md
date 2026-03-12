@@ -3435,7 +3435,7 @@ Agreement type (agreement_type) defines the deduction mode of agreement payment,
 
 | Environment | Domain | Description |
 | --- | --- | --- |
-| Sandbox | api.testnet.bybit.com | Test environment, no real transactions |
+| Sandbox | api2-testnet.bybit.com | Test environment, no real transactions |
 | Production | api2.bybit.com | Production environment, real transactions |
 
 #### Sandbox Environment Features
