@@ -1,0 +1,33 @@
+docs/scan-payment/guide.mdx
+  996d0285c1348973 12,135,148
+docs/scan-payment/payment-status-mock.mdx
+  996d0285c1348973 29,48
+docs/agreement-payment-api-lark-en.md
+  996d0285c1348973 3438
+docs/skills/SKILL.md
+  996d0285c1348973 40,104-119,139-156,232,234,290-291
+docs/guide.mdx
+  996d0285c1348973 134
+docs/recurring-payments/appendix.mdx
+  996d0285c1348973 166
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.6-bit.1+4dcd1b1",
+  "base_commit_sha": "2d0253dbc5f6ac3ac5ae67e465b9541b712f6c5b",
+  "prompts": {
+    "996d0285c1348973": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7aa29a-a945-4459-9ef1-b1ad563d1004",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "wei.song <wei.song@bkyo.io>",
+      "messages": [],
+      "total_additions": 50,
+      "total_deletions": 17,
+      "accepted_lines": 49,
+      "overriden_lines": 0
+    }
+  }
+}
