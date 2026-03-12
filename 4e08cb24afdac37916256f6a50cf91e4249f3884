@@ -1,0 +1,67 @@
+docs/skills/SKILL.md
+  996d0285c1348973 1-6
+docs/guide.mdx
+  996d0285c1348973 135
+docs/scan-payment/settlement.mdx
+  996d0285c1348973 37,58
+docusaurus.config.js
+  996d0285c1348973 117-120
+docs/recurring-payments/list-transactions.mdx
+  996d0285c1348973 78-82,89-93,100-104
+docs/scan-payment/guide.mdx
+  996d0285c1348973 14,28
+sidebars.js
+  996d0285c1348973 144-146
+docs/scan-payment/create-payment.mdx
+  996d0285c1348973 46
+docs/recurring-payments/specifications.mdx
+  996d0285c1348973 14-17,99
+docs/scan-payment/payment-result.mdx
+  996d0285c1348973 28,39,50
+docs/recurring-payments/unsign.mdx
+  996d0285c1348973 52,54-57,73,75-78
+docs/recurring-payments/list-agreements.mdx
+  996d0285c1348973 60-64,71-75,82-86
+docs/scan-payment/payment-fx-convert.mdx
+  996d0285c1348973 34,57,80
+docs/recurring-payments/query-agreement.mdx
+  996d0285c1348973 55-59
+docs/agreement-payment-api-lark-en.md
+  996d0285c1348973 2896,3439
+docs/recurring-payments/signature.mdx
+  996d0285c1348973 9,15-18,20,31-38,40,43,45,51-55,61-64,71,74-76,80-87,92,95,97-100,102-103,111,113-115,117,119-121,125-128
+docs/recurring-payments/query-transaction.mdx
+  996d0285c1348973 73-77,84-88
+docs/scan-payment/payout.mdx
+  996d0285c1348973 36,72
+docs/recurring-payments/sign-request.mdx
+  996d0285c1348973 65,67-70,86,88-91
+docs/scan-payment/refund.mdx
+  996d0285c1348973 25,64,93
+docs/recurring-payments/refund.mdx
+  996d0285c1348973 62,64-67,90,92-95
+docs/recurring-payments/deduction.mdx
+  996d0285c1348973 80,82-85,114,116-119
+docs/recurring-payments/appendix.mdx
+  996d0285c1348973 167
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.6-bit.1+4dcd1b1",
+  "base_commit_sha": "4e08cb24afdac37916256f6a50cf91e4249f3884",
+  "prompts": {
+    "996d0285c1348973": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7aa29a-a945-4459-9ef1-b1ad563d1004",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "wei.song <wei.song@bkyo.io>",
+      "messages": [],
+      "total_additions": 657,
+      "total_deletions": 222,
+      "accepted_lines": 656,
+      "overriden_lines": 0
+    }
+  }
+}
