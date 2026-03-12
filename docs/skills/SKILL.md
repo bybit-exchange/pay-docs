@@ -136,7 +136,21 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
 8. POST /v5/bybitpay/agreement/unsign  → terminate when user cancels
 ```
 
-**Minimal deduction request body:**
+**Step 1 — Sign request body** (`POST /v5/bybitpay/agreement/sign`):
+```json
+{
+  "merchant_id": "M123456789",
+  "agreement_type": "CYCLE",
+  "merchant_user_id": "your_internal_user_id",
+  "external_agreement_no": "YOUR-AGR-001",
+  "scene_code": "SUBSCRIPTION",
+  "notify_url": "https://merchant.com/webhook/agreement",
+  "single_limit": { "amount": "10000", "currency": "USDT", "currency_type": "CRYPTO", "chain": "TRC20" }
+}
+```
+Response: `result.qr_code` (base64 image), `result.sign_url` (redirect link), `result.agreement_no`
+
+**Step 4 — Deduction request body** (`POST /v5/bybitpay/agreement/pay`):
 ```json
 {
   "merchant_id": "M123456789",
@@ -151,7 +165,8 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
 }
 ```
 
-> **Amount format (Recurring Payments):** minimum unit integer string, e.g. `"2350"` = 23.50 USDT (2 decimals)。
+> **Amount format (Recurring Payments):** minimum unit integer string, e.g. `"2350"` = 23.50 USDT (2 decimals).
+> **`scene_code` values:** `SUBSCRIPTION` (membership/subscription) · `UTILITY_BILL` (utilities) · `TRANSPORTATION` (ride-hailing/parking) · `FOOD_DELIVERY` · `LIFESTYLE` (laundry/repair)
 > Verify agreement `status == SIGNED` via `GET /v5/bybitpay/agreement/query` before deducting.
 
 ---
@@ -162,6 +177,7 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
 
 ```
 1. POST /v5/bybitpay/agreement/sign   → user authorizes once (agreement_type: NON_CYCLE)
+2. User scans QR / opens sign_url; Bybit notifies SIGNED webhook → store agreement_no
 3. [Each consumption event]
    POST /v5/bybitpay/agreement/pay   → deduct; include scene_info.device_ip & location
 4. POST {notify_url}                  ← async result notification
@@ -288,6 +304,55 @@ public boolean verifyRecurringWebhook(String timestamp, String nonce,
 **Webhook response:** Always return HTTP 200 with plain text body `success`. Bybit retries up to 5 times (15s → 30s → 1min → 5min → 30min).
 
 > **Platform public key:** Download from Bybit Merchant Portal → API Management → Platform Public Key. Required for webhook signature verification.
+
+#### QR Payment Webhook Payload
+
+```json
+{
+  "notifyType": "PAY_RESULT",
+  "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
+  "merchantTradeNo": "ORDER-20260107-001",
+  "status": "PAY_SUCCESS",
+  "orderAmount": "23.50",
+  "currency": "USDT",
+  "merchantId": "305142568",
+  "transactTime": 1736233205000
+}
+```
+Key fields: `status` (`PAY_SUCCESS` / `PAY_FAILED` / `REFUND_SUCCESS` / `TIMEOUT`), `payId` (use for dedup + polling).
+
+#### Recurring Payments Webhook Payload
+
+```json
+{
+  "notifyId": "NOTIFY202601070001",
+  "notifyType": "AGREEMENT_STATUS",
+  "merchantId": "M123456789",
+  "data": {
+    "eventType": "SIGNED",
+    "agreement_no": "AGR202601070001",
+    "external_agreement_no": "YOUR-AGR-001",
+    "status": "SIGNED",
+    "user_id": "U_123456789"
+  }
+}
+```
+```json
+{
+  "notifyId": "NOTIFY202601070002",
+  "notifyType": "TRANSACTION_RESULT",
+  "merchantId": "M123456789",
+  "data": {
+    "eventType": "PAY",
+    "trade_no": "PAY202601070001",
+    "out_trade_no": "ORDER-20260107-001",
+    "status": "SUCCESS",
+    "amount": { "total": "2350", "currency": "USDT" }
+  }
+}
+```
+Key fields: `notifyId` (dedup), `notifyType` + `data.eventType` (routing), `data.status` (result).
+Use `notifyId` to prevent duplicate processing.
 
 ---
 
