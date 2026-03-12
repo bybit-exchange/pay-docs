@@ -102,7 +102,7 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
 ```
 
 > **Key fields:** `merchantTradeNo` (idempotency key) · `orderAmount` decimal string e.g. `"23.50"` · `env.ip` real user IP (required) · `orderExpireTime` Unix seconds max +1h
-> See full field reference: [Create Payment API](scan-payment/create-payment)
+> See full field reference: [Create Payment API](scan-payment/create-payment) · [Refund API](scan-payment/refund)
 
 ---
 
@@ -118,8 +118,8 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
    POST /v5/bybitpay/agreement/pay   → deduct using agreement_no
 5. POST {notify_url}                  ← Bybit notifies deduction result
 6. GET  /v5/bybitpay/agreement/pay/query → query if webhook not received
-7. POST /v5/bybitpay/agreement/refund  → refund if needed
-8. POST /v5/bybitpay/agreement/unsign  → terminate when user cancels
+7. POST /v5/bybitpay/agreement/refund  → refund if needed (see [Refund API](recurring-payments/refund))
+8. POST /v5/bybitpay/agreement/unsign  → terminate when user cancels (see [Unsign API](recurring-payments/unsign))
 ```
 
 > **Step 1 sign key fields:** `agreement_type` · `merchant_user_id` · `external_agreement_no` (idempotency) · `scene_code` · `single_limit` · `notify_url`
@@ -207,7 +207,7 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
 | POST | `/v5/bybitpay/agreement/sign` | Create sign request (get QR for user) |
 | POST | `/v5/bybitpay/agreement/unsign` | Terminate agreement |
 | POST | `/v5/bybitpay/agreement/pay` | Execute deduction |
-| POST | `/v5/bybitpay/agreement/pay-with-sign` | Sign + deduct in one step (NON_CYCLE / SINGLE) |
+| POST | `/v5/bybitpay/agreement/pay-with-sign` | Sign + deduct in one step — use when user is present to authorize and pay immediately (NON_CYCLE / SINGLE) |
 | POST | `/v5/bybitpay/agreement/refund` | Refund deduction |
 | GET | `/v5/bybitpay/agreement/query` | Query single agreement (check SIGNED status) |
 | GET | `/v5/bybitpay/agreement/list` | List agreements (paginated) |
@@ -480,8 +480,12 @@ PROCESSING → SUCCESS
 
 ## Quick Start Checklist
 
+:::tip Before You Start
+Configure your **server IP whitelist** in Bybit Merchant Portal → API Management, otherwise all API calls return `403 FORBIDDEN`.
+:::
+
 **QR Payment:**
-- [ ] Generate API key at Bybit (testnet first, then mainnet)
+- [ ] Generate API key + whitelist server IP in Merchant Portal (testnet first, then mainnet)
 - [ ] Implement HMAC_SHA256 or RSA_SHA256 request signing
 - [ ] Build `POST /v5/bybitpay/create_pay` with `env.ip` = real user IP
 - [ ] Host a public `webhookUrl` endpoint; verify Bybit's RSA signature
