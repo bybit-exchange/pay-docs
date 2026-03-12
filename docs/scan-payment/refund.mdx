@@ -22,7 +22,7 @@ POST `/v5/bybitpay/refund`
 #### Single Full Refund (by payId - Recommended)
 ```http
 POST /v5/bybitpay/refund HTTP/1.1
-Host: api.bybit.com
+Host: api2.bybit.com
 X-BAPI-SIGN: XXXXX
 X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
 X-BAPI-TIMESTAMP: 1736233200000
@@ -61,7 +61,7 @@ Content-Type: application/json
 #### Single Partial Refund (by merchantTradeNo)
 ```http
 POST /v5/bybitpay/refund HTTP/1.1
-Host: api.bybit.com
+Host: api2.bybit.com
 X-BAPI-SIGN: XXXXX
 X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
 X-BAPI-TIMESTAMP: 1736233200000
@@ -90,7 +90,7 @@ Content-Type: application/json
 #### Batch Refund (Multiple Orders)
 ```http
 POST /v5/bybitpay/refund HTTP/1.1
-Host: api.bybit.com
+Host: api2.bybit.com
 X-BAPI-SIGN: XXXXX
 X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
 X-BAPI-TIMESTAMP: 1736233200000

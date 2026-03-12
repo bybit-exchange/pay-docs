@@ -77,12 +77,12 @@ Execute automatic deduction from user's account using a signed agreement. This i
 
 ```http
 POST /v5/bybitpay/agreement/pay HTTP/1.1
-Host: api.bybit.com
+Host: api2.bybit.com
 Content-Type: application/json
-X-Request-Id: 550e8400-e29b-41d4-a716-446655440005
-X-Timestamp: 1736233200000
-X-Signature: {signature}
-Authorization: Bearer {access_token}
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-SIGN: {signature}
+X-BAPI-RECV-WINDOW: 5000
 
 {
   "merchant_id": "M123456789",
@@ -111,12 +111,12 @@ Authorization: Bearer {access_token}
 
 ```http
 POST /v5/bybitpay/agreement/pay HTTP/1.1
-Host: api.bybit.com
+Host: api2.bybit.com
 Content-Type: application/json
-X-Request-Id: 550e8400-e29b-41d4-a716-446655440006
-X-Timestamp: 1736233200000
-X-Signature: {signature}
-Authorization: Bearer {access_token}
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-SIGN: {signature}
+X-BAPI-RECV-WINDOW: 5000
 
 {
   "merchant_id": "M123456789",

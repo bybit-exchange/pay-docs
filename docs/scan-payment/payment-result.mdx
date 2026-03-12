@@ -25,7 +25,7 @@ GET `/v5/bybitpay/pay_result`
 #### Query Pay Order by merchantTradeNo
 ```http
 GET /v5/bybitpay/pay_result?merchantId=305142568&paymentType=E_COMMERCE&merchantTradeNo=af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c HTTP/1.1
-Host: api.bybit.com
+Host: api2.bybit.com
 X-BAPI-SIGN: XXXXX
 X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
 X-BAPI-TIMESTAMP: 1736233200000
@@ -36,7 +36,7 @@ Content-Type: application/json
 #### Query Pay Order by payId (Recommended)
 ```http
 GET /v5/bybitpay/pay_result?merchantId=305142568&paymentType=E_COMMERCE&payId=01JY2KM5QNPXR8S4HTJZT9BC12 HTTP/1.1
-Host: api.bybit.com
+Host: api2.bybit.com
 X-BAPI-SIGN: XXXXX
 X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
 X-BAPI-TIMESTAMP: 1736233200000
@@ -47,7 +47,7 @@ Content-Type: application/json
 #### Query Refund Order
 ```http
 GET /v5/bybitpay/pay_result?merchantId=305142568&paymentType=E_COMMERCE_REFUND&merchantTradeNo=RF-2026-0001 HTTP/1.1
-Host: api.bybit.com
+Host: api2.bybit.com
 X-BAPI-SIGN: XXXXX
 X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
 X-BAPI-TIMESTAMP: 1736233200000

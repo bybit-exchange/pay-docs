@@ -75,33 +75,33 @@ Query deduction transaction or refund record list under an agreement with pagina
 
 ```
 GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202601070001&record_type=PAY&status=SUCCESS&page_no=1&page_size=20 HTTP/1.1
-Host: api.bybit.com
-X-Request-Id: 550e8400-e29b-41d4-a716-446655440015
-X-Timestamp: 1736233200000
-X-Signature: {signature}
-Authorization: Bearer {access_token}
+Host: api2.bybit.com
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-SIGN: {signature}
+X-BAPI-RECV-WINDOW: 5000
 ```
 
 ### List All Transactions with Time Range
 
 ```
 GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202601070001&record_type=PAY&start_time=2026-01-01T00:00:00Z&end_time=2026-01-31T23:59:59Z&page_no=1&page_size=50 HTTP/1.1
-Host: api.bybit.com
-X-Request-Id: 550e8400-e29b-41d4-a716-446655440016
-X-Timestamp: 1736233200000
-X-Signature: {signature}
-Authorization: Bearer {access_token}
+Host: api2.bybit.com
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-SIGN: {signature}
+X-BAPI-RECV-WINDOW: 5000
 ```
 
 ### List Refund Records
 
 ```
 GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202601070001&record_type=REFUND&page_no=1&page_size=20 HTTP/1.1
-Host: api.bybit.com
-X-Request-Id: 550e8400-e29b-41d4-a716-446655440017
-X-Timestamp: 1736233200000
-X-Signature: {signature}
-Authorization: Bearer {access_token}
+Host: api2.bybit.com
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-SIGN: {signature}
+X-BAPI-RECV-WINDOW: 5000
 ```
 
 ---

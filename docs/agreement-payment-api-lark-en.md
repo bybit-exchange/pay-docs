@@ -2893,7 +2893,7 @@ The following example shows how to initiate a signed request using cURL (using a
 #!/bin/bash
 
 # Configuration parameters
-API_HOST="https://api.bybit.com"
+API_HOST="https://api2.bybit.com"
 API_PATH="/v5/bybitpay/agreement/pay"
 MERCHANT_PRIVATE_KEY="./merchant_private_key.pem"
 ACCESS_TOKEN="your_access_token"
@@ -3436,7 +3436,7 @@ Agreement type (agreement_type) defines the deduction mode of agreement payment,
 | Environment | Domain | Description |
 | --- | --- | --- |
 | Sandbox | api.testnet.bybit.com | Test environment, no real transactions |
-| Production | api.bybit.com | Production environment, real transactions |
+| Production | api2.bybit.com | Production environment, real transactions |
 
 #### Sandbox Environment Features
 

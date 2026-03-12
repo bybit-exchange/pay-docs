@@ -52,11 +52,11 @@ Either `agreement_no` or `external_agreement_no` must be provided.
 
 ```
 GET /v5/bybitpay/agreement/query?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202601070001 HTTP/1.1
-Host: api.bybit.com
-X-Request-Id: 550e8400-e29b-41d4-a716-446655440009
-X-Timestamp: 1736233200000
-X-Signature: {signature}
-Authorization: Bearer {access_token}
+Host: api2.bybit.com
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-SIGN: {signature}
+X-BAPI-RECV-WINDOW: 5000
 ```
 
 ---

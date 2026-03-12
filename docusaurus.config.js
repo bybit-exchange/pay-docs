@@ -114,6 +114,12 @@ const config = {
           },
           {
             type: 'doc',
+            docId: 'skills/SKILL',
+            position: 'right',
+            label: 'AI Skill',
+          },
+          {
+            type: 'doc',
             docId: 'changelog/bybit-pay',
             position: 'right',
             label: 'Changelog',

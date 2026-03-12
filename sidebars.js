@@ -141,6 +141,9 @@ const sidebars = {
   ],
   changelogSidebar: [
     "changelog/bybit-pay"
+  ],
+  skillsSidebar: [
+    'skills/SKILL',
   ]
 };
 
