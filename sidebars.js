@@ -138,6 +138,14 @@ const sidebars = {
         },
       ]
     },
+    {
+      type: 'category',
+      label: 'AI Integration Skill',
+      collapsed: false,
+      items: [
+        'skills/SKILL',
+      ]
+    },
   ],
   changelogSidebar: [
     "changelog/bybit-pay"
