@@ -1,0 +1,23 @@
+docs/skills/SKILL.md
+  996d0285c1348973 139,143-153,168-169,180,308-356
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.6-bit.1+4dcd1b1",
+  "base_commit_sha": "713517a976263e6e837bdfe2efab93b42e6d61cb",
+  "prompts": {
+    "996d0285c1348973": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7aa29a-a945-4459-9ef1-b1ad563d1004",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "wei.song <wei.song@bkyo.io>",
+      "messages": [],
+      "total_additions": 67,
+      "total_deletions": 2,
+      "accepted_lines": 67,
+      "overriden_lines": 0
+    }
+  }
+}
