@@ -1,0 +1,23 @@
+docusaurus.config.js
+  996d0285c1348973 116-117
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.6-bit.1+4dcd1b1",
+  "base_commit_sha": "ad7675bb8a92dfdb806f34314600dc2de671c86f",
+  "prompts": {
+    "996d0285c1348973": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7aa29a-a945-4459-9ef1-b1ad563d1004",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "wei.song <wei.song@bkyo.io>",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 2,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}

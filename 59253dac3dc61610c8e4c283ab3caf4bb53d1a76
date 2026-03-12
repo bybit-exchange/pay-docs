@@ -1,0 +1,23 @@
+sidebars.js
+  996d0285c1348973 143
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.6-bit.1+4dcd1b1",
+  "base_commit_sha": "59253dac3dc61610c8e4c283ab3caf4bb53d1a76",
+  "prompts": {
+    "996d0285c1348973": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fe7aa29a-a945-4459-9ef1-b1ad563d1004",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "wei.song <wei.song@bkyo.io>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
