@@ -140,7 +140,7 @@ const sidebars = {
     },
     {
       type: 'category',
-      label: 'AI Integration Skill',
+      label: 'AI Skill',
       collapsed: false,
       items: [
         'skills/SKILL',
