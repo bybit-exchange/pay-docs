@@ -1,6 +1,6 @@
 ---
 title: AI Integration Skill
-sidebar_label: AI Integration Skill
+sidebar_label: Skills
 sidebar_position: 0
 ---
 
