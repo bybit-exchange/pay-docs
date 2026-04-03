@@ -11,10 +11,10 @@ All API requests must include the following headers:
 | Parameter | Type | Required | Description |
 |:----------|:-----|:---------|:------------|
 | Content-Type | string | Yes | `application/json` |
-| X-Request-Id | string | Yes | Request unique identifier (UUID format) |
-| X-Timestamp | string | Yes | Request timestamp (millisecond Unix timestamp) |
-| X-Signature | string | Yes | Request signature (see [Signature Algorithm](signature)) |
-| Authorization | string | Yes | `Bearer {access_token}` |
+| X-BAPI-API-KEY | string | Yes | API key |
+| X-BAPI-TIMESTAMP | string | Yes | UTC timestamp in milliseconds |
+| X-BAPI-SIGN | string | Yes | Request signature (see [Signature Algorithm](signature)) |
+| X-BAPI-RECV-WINDOW | string | No | Request validity window in ms, default 5000 |
 
 ---
 
@@ -96,8 +96,7 @@ Idempotency is guaranteed through business unique indexes:
 | Refund Request | out_refund_no | (merchant_id, out_refund_no) |
 
 **Notes:**
-- `X-Request-Id` is used for request tracing and troubleshooting
-- Format requirement: UUID v4, e.g., `550e8400-e29b-41d4-a716-446655440000`
+- `X-BAPI-RECV-WINDOW` (unit in milliseconds, default 5000) specifies how long an HTTP request is valid and prevents replay attacks
 - Repeated requests with the same merchant order number return the result of the first request
 
 ---

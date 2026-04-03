@@ -70,22 +70,22 @@ Query single deduction transaction or refund record details.
 
 ```
 GET /v5/bybitpay/agreement/pay/query?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&record_type=PAY&trade_no=PAY202601070001 HTTP/1.1
-Host: api.bybit.com
-X-Request-Id: 550e8400-e29b-41d4-a716-446655440013
-X-Timestamp: 1736233200000
-X-Signature: {signature}
-Authorization: Bearer {access_token}
+Host: api2.bybit.com
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-SIGN: {signature}
+X-BAPI-RECV-WINDOW: 5000
 ```
 
 ### Query Refund Record
 
 ```
 GET /v5/bybitpay/agreement/pay/query?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&record_type=REFUND&refund_no=RF202601070001 HTTP/1.1
-Host: api.bybit.com
-X-Request-Id: 550e8400-e29b-41d4-a716-446655440014
-X-Timestamp: 1736233200000
-X-Signature: {signature}
-Authorization: Bearer {access_token}
+Host: api2.bybit.com
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-SIGN: {signature}
+X-BAPI-RECV-WINDOW: 5000
 ```
 
 ---

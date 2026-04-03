@@ -6,20 +6,18 @@ sidebar_position: 12
 
 ## Overview
 
-All Agreement Payment APIs use RSA2 signature algorithm (SHA256withRSA with 2048-bit key) for request authentication and webhook verification.
+All Agreement Payment APIs use the same authentication mechanism as QR Payment: HMAC_SHA256 or RSA_SHA256 signature via standard Bybit API headers.
 
 ---
 
 ## Signature Algorithm
 
-| Algorithm | Description |
-|:----------|:------------|
-| RSA2 | RSA-SHA256 with 2048-bit key |
+| Algorithm | Key Type | Signature Header | Description |
+|:----------|:---------|:-----------------|:------------|
+| HMAC_SHA256 | API Secret (symmetric) | `X-BAPI-SIGN` (hex) | System-generated API key |
+| RSA_SHA256 | RSA private key (asymmetric) | `X-BAPI-SIGN` (base64) | Self-generated API key |
 
-**Notes:**
-- Only RSA2 signature algorithm is supported
-- `signType` is fixed as `RSA2`
-- Private key supports both PKCS1 and PKCS8 PEM formats
+**Reference:** See [Bybit API authentication examples](https://github.com/bybit-exchange/api-usage-examples) for complete sample code.
 
 ---
 
@@ -30,102 +28,79 @@ All Agreement Payment APIs use RSA2 signature algorithm (SHA256withRSA with 2048
 **1. Construct String to Sign**
 
 ```
-String to sign = HTTP Method + "\n" + Request Path + "\n" + Timestamp + "\n" + Request Body
+# POST request:
+String to sign = timestamp + api_key + recv_window + raw_request_body
+
+# GET request:
+String to sign = timestamp + api_key + recv_window + queryString
 ```
 
-**Example:**
+**Example (POST):**
 ```
-POST
-/v5/bybitpay/agreement/pay
-1736233200000
-{"merchant_id":"M123456789","user_id":"U_123456789",...}
+1736233200000xxxxxxxxxxxxxxxxxx5000{"merchant_id":"M123456789","user_id":"U_123456789",...}
+```
+
+**Example (GET):**
+```
+1736233200000xxxxxxxxxxxxxxxxxx5000merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202601070001
 ```
 
 **2. Calculate Signature**
 
 ```
-Signature = Base64(RSA_SHA256_Sign(String to sign, Merchant Private Key))
+# HMAC_SHA256 (System-generated key):
+Signature = HEX(HMAC_SHA256(String to sign, api_secret))
+
+# RSA_SHA256 (Self-generated key):
+Signature = Base64(RSA_SHA256_Sign(String to sign, merchant_private_key))
 ```
 
 **3. Set Request Headers**
 
 ```
-X-Timestamp: 1736233200000
-X-Signature: Base64 encoded signature value
-X-Request-Id: Unique request identifier
-Authorization: Bearer {access_token}
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-SIGN: {calculated signature}
+X-BAPI-RECV-WINDOW: 5000
 ```
 
 ---
 
 ## Code Examples
 
-### Java
+### Java (HMAC_SHA256)
 
 ```java
-import java.security.*;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.HexFormat;
 
 public class SignatureUtil {
 
-    /**
-     * RSA2 Signature (SHA256withRSA)
-     */
-    public static String sign(String content, String privateKeyStr) throws Exception {
-        PrivateKey privateKey = loadPrivateKey(privateKeyStr);
-        Signature signature = Signature.getInstance("SHA256withRSA");
-        signature.initSign(privateKey);
-        signature.update(content.getBytes("UTF-8"));
-        return Base64.getEncoder().encodeToString(signature.sign());
-    }
-
-    /**
-     * Load private key (supports PKCS1 and PKCS8)
-     */
-    private static PrivateKey loadPrivateKey(String privateKeyStr) throws Exception {
-        // PKCS8 format
-        if (privateKeyStr.contains("BEGIN PRIVATE KEY")) {
-            String keyContent = privateKeyStr
-                    .replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replaceAll("\\s+", "");
-            byte[] keyBytes = Base64.getDecoder().decode(keyContent);
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            return keyFactory.generatePrivate(keySpec);
-        }
-        // PKCS1 format requires BouncyCastle library
-        throw new IllegalArgumentException("Unsupported private key format");
-    }
-
-    /**
-     * Construct request signature
-     */
-    public static String signRequest(String method, String path,
-                                      long timestamp, String body,
-                                      String privateKeyStr) throws Exception {
-        String content = method + "\n" + path + "\n" + timestamp + "\n" + body;
-        return sign(content, privateKeyStr);
+    public static String signHmac(String timestamp, String apiKey,
+                                   String recvWindow, String body,
+                                   String apiSecret) throws Exception {
+        String content = timestamp + apiKey + recvWindow + body;
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(new SecretKeySpec(apiSecret.getBytes("UTF-8"), "HmacSHA256"));
+        byte[] hash = mac.doFinal(content.getBytes("UTF-8"));
+        return HexFormat.of().formatHex(hash);
     }
 }
 ```
 
-### Python
+### Python (HMAC_SHA256)
 
 ```python
-import base64
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
+import hmac, hashlib
 
-def sign_request(method, path, timestamp, body, private_key):
-    content = f"{method}\n{path}\n{timestamp}\n{body}"
-    signature = private_key.sign(
+def sign_request(timestamp, api_key, recv_window, body, api_secret):
+    content = f"{timestamp}{api_key}{recv_window}{body}"
+    return hmac.new(
+        api_secret.encode('utf-8'),
         content.encode('utf-8'),
-        padding.PKCS1v15(),
-        hashes.SHA256()
-    )
-    return base64.b64encode(signature).decode('utf-8')
+        hashlib.sha256
+    ).hexdigest()
 ```
 
 ### cURL Example
@@ -133,49 +108,24 @@ def sign_request(method, path, timestamp, body, private_key):
 ```bash
 #!/bin/bash
 
-API_HOST="https://api.bybit.com"
+API_HOST="https://api2.bybit.com"
 API_PATH="/v5/bybitpay/agreement/pay"
-MERCHANT_PRIVATE_KEY="./merchant_private_key.pem"
-ACCESS_TOKEN="your_access_token"
+API_KEY="xxxxxxxxxxxxxxxxxx"
+API_SECRET="your_api_secret"
+RECV_WINDOW="5000"
 
-REQUEST_BODY='{
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "agreement_no": "AGR202601070001",
-  "out_trade_no": "ORDER20260107001",
-  "scene_code": "SUBSCRIPTION",
-  "amount": {
-    "total": "2350",
-    "currency": "USDT",
-    "currency_type": "CRYPTO",
-    "chain": "TRC20"
-  },
-  "order_info": {
-    "order_title": "Monthly subscription"
-  },
-  "notify_url": "https://merchant.com/notify/pay"
-}'
+REQUEST_BODY='{"merchant_id":"M123456789","user_id":"U_123456789","agreement_type":"CYCLE","agreement_no":"AGR202601070001","out_trade_no":"ORDER20260107001","scene_code":"SUBSCRIPTION","amount":{"total":"2350","currency":"USDT","currency_type":"CRYPTO","chain":"TRC20"},"order_info":{"order_title":"Monthly subscription"},"notify_url":"https://merchant.com/notify/pay"}'
 
 TIMESTAMP=$(date +%s000)
-REQUEST_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+SIGN_CONTENT="${TIMESTAMP}${API_KEY}${RECV_WINDOW}${REQUEST_BODY}"
+SIGNATURE=$(echo -n "$SIGN_CONTENT" | openssl dgst -sha256 -hmac "$API_SECRET" | awk '{print $2}')
 
-# Construct string to sign
-SIGN_CONTENT="POST
-${API_PATH}
-${TIMESTAMP}
-${REQUEST_BODY}"
-
-# Calculate RSA signature
-SIGNATURE=$(echo -n "$SIGN_CONTENT" | openssl dgst -sha256 -sign "$MERCHANT_PRIVATE_KEY" | base64 | tr -d '\n')
-
-# Send request
 curl -X POST "${API_HOST}${API_PATH}" \
   -H "Content-Type: application/json" \
-  -H "X-Request-Id: ${REQUEST_ID}" \
-  -H "X-Timestamp: ${TIMESTAMP}" \
-  -H "X-Signature: ${SIGNATURE}" \
-  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+  -H "X-BAPI-API-KEY: ${API_KEY}" \
+  -H "X-BAPI-TIMESTAMP: ${TIMESTAMP}" \
+  -H "X-BAPI-SIGN: ${SIGNATURE}" \
+  -H "X-BAPI-RECV-WINDOW: ${RECV_WINDOW}" \
   -d "${REQUEST_BODY}"
 ```
 
