@@ -12,9 +12,10 @@ This API is not yet publicly available. Please contact Bybit Pay team if you nee
 
 Recurring Payments (Auto-deduction) enables merchants to automatically deduct funds from users' Bybit accounts after users pre-authorize the agreement. No manual confirmation is required for each transaction.
 
-**Document Version**: v2.9
+**Document Version**: v2.10
 
 **Update History:**
+- **v2.10** (2026-03-29): Added merchant settlement configuration error code MERCHANT_SETTLEMENT_CONFIG_ERROR (139006004); Added merchant quota limit error code EXCEED_MERCHANT_QUOTA_LIMIT (139004008); Added chain_address field to amount and limit config in sign/deduction/sign-and-pay APIs
 - **v2.9** (2026-02-24): Added Agreement Type Description section detailing usage scenarios and limit configuration differences for CYCLE/NON_CYCLE/SINGLE types; Fixed missing NON_CYCLE in documentation
 - **v2.8** (2026-02-11): Expanded deduction API supported scene codes from 6 to 17, added FOOD, ENTERTAINMENT, EDUCATION, MEMBERSHIP, RENT, FITNESS, TELECOM, CLOUD, INSURANCE, LOAN, OTHERS
 - **v2.7**: Updated response format (retCode/retMsg/result), fixed field type descriptions, adjusted document structure

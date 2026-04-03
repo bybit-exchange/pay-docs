@@ -83,6 +83,8 @@ Error codes are returned through the `retCode` field in the response body. The `
 | 139004004 | INVALID_AMOUNT | Invalid amount | Check amount format and precision |
 | 139004005 | AMOUNT_EXCEED_SINGLE_LIMIT | Amount exceeds single limit | Lower amount or adjust limit config |
 | 139004006 | AMOUNT_EXCEED_PERIOD_LIMIT | Amount exceeds period limit | Wait for reset or adjust limit config |
+| 139004007 | USER_LIMIT_EXCEED_MERCHANT | User limit exceeds merchant limit | User custom limit cannot exceed agreement template limit |
+| 139004008 | EXCEED_MERCHANT_QUOTA_LIMIT | Exceed merchant quota limit | Contact merchant to adjust quota configuration |
 
 ---
 
@@ -103,6 +105,7 @@ Error codes are returned through the `retCode` field in the response body. The `
 |:-----------|:-----------|:------------|:---------|
 | 139006001 | MERCHANT_NOT_EXIST | Merchant does not exist | Check if merchant ID is correct |
 | 139006002 | USER_NOT_EXIST | User does not exist | Check if user ID is correct |
+| 139006004 | MERCHANT_SETTLEMENT_CONFIG_ERROR | Merchant settlement configuration error | Contact platform to check merchant settlement configuration |
 
 ---
 
@@ -135,7 +138,7 @@ These errors require business logic handling:
 - `139001001` - `139001013` (Agreement errors)
 - `139002001` - `139002004` (Transaction errors)
 - `139003001` - `139003004` (Refund errors)
-- `139004001` - `139004006` (Amount errors)
+- `139004001` - `139004008` (Amount errors)
 - `139005001` - `139005004` (Security errors)
 
 ### User-Facing Error Messages

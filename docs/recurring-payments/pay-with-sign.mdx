@@ -42,12 +42,14 @@ This API supports merchants to complete both agreement signing and deduction pay
 | sign_params.single_limit.currency | string | Conditional | Currency code (required when passing single_limit) |
 | sign_params.single_limit.currency_type | string | Conditional | `FIAT` or `CRYPTO` (required when passing single_limit) |
 | sign_params.single_limit.chain | string | No | Chain network (optional for cryptocurrency) |
+| sign_params.single_limit.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | sign_params.period_limits | array | No | Period limit configuration list |
 | sign_params.period_limits[].period_type | string | Conditional | Period type: `DAY`/`WEEK`/`MONTH`/`YEAR` |
 | sign_params.period_limits[].amount | string | Conditional | Period limit amount |
 | sign_params.period_limits[].currency | string | Conditional | Currency code |
 | sign_params.period_limits[].currency_type | string | Conditional | `FIAT` or `CRYPTO` |
 | sign_params.period_limits[].chain | string | No | Chain network (optional for cryptocurrency) |
+| sign_params.period_limits[].chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | sign_params.sign_notify_url | string | No | Sign result async notification URL |
 | sign_params.return_url | string | No | Redirect URL after sign completion |
 | sign_params.sign_expire_minutes | int | No | Sign link validity period (minutes), default 30 |
@@ -61,6 +63,7 @@ This API supports merchants to complete both agreement signing and deduction pay
 | pay_params.amount.currency | string | **Yes** | Currency code |
 | pay_params.amount.currency_type | string | **Yes** | `FIAT` or `CRYPTO` |
 | pay_params.amount.chain | string | No | Chain network (required for crypto) |
+| pay_params.amount.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | pay_params.order_info | object | **Yes** | Order information |
 | pay_params.order_info.order_title | string | **Yes** | Order title |
 | pay_params.order_info.order_desc | string | No | Order description |

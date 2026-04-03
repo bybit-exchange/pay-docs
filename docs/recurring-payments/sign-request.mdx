@@ -29,12 +29,14 @@ Create a sign request to initiate the agreement signing process. Returns a QR co
 | single_limit.currency | string | Conditional | Currency code |
 | single_limit.currency_type | string | Conditional | `FIAT` or `CRYPTO` |
 | single_limit.chain | string | No | Chain network (for crypto, e.g., ERC20, TRC20) |
+| single_limit.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | period_limits | array | No | Period limit configuration list |
 | period_limits[].period_type | string | Conditional | `DAY` / `WEEK` / `MONTH` / `YEAR` |
 | period_limits[].amount | string | Conditional | Period limit amount |
 | period_limits[].currency | string | Conditional | Currency code |
 | period_limits[].currency_type | string | Conditional | `FIAT` or `CRYPTO` |
 | period_limits[].chain | string | No | Chain network |
+| period_limits[].chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | return_url | string | No | Redirect URL after sign completion |
 | sign_expire_minutes | int | No | Sign link validity (minutes), default 30, max 1440 |
 | extra_params | string | No | Extension parameters (JSON string, passed through) |

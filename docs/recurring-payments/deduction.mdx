@@ -27,6 +27,7 @@ Execute automatic deduction from user's account using a signed agreement. This i
 | amount.currency | string | **Yes** | Currency code |
 | amount.currency_type | string | **Yes** | `FIAT` or `CRYPTO` |
 | amount.chain | string | No | Chain network (required for crypto) |
+| amount.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | order_info | object | **Yes** | Order information |
 | order_info.order_title | string | **Yes** | Order title (displayed to user) |
 | order_info.order_desc | string | No | Order description |

@@ -1,10 +1,11 @@
 # Agreement Payment API Documentation
 
-**Document Version**: v2.9
+**Document Version**: v2.10
 
-**Update Date**: 2026-02-24
+**Update Date**: 2026-03-29
 
 **Update History**:
+- v2.10: Added merchant settlement configuration error code MERCHANT_SETTLEMENT_CONFIG_ERROR (139006004); Added merchant quota limit error code EXCEED_MERCHANT_QUOTA_LIMIT (139004008); Added chain_address field to amount and limit config in sign/deduction/sign-and-pay APIs
 - v2.9: Added Agreement Type Description section (7.5) detailing the usage scenarios and limit configuration differences for CYCLE/NON_CYCLE/SINGLE types; Fixed 4 instances of missing NON_CYCLE in English documentation
 - v2.8: Expanded agreement pay API supported scene codes from 6 to 17 (added FOOD/ENTERTAINMENT/EDUCATION/MEMBERSHIP/RENT/FITNESS/TELECOM/CLOUD/INSURANCE/LOAN/OTHERS), fully consistent with sign API scene codes
 - v2.7: Fixed unsign API failure response example field names (code→retCode, message→retMsg); Fixed rate limiting response format field names
@@ -587,12 +588,14 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | single_limit.currency | string | No | Currency code (required when passing single_limit) |
 | single_limit.currency_type | string | No | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) (required when passing single_limit) |
 | single_limit.chain | string | No | Chain network (optional for cryptocurrency, e.g.: ERC20/TRC20/Arbitrum) |
+| single_limit.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | period_limits | array | No | Period limit configuration list (supports configuring limits for multiple period types) |
 | period_limits[].period_type | string | No | Period type: DAY/WEEK/MONTH/YEAR (required when passing period_limits) |
 | period_limits[].amount | string | No | Period limit amount (required when passing period_limits) |
 | period_limits[].currency | string | No | Currency code (required when passing period_limits) |
 | period_limits[].currency_type | string | No | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) (required when passing period_limits) |
 | period_limits[].chain | string | No | Chain network (optional for cryptocurrency, e.g.: ERC20/TRC20/Arbitrum) |
+| period_limits[].chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | notify_url | string | Yes | Sign result async notification URL |
 | return_url | string | No | Redirect URL after sign completion (can be omitted for App scan scenario) |
 | sign_expire_minutes | int | No | Sign link validity period (minutes), default 30, max 1440 (24 hours) |
@@ -769,6 +772,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | amount.currency | string | Yes | Currency code |
 | amount.currency_type | string | Yes | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) |
 | amount.chain | string | No | Chain network (required for cryptocurrency, e.g.: ERC20/TRC20/Arbitrum) |
+| amount.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | order_info | object | Yes | Order information |
 | order_info.order_title | string | Yes | Order title (displayed to user) |
 | order_info.order_desc | string | No | Order description |
@@ -995,12 +999,14 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | sign_params.single_limit.currency | string | Conditional | Currency code (required when passing single_limit) |
 | sign_params.single_limit.currency_type | string | Conditional | Currency type: FIAT/CRYPTO (required when passing single_limit) |
 | sign_params.single_limit.chain | string | No | Chain network (optional for cryptocurrency) |
+| sign_params.single_limit.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | sign_params.period_limits | array | No | Period limit configuration list |
 | sign_params.period_limits[].period_type | string | Conditional | Period type: DAY/WEEK/MONTH/YEAR (required when passing period_limits) |
 | sign_params.period_limits[].amount | string | Conditional | Period limit amount (required when passing period_limits) |
 | sign_params.period_limits[].currency | string | Conditional | Currency code (required when passing period_limits) |
 | sign_params.period_limits[].currency_type | string | Conditional | Currency type: FIAT/CRYPTO (required when passing period_limits) |
 | sign_params.period_limits[].chain | string | No | Chain network (optional for cryptocurrency) |
+| sign_params.period_limits[].chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | sign_params.sign_notify_url | string | No | Sign result async notification URL |
 | sign_params.return_url | string | No | Redirect URL after sign completion |
 | sign_params.sign_expire_minutes | int | No | Sign link validity period (minutes), default 30 |
@@ -1014,6 +1020,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | pay_params.amount.currency | string | Yes | Currency code |
 | pay_params.amount.currency_type | string | Yes | Currency type: FIAT/CRYPTO |
 | pay_params.amount.chain | string | No | Chain network (required for cryptocurrency) |
+| pay_params.amount.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | pay_params.order_info | object | Yes | Order information |
 | pay_params.order_info.order_title | string | Yes | Order title |
 | pay_params.order_info.order_desc | string | No | Order description |
@@ -3131,6 +3138,8 @@ MIIEvgIBADANBgkq...(Base64 encoded content)
 | 139004004 | INVALID_AMOUNT | Invalid amount | Invalid amount | Check if amount format and precision meet requirements |
 | 139004005 | AMOUNT_EXCEED_SINGLE_LIMIT | Amount exceeds single transaction limit | Amount exceeds single transaction limit | Lower single deduction amount or adjust agreement limit configuration |
 | 139004006 | AMOUNT_EXCEED_PERIOD_LIMIT | Amount exceeds period limit | Amount exceeds period limit | Wait for period reset or adjust agreement limit configuration |
+| 139004007 | USER_LIMIT_EXCEED_MERCHANT | User limit exceeds merchant limit | User limit exceeds merchant limit | User custom limit cannot exceed agreement template limit |
+| 139004008 | EXCEED_MERCHANT_QUOTA_LIMIT | Exceed merchant quota limit | Exceed merchant quota limit | Contact merchant to adjust quota configuration |
 
 ### 6.6 Security/Authentication Related Error Codes
 
@@ -3148,6 +3157,7 @@ MIIEvgIBADANBgkq...(Base64 encoded content)
 | 139006001 | MERCHANT_NOT_EXIST | Merchant does not exist | Merchant does not exist | Check if merchant ID is correct |
 | 139006002 | USER_NOT_EXIST | User does not exist | User does not exist | Check if user ID is correct |
 | 139006003 | USER_NOT_LOGIN | User not logged in | User not logged in | Require user to log in |
+| 139006004 | MERCHANT_SETTLEMENT_CONFIG_ERROR | Merchant settlement configuration error | Merchant settlement configuration error | Contact platform to check merchant settlement configuration |
 
 ### 6.8 Order Related Error Codes
 
