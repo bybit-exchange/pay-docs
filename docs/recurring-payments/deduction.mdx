@@ -26,7 +26,7 @@ Execute automatic deduction from user's account using a signed agreement. This i
 | amount.total | string | **Yes** | Amount (minimum unit) |
 | amount.currency | string | **Yes** | Currency code |
 | amount.currency_type | string | **Yes** | `FIAT` or `CRYPTO` |
-| amount.chain | string | No | Chain network (required for crypto) |
+| amount.chain | string | No | Chain network (required for crypto, e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
 | amount.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
 | order_info | object | **Yes** | Order information |
 | order_info.order_title | string | **Yes** | Order title (displayed to user) |
@@ -64,7 +64,7 @@ Execute automatic deduction from user's account using a signed agreement. This i
 | result.crypto_payment | object | Actual crypto payment info (for fiat orders) |
 | result.crypto_payment.currency | string | Cryptocurrency (e.g., USDT) |
 | result.crypto_payment.amount | string | Cryptocurrency amount |
-| result.crypto_payment.chain | string | Chain network |
+| result.crypto_payment.chain | string | Chain network (e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
 | result.crypto_payment.exchange_rate | string | Exchange rate |
 | result.crypto_payment.rate_time | string | Rate lock time |
 | result.pay_time | string | Payment time (on success) |
