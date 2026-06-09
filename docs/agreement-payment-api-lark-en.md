@@ -2900,7 +2900,7 @@ The following example shows how to initiate a signed request using cURL (using a
 #!/bin/bash
 
 # Configuration parameters
-API_HOST="https://api2.bybit.com"
+API_HOST="https://api.bybit.com"
 API_PATH="/v5/bybitpay/agreement/pay"
 MERCHANT_PRIVATE_KEY="./merchant_private_key.pem"
 ACCESS_TOKEN="your_access_token"

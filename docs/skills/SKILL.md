@@ -18,8 +18,8 @@ sidebar_position: 0
 | **Recurring Payments** | Auto-deduction (utilities, subscriptions, ride-hailing) | Sign agreement → Deduct → Webhook notify |
 
 Base URL:
-- Mainnet: `https://api2.bybit.com` or `https://api.bytick.com`
-- Testnet: `https://api2-testnet.bybit.com`
+- Mainnet: `https://api.bybit.com` or `https://api.bytick.com`
+- Testnet: `https://api-testnet.bybit.com`
 
 ---
 
