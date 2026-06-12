@@ -1,0 +1,35 @@
+docs/scan-payment/data-model/pay-order.mdx
+  7000fbfe3c15ed3a 21-23
+docs/scan-payment/create-payment.mdx
+  7000fbfe3c15ed3a 30-31,92-94,124-126
+docs/scan-payment/payment-result.mdx
+  7000fbfe3c15ed3a 87-90,123-127
+docs/scan-payment/data-model/customer.mdx
+  7000fbfe3c15ed3a 13-15
+docs/scan-payment/payment-notify.mdx
+  7000fbfe3c15ed3a 34
+docs/scan-payment/onchain-notify.mdx
+  7000fbfe3c15ed3a 1-59
+docs/scan-payment/data-model/payment-type.mdx
+  7000fbfe3c15ed3a 12-13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2-bit.9+daa2e24",
+  "base_commit_sha": "b03606144284eb391b3a6663497ab3259b9d99cd",
+  "prompts": {
+    "7000fbfe3c15ed3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "65b8caea-6671-4e34-8f90-61e958f7724a",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "dawson.hou",
+      "messages": [],
+      "total_additions": 85,
+      "total_deletions": 5,
+      "accepted_lines": 85,
+      "overriden_lines": 0
+    }
+  }
+}
