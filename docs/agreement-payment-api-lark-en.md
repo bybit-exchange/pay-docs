@@ -1460,15 +1460,17 @@ After user completes sign and payment via scanning, system sends async notificat
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
 | merchant_id | string | Yes | Merchant ID |
-| user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
 | agreement_no | string | Either | Platform agreement number |
 | external_agreement_no | string | Either | Merchant agreement number |
+
+:::info
+Either `agreement_no` or `external_agreement_no` must be provided.
+:::
 
 #### Request Example
 
 ```
-GET /v5/bybitpay/agreement/query?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202312230001
+GET /v5/bybitpay/agreement/query?merchant_id=M123456789&agreement_no=AGR202312230001
 ```
 
 #### Response Parameters

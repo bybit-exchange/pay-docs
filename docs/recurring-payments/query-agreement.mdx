@@ -17,8 +17,6 @@ Query single agreement status and details.
 | Parameter | Type | Required | Description |
 |:----------|:-----|:---------|:------------|
 | merchant_id | string | **Yes** | Merchant ID |
-| user_id | string | **Yes** | Platform user ID |
-| agreement_type | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
 | agreement_no | string | Either | Platform agreement number |
 | external_agreement_no | string | Either | Merchant agreement number |
 
@@ -51,7 +49,7 @@ Either `agreement_no` or `external_agreement_no` must be provided.
 ## Request Example
 
 ```
-GET /v5/bybitpay/agreement/query?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202601070001 HTTP/1.1
+GET /v5/bybitpay/agreement/query?merchant_id=M123456789&agreement_no=AGR202601070001 HTTP/1.1
 Host: api2.bybit.com
 X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
 X-BAPI-TIMESTAMP: 1736233200000
