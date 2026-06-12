@@ -27,6 +27,8 @@ POST `/v5/bybitpay/create_pay`
 |env | **true**|&lt;[EnvType](data-model/env)&gt; |Transaction source|
 |riskInfo |false|&lt;[RiskInfoType](data-model/risk-info)&gt; |Risk info for order pay|
 |remark |false|string |Payment remark, max 50 characters|
+|chainAddress |false|string |Chain address|
+|chainType |false|string |The receiver's chain type (BSC/TRX/ARBI/LTC/SOL/ETH/TON/APTOS)|
 
 ### Response Parameters
 | Parameter | Type | Comments|
@@ -87,7 +89,9 @@ Content-Type: application/json
     },
     "riskInfo": {
         "terminalType": "WEB"
-    }
+    },
+    "chainAddress": "",
+    "chainType": ""
 }
 ```
 
@@ -117,7 +121,9 @@ Content-Type: application/json
             "paymentTime": 0,
             "finishTime": 0,
             "refundOrders": [],
-            "remark": "Order for digital goods"
+            "remark": "Order for digital goods",
+            "chainAddress": "",
+            "chainType": ""
         },
         "customer": {
             "uid": "104326789",

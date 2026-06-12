@@ -31,7 +31,7 @@ All timestamp fields in webhook callbacks use **Unix timestamp in seconds** (10 
 ### Callback Request Parameters
 | Parameter | Type | Comments|
 |:----- |:-----|----- |
-|paymentType |string |Payment type  <li>`E_COMMERCE`: Bybit QR Pay for e-commerce</li><li>`E_COMMERCE_REFUND`: Bybit QR Pay refund for e-commerce</li>|
+|paymentType |string |Payment type  <li>`E_COMMERCE`: Bybit QR Pay for e-commerce</li><li>`E_COMMERCE_REFUND`: Bybit QR Pay refund for e-commerce</li><li>`ONCHAIN_PAY`: Bybit On-chain pay</li><li>`ONCHAIN_PAY_REFUND`: Bybit On-chain pay refund</li>|
 | |&lt;[PayOrderType](data-model/pay-order)&gt; |Returned when "paymentType"=`E_COMMERCE`|
 | |&lt;[RefundOrderType](data-model/refund-order)&gt; |Returned when "paymentType"=`E_COMMERCE_REFUND`|
 

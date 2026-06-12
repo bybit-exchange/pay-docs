@@ -1,0 +1,59 @@
+---
+title: OnChain Notify
+sidebar_label: OnChain Notify
+---
+### HTTP Request
+POST `/v5/bybitpay/onchain/notify`
+
+### Request Parameters
+| Parameter | Required | Type | Comments|
+|:----- |:-------|:-----|------ |
+|notifyType |**true** |string |Notify type: `ONCHAIN_REFUND`, `ONCHAIN_PARTIAL_REFUND`|
+|merchantTradeNo |**oneof**|string |Merchant trade order number, **required** if `payId` is not provided|
+|payId |**oneof**|string |The Bybit order ID, **required** if `merchantTradeNo` is not provided|
+|amount |**true**|string |Refund amount|
+|currency |**true**|string |Refund currency|
+|onChainInfo |**true**|Object |User block chain info|
+|onChainInfo.chainType |**true**|string |The receiver's chain type (BSC/TRX/ARBI/LTC/SOL/ETH/TON/APTOS)|
+|onChainInfo.chainAddress |**true**|string |The receiver's chain address|
+|onChainInfo.blockHash |**true**|string |The block hash|
+
+### Response Parameters
+| Parameter | Type | Comments|
+|:----- |:-----|----- |
+|retCode |number |Return Code, 100000: success|
+|retMsg |string |Return Message|
+
+### Request Example
+
+```http
+POST /v5/bybitpay/onchain/notify HTTP/1.1
+Host: api2.bybit.com
+X-BAPI-SIGN: XXXXX
+X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
+X-BAPI-TIMESTAMP: 1736233200000
+X-BAPI-RECV-WINDOW: 5000
+Content-Type: application/json
+
+{
+    "notifyType": "ONCHAIN_REFUND",
+    "merchantTradeNo": "af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c",
+    "payId": "01JY2KM5QNPXR8S4HTJZT9BC12",
+    "amount": "20",
+    "currency": "USDT",
+    "onChainInfo": {
+        "chainType": "TRC20",
+        "chainAddress": "TXxx...xxxx",
+        "blockHash": "17D8E6558DC60E702A6B57E1B9B7060D"
+    }
+}
+```
+
+### Response Example
+
+```json
+{
+    "retCode": 100000,
+    "retMsg": "success"
+}
+```
