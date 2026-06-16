@@ -51,6 +51,7 @@ const sidebars = {
               items: [
                 'scan-payment/refund',
                 'scan-payment/payout',
+                'scan-payment/onchain-notify',
               ]
             },
             'scan-payment/settlement',

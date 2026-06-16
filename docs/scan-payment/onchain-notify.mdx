@@ -11,7 +11,7 @@ POST `/v5/bybitpay/onchain/notify`
 |notifyType |**true** |string |Notify type: `ONCHAIN_REFUND`, `ONCHAIN_PARTIAL_REFUND`|
 |merchantTradeNo |**oneof**|string |Merchant trade order number, **required** if `payId` is not provided|
 |payId |**oneof**|string |The Bybit order ID, **required** if `merchantTradeNo` is not provided|
-|amount |**true**|string |Refund amount|
+|amount |**true**|double |Refund amount|
 |currency |**true**|string |Refund currency|
 |onChainInfo |**true**|Object |User block chain info|
 |onChainInfo.chainType |**true**|string |The receiver's chain type (BSC/TRX/ARBI/LTC/SOL/ETH/TON/APTOS)|
@@ -21,7 +21,7 @@ POST `/v5/bybitpay/onchain/notify`
 ### Response Parameters
 | Parameter | Type | Comments|
 |:----- |:-----|----- |
-|retCode |number |Return Code, 100000: success|
+|retCode |number |Return Code, 100000: success, not 0: failed, See \<Error Code\>|
 |retMsg |string |Return Message|
 
 ### Request Example
