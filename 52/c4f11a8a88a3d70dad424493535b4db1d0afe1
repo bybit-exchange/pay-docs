@@ -1,0 +1,25 @@
+docs/scan-payment/onchain-notify.mdx
+  fc53122c17e5674d 14,24
+sidebars.js
+  fc53122c17e5674d 54
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2-bit.9+daa2e24",
+  "base_commit_sha": "52c4f11a8a88a3d70dad424493535b4db1d0afe1",
+  "prompts": {
+    "fc53122c17e5674d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4ee408dc-a698-4538-9621-74ff2e9932c2",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "dawson.hou",
+      "messages": [],
+      "total_additions": 9,
+      "total_deletions": 8,
+      "accepted_lines": 5,
+      "overriden_lines": 0
+    }
+  }
+}
