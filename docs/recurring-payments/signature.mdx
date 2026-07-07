@@ -6,18 +6,22 @@ sidebar_position: 12
 
 ## Overview
 
-All Agreement Payment APIs use the same authentication mechanism as QR Payment: HMAC_SHA256 or RSA_SHA256 signature via standard Bybit API headers.
+All Agreement Payment APIs use RSA2 (SHA256withRSA) signature for authentication. This system only supports RSA2 signature algorithm.
 
 ---
 
 ## Signature Algorithm
 
-| Algorithm | Key Type | Signature Header | Description |
-|:----------|:---------|:-----------------|:------------|
-| HMAC_SHA256 | API Secret (symmetric) | `X-BAPI-SIGN` (hex) | System-generated API key |
-| RSA_SHA256 | RSA private key (asymmetric) | `X-BAPI-SIGN` (base64) | Self-generated API key |
+| Algorithm | Description |
+|:----------|:------------|
+| RSA2 | RSA-SHA256 with 2048-bit key (`signType=RSA2`) |
 
-**Reference:** See [Bybit API authentication examples](https://github.com/bybit-exchange/api-usage-examples) for complete sample code.
+**Notes:**
+- Only RSA2 signature algorithm (SHA256withRSA) is supported; HMAC-SHA256 is NOT supported
+- `signType` is fixed as `RSA2`
+- Private key supports both PKCS1 and PKCS8 PEM formats:
+  - PKCS1 format: `-----BEGIN RSA PRIVATE KEY-----`
+  - PKCS8 format: `-----BEGIN PRIVATE KEY-----`
 
 ---
 
@@ -28,79 +32,124 @@ All Agreement Payment APIs use the same authentication mechanism as QR Payment: 
 **1. Construct String to Sign**
 
 ```
-# POST request:
-String to sign = timestamp + api_key + recv_window + raw_request_body
-
-# GET request:
-String to sign = timestamp + api_key + recv_window + queryString
+String to sign = HTTP Method + "\n" + Request Path + "\n" + Timestamp + "\n" + Request Body
 ```
 
-**Example (POST):**
+**Example:**
 ```
-1736233200000xxxxxxxxxxxxxxxxxx5000{"merchant_id":"M123456789","user_id":"U_123456789",...}
-```
-
-**Example (GET):**
-```
-1736233200000xxxxxxxxxxxxxxxxxx5000merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202601070001
+POST
+/v5/pay/agreement/deduction
+1703318400000
+{"merchant_id":"M123456789","user_id":"U_123456789",...}
 ```
 
 **2. Calculate Signature**
 
 ```
-# HMAC_SHA256 (System-generated key):
-Signature = HEX(HMAC_SHA256(String to sign, api_secret))
-
-# RSA_SHA256 (Self-generated key):
-Signature = Base64(RSA_SHA256_Sign(String to sign, merchant_private_key))
+Signature = Base64(RSA_SHA256_Sign(String to sign, Merchant Private Key))
 ```
 
 **3. Set Request Headers**
 
 ```
-X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
-X-BAPI-TIMESTAMP: 1736233200000
-X-BAPI-SIGN: {calculated signature}
-X-BAPI-RECV-WINDOW: 5000
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440000
+X-Timestamp: 1703318400000
+X-Signature: Base64 encoded signature value
+Authorization: Bearer {access_token}
 ```
 
 ---
 
 ## Code Examples
 
-### Java (HMAC_SHA256)
+### Java (RSA2)
+
+Supports both PKCS1 and PKCS8 private key formats:
 
 ```java
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.util.HexFormat;
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 
 public class SignatureUtil {
 
-    public static String signHmac(String timestamp, String apiKey,
-                                   String recvWindow, String body,
-                                   String apiSecret) throws Exception {
-        String content = timestamp + apiKey + recvWindow + body;
-        Mac mac = Mac.getInstance("HmacSHA256");
-        mac.init(new SecretKeySpec(apiSecret.getBytes("UTF-8"), "HmacSHA256"));
-        byte[] hash = mac.doFinal(content.getBytes("UTF-8"));
-        return HexFormat.of().formatHex(hash);
+    /**
+     * RSA2 Signature (SHA256withRSA)
+     */
+    public static String sign(String content, String privateKeyStr) throws Exception {
+        PrivateKey privateKey = loadPrivateKey(privateKeyStr);
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initSign(privateKey);
+        signature.update(content.getBytes("UTF-8"));
+        return Base64.getEncoder().encodeToString(signature.sign());
+    }
+
+    /**
+     * Load private key (auto-detect PKCS1 and PKCS8 formats)
+     */
+    private static PrivateKey loadPrivateKey(String privateKeyStr) throws Exception {
+        if (privateKeyStr.contains("BEGIN PRIVATE KEY")) {
+            String keyContent = privateKeyStr
+                    .replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "")
+                    .replaceAll("\\s+", "");
+            byte[] keyBytes = Base64.getDecoder().decode(keyContent);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            return keyFactory.generatePrivate(keySpec);
+        } else if (privateKeyStr.contains("BEGIN RSA PRIVATE KEY")) {
+            PEMParser pemParser = new PEMParser(new java.io.StringReader(privateKeyStr));
+            Object object = pemParser.readObject();
+            pemParser.close();
+            JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+            if (object instanceof PEMKeyPair) {
+                return converter.getPrivateKey(((PEMKeyPair) object).getPrivateKeyInfo());
+            }
+            throw new IllegalArgumentException("Invalid PKCS1 private key");
+        }
+        throw new IllegalArgumentException("Unsupported private key format");
+    }
+
+    /**
+     * Construct request signature
+     */
+    public static String signRequest(String method, String path,
+                                      long timestamp, String body,
+                                      String privateKeyStr) throws Exception {
+        String content = method + "\n" + path + "\n" + timestamp + "\n" + body;
+        return sign(content, privateKeyStr);
     }
 }
 ```
 
-### Python (HMAC_SHA256)
+**Maven Dependency (BouncyCastle, for PKCS1 format support):**
+
+```xml
+<dependency>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcpkix-jdk15on</artifactId>
+    <version>1.70</version>
+</dependency>
+```
+
+### Python (RSA2)
 
 ```python
-import hmac, hashlib
+import base64
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
 
-def sign_request(timestamp, api_key, recv_window, body, api_secret):
-    content = f"{timestamp}{api_key}{recv_window}{body}"
-    return hmac.new(
-        api_secret.encode('utf-8'),
+def sign(method, path, timestamp, body, private_key):
+    content = f"{method}\n{path}\n{timestamp}\n{body}"
+    signature = private_key.sign(
         content.encode('utf-8'),
-        hashlib.sha256
-    ).hexdigest()
+        padding.PKCS1v15(),
+        hashes.SHA256()
+    )
+    return base64.b64encode(signature).decode('utf-8')
 ```
 
 ### cURL Example
@@ -109,23 +158,45 @@ def sign_request(timestamp, api_key, recv_window, body, api_secret):
 #!/bin/bash
 
 API_HOST="https://api.bybit.com"
-API_PATH="/v5/bybitpay/agreement/pay"
-API_KEY="xxxxxxxxxxxxxxxxxx"
-API_SECRET="your_api_secret"
-RECV_WINDOW="5000"
+API_PATH="/v5/pay/agreement/deduction"
+MERCHANT_PRIVATE_KEY="./merchant_private_key.pem"
+ACCESS_TOKEN="your_access_token"
 
-REQUEST_BODY='{"merchant_id":"M123456789","user_id":"U_123456789","agreement_type":"CYCLE","agreement_no":"AGR202601070001","out_trade_no":"ORDER20260107001","scene_code":"SUBSCRIPTION","amount":{"total":"2350","currency":"USDT","currency_type":"CRYPTO","chain":"TRC20"},"order_info":{"order_title":"Monthly subscription"},"notify_url":"https://merchant.com/notify/pay"}'
+REQUEST_BODY='{
+  "merchant_id": "M123456789",
+  "user_id": "U_123456789",
+  "agreement_type": "CYCLE",
+  "agreement_no": "AGR202312230001",
+  "out_trade_no": "TAXI20231224001",
+  "scene_code": "TAXI",
+  "amount": {
+    "total": "2350",
+    "currency": "USDT",
+    "currency_type": "CRYPTO",
+    "chain": "TRC20"
+  },
+  "order_info": {
+    "order_title": "Ride fare"
+  },
+  "notify_url": "https://merchant.com/notify/pay"
+}'
 
 TIMESTAMP=$(date +%s000)
-SIGN_CONTENT="${TIMESTAMP}${API_KEY}${RECV_WINDOW}${REQUEST_BODY}"
-SIGNATURE=$(echo -n "$SIGN_CONTENT" | openssl dgst -sha256 -hmac "$API_SECRET" | awk '{print $2}')
+REQUEST_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')
+
+SIGN_CONTENT="POST
+${API_PATH}
+${TIMESTAMP}
+${REQUEST_BODY}"
+
+SIGNATURE=$(echo -n "$SIGN_CONTENT" | openssl dgst -sha256 -sign "$MERCHANT_PRIVATE_KEY" | base64 | tr -d '\n')
 
 curl -X POST "${API_HOST}${API_PATH}" \
   -H "Content-Type: application/json" \
-  -H "X-BAPI-API-KEY: ${API_KEY}" \
-  -H "X-BAPI-TIMESTAMP: ${TIMESTAMP}" \
-  -H "X-BAPI-SIGN: ${SIGNATURE}" \
-  -H "X-BAPI-RECV-WINDOW: ${RECV_WINDOW}" \
+  -H "X-Request-Id: ${REQUEST_ID}" \
+  -H "X-Timestamp: ${TIMESTAMP}" \
+  -H "X-Signature: ${SIGNATURE}" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -d "${REQUEST_BODY}"
 ```
 
@@ -133,38 +204,47 @@ curl -X POST "${API_HOST}${API_PATH}" \
 
 ## Webhook Signature Verification
 
+Merchant needs to verify signature after receiving Webhook notification to prevent forged requests.
+
 ### Verification Steps
 
-1. Get `sign` and `signType` from request body
-2. Remove `sign` and `signType` to get content to verify
-3. Use platform public key to verify signature (RSA2/SHA256withRSA)
-4. Verify timestamp from `X-Timestamp` header (within 5 minutes)
+1. Get signature-related parameters from HTTP request headers: `X-Timestamp`, `X-Signature`, `X-Nonce`, `X-Sign-Type`
+2. Verify timestamp: Check if `X-Timestamp` is within 5 minutes of current server time (prevent replay attack)
+3. Construct content to verify: `timestamp + nonce + requestBody` (string concatenation, not JSON format)
+4. Request body is pure JSON: Contains only business fields (notifyId, notifyType, notifyTime, merchantId, data), no signature fields need to be removed
+5. Use platform public key to verify signature (RSA2/SHA256withRSA)
 
 ### Java Example
 
 ```java
+import java.security.*;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
+
 public class WebhookVerifier {
 
-    public boolean verifyWebhook(String body, String timestamp,
-                                  String platformPublicKey) throws Exception {
-        // 1. Check timestamp
+    /**
+     * Verify Webhook signature
+     * @param body Original request body JSON string (pure JSON, only business fields)
+     * @param timestamp X-Timestamp from request header
+     * @param nonce X-Nonce from request header
+     * @param signature X-Signature from request header
+     * @param platformPublicKey Platform public key (PEM format)
+     */
+    public boolean verifyWebhook(String body, String timestamp, String nonce,
+                                  String signature, String platformPublicKey) throws Exception {
+        // 1. Check timestamp (prevent replay attack)
         long now = System.currentTimeMillis();
         long ts = Long.parseLong(timestamp);
         if (Math.abs(now - ts) > 5 * 60 * 1000) {
             return false;
         }
 
-        // 2. Extract signature
-        JSONObject notify = JSONObject.parseObject(body);
-        String sign = notify.getString("sign");
+        // 2. Construct content to verify: timestamp + nonce + requestBody
+        String contentToVerify = timestamp + nonce + body;
 
-        // 3. Remove sign and signType
-        notify.remove("sign");
-        notify.remove("signType");
-        String contentToVerify = notify.toJSONString();
-
-        // 4. Verify RSA2 signature
-        return verifyRSA2(contentToVerify, sign, platformPublicKey);
+        // 3. Use platform public key to verify RSA2 signature (SHA256withRSA)
+        return verifyRSA2(contentToVerify, signature, platformPublicKey);
     }
 
     private boolean verifyRSA2(String content, String signBase64,
@@ -193,22 +273,22 @@ public class WebhookVerifier {
 
 | Key Type | Purpose | Custodian | Format |
 |:---------|:--------|:----------|:-------|
-| Merchant Private Key | Sign API requests | Merchant (confidential) | PEM (PKCS1/PKCS8) |
-| Merchant Public Key | Platform verifies requests | Platform | PEM (X.509) |
-| Platform Private Key | Sign webhooks | Platform | PEM |
-| Platform Public Key | Verify webhooks | Merchant | PEM (X.509) |
+| Merchant Private Key | Sign API requests (RSA2) | Merchant (strictly confidential) | PEM (PKCS1 or PKCS8) |
+| Merchant Public Key | Platform verifies merchant requests | Platform | PEM (X.509) |
+| Platform Private Key | Sign webhook notifications (RSA2) | Platform | PEM |
+| Platform Public Key | Merchant verifies webhooks | Merchant | PEM (X.509) |
 
 ### Private Key Formats
 
 ```
-# PKCS1 format
+# PKCS1 format (traditional RSA format)
 -----BEGIN RSA PRIVATE KEY-----
-MIIEpAIBAAKCAQEA...
+MIIEpAIBAAKCAQEA...(Base64 encoded content)
 -----END RSA PRIVATE KEY-----
 
-# PKCS8 format (recommended)
+# PKCS8 format (PKCS#8 standard format, recommended)
 -----BEGIN PRIVATE KEY-----
-MIIEvgIBADANBgkq...
+MIIEvgIBADANBgkq...(Base64 encoded content)
 -----END PRIVATE KEY-----
 ```
 
@@ -218,4 +298,4 @@ MIIEvgIBADANBgkq...
 2. Rotate keys periodically (recommended annually)
 3. Contact platform immediately if key is compromised
 4. Use different keys for test and production environments
-5. PKCS8 format is recommended for better compatibility
+5. PKCS8 format is recommended (more universal); if using PKCS1 format, BouncyCastle library is required

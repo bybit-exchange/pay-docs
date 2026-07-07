@@ -12,9 +12,10 @@ This API is not yet publicly available. Please contact Bybit Pay team if you nee
 
 Recurring Payments (Auto-deduction) enables merchants to automatically deduct funds from users' Bybit accounts after users pre-authorize the agreement. No manual confirmation is required for each transaction.
 
-**Document Version**: v2.10
+**Document Version**: v2.11
 
 **Update History:**
+- **v2.11** (2026-06-09): Added REJECTED agreement status (user actively canceled signing); Sign-with-pay Webhook changed to independent notifications to signNotifyUrl/payNotifyUrl; Added sign rejected notification (eventType=REJECTED) and sign failed notification (eventType=AGREEMENT_SIGN_RESULT); Added EXPIRED event type; Fixed timeout handling description (timeout does send Webhook notification); Completed all eventType enum tables
 - **v2.10** (2026-03-29): Added merchant settlement configuration error code MERCHANT_SETTLEMENT_CONFIG_ERROR (139006004); Added merchant quota limit error code EXCEED_MERCHANT_QUOTA_LIMIT (139004008); Added chain_address field to amount and limit config in sign/deduction/sign-and-pay APIs
 - **v2.9** (2026-02-24): Added Agreement Type Description section detailing usage scenarios and limit configuration differences for CYCLE/NON_CYCLE/SINGLE types; Fixed missing NON_CYCLE in documentation
 - **v2.8** (2026-02-11): Expanded deduction API supported scene codes from 6 to 17, added FOOD, ENTERTAINMENT, EDUCATION, MEMBERSHIP, RENT, FITNESS, TELECOM, CLOUD, INSURANCE, LOAN, OTHERS
@@ -48,12 +49,17 @@ Recurring Payments (Auto-deduction) enables merchants to automatically deduct fu
 │ Start│                │ INIT │              │ PENDING │                │ SIGNED │◀──┐
 │      │                │      │              │         │                │        │   │
 └──────┘                └──────┘              └─────────┘                └────────┘   │
-                            │                    │ │                         │ │ │    │
-                            │ Timeout            │ │ Failed/Rejected         │ │ │    │
-                            ▼                    ▼ │                         │ │ │    │
-                        ┌─────────┐         ┌────────┐                      │ │ │    │
-                        │ TIMEOUT │         │ FAILED │                      │ │ │    │
-                        └─────────┘         └────────┘                      │ │ │    │
+                            │                    │ │ │                       │ │ │    │
+                            │ Timeout(30min)     │ │ │ Sign Failed           │ │ │    │
+                            ▼                    │ ▼ │                       │ │ │    │
+                        ┌─────────┐         ┌────────┐│                     │ │ │    │
+                        │ TIMEOUT │         │ FAILED ││                     │ │ │    │
+                        └─────────┘         └────────┘│                     │ │ │    │
+                                                      │ User Rejected       │ │ │    │
+                                                      ▼                     │ │ │    │
+                                                 ┌──────────┐               │ │ │    │
+                                                 │ REJECTED │               │ │ │    │
+                                                 └──────────┘               │ │ │    │
                                                                             │ │ │    │
                              ┌──────────────────────────────────────────────┘ │ │    │
                              │ Unsign                                         │ │    │
@@ -87,6 +93,7 @@ Recurring Payments (Auto-deduction) enables merchants to automatically deduct fu
 | `SUSPENDED` | Temporarily paused (can be resumed) | No |
 | `UNSIGNED` | Agreement terminated (final) | No |
 | `EXPIRED` | Agreement expired (final) | No |
+| `REJECTED` | User actively canceled signing (final) | No |
 | `FAILED` | Sign failed (final) | No |
 | `TIMEOUT` | Sign link expired (final) | No |
 
@@ -170,14 +177,15 @@ User receives refund notification (Push/SMS)
 
 | API Name | Method | Endpoint | Description |
 |:---------|:-------|:---------|:------------|
-| [Sign Request](sign-request) | POST | `/v5/bybitpay/agreement/sign` | Create sign request, get QR code |
-| [Unsign](unsign) | POST | `/v5/bybitpay/agreement/unsign` | Terminate agreement |
-| [Deduction](deduction) | POST | `/v5/bybitpay/agreement/pay` | Execute automatic deduction |
-| [Refund](refund) | POST | `/v5/bybitpay/agreement/refund` | Refund deduction transaction |
-| [Query Agreement](query-agreement) | GET | `/v5/bybitpay/agreement/query` | Query single agreement status |
-| [List Agreements](list-agreements) | GET | `/v5/bybitpay/agreement/list` | List merchant agreements |
-| [Query Transaction](query-transaction) | GET | `/v5/bybitpay/agreement/pay/query` | Query single transaction/refund |
-| [List Transactions](list-transactions) | GET | `/v5/bybitpay/agreement/pay/list` | List transactions under agreement |
+| [Sign Request](sign-request) | POST | `/v5/pay/agreement/sign` | Create sign request, get QR code |
+| [Unsign](unsign) | POST | `/v5/pay/agreement/unsign` | Terminate agreement |
+| [Deduction](deduction) | POST | `/v5/pay/agreement/deduction` | Execute automatic deduction |
+| [Pay with Sign](pay-with-sign) | POST | `/v5/pay/agreement/pay-with-sign` | Sign + Pay in one step |
+| [Refund](refund) | POST | `/v5/pay/agreement/refund` | Refund deduction transaction |
+| [Query Agreement](query-agreement) | GET | `/v5/pay/agreement/query` | Query single agreement status |
+| [List Agreements](list-agreements) | GET | `/v5/pay/agreement/list` | List merchant agreements |
+| [Query Transaction](query-transaction) | GET | `/v5/pay/agreement/transaction/query` | Query single transaction/refund |
+| [List Transactions](list-transactions) | GET | `/v5/pay/agreement/transaction/list` | List transactions under agreement |
 
 ---
 
@@ -186,7 +194,7 @@ User receives refund notification (Push/SMS)
 ### Step 1: Create Sign Request
 
 ```bash
-POST /v5/bybitpay/agreement/sign
+POST /v5/pay/agreement/sign
 ```
 
 ```json
@@ -213,8 +221,9 @@ Display the returned `qr_code` or `sign_url` to the user. User scans and complet
 
 ```json
 {
-  "notifyType": "AGREEMENT_SIGN",
+  "notifyType": "AGREEMENT_STATUS",
   "data": {
+    "eventType": "SIGNED",
     "agreementNo": "AGR202312230001",
     "status": "SIGNED",
     "userId": "U_123456789"
@@ -225,7 +234,7 @@ Display the returned `qr_code` or `sign_url` to the user. User scans and complet
 ### Step 4: Execute Deduction
 
 ```bash
-POST /v5/bybitpay/agreement/pay
+POST /v5/pay/agreement/deduction
 ```
 
 ```json
@@ -239,7 +248,8 @@ POST /v5/bybitpay/agreement/pay
   "amount": {
     "total": "2350",
     "currency": "USDT",
-    "currency_type": "CRYPTO"
+    "currency_type": "CRYPTO",
+    "chain": "TRC20"
   },
   "order_info": {
     "order_title": "Monthly subscription"

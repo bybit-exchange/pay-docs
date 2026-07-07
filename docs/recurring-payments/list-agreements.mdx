@@ -6,7 +6,7 @@ sidebar_position: 9
 
 ## HTTP Request
 
-GET `/v5/bybitpay/agreement/list`
+GET `/v5/pay/agreement/list`
 
 Query agreement list under merchant with pagination and filtering support.
 
@@ -56,34 +56,34 @@ Query agreement list under merchant with pagination and filtering support.
 ### List All Active Agreements
 
 ```
-GET /v5/bybitpay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&page_size=20 HTTP/1.1
-Host: api2.bybit.com
-X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
-X-BAPI-TIMESTAMP: 1736233200000
-X-BAPI-SIGN: {signature}
-X-BAPI-RECV-WINDOW: 5000
+GET /v5/pay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&page_size=20 HTTP/1.1
+Host: api.bybit.com
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440000
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
 ```
 
 ### List Agreements for Specific User
 
 ```
-GET /v5/bybitpay/agreement/list?merchant_id=M123456789&user_id=U_123456789&page_no=1&page_size=20 HTTP/1.1
-Host: api2.bybit.com
-X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
-X-BAPI-TIMESTAMP: 1736233200000
-X-BAPI-SIGN: {signature}
-X-BAPI-RECV-WINDOW: 5000
+GET /v5/pay/agreement/list?merchant_id=M123456789&user_id=U_123456789&page_no=1&page_size=20 HTTP/1.1
+Host: api.bybit.com
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440000
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
 ```
 
 ### List Agreements by Scene and Time Range
 
 ```
-GET /v5/bybitpay/agreement/list?merchant_id=M123456789&scene_code=SUBSCRIPTION&start_time=2026-01-01T00:00:00Z&end_time=2026-01-31T23:59:59Z&page_no=1&page_size=50 HTTP/1.1
-Host: api2.bybit.com
-X-BAPI-API-KEY: xxxxxxxxxxxxxxxxxx
-X-BAPI-TIMESTAMP: 1736233200000
-X-BAPI-SIGN: {signature}
-X-BAPI-RECV-WINDOW: 5000
+GET /v5/pay/agreement/list?merchant_id=M123456789&scene_code=SUBSCRIPTION&start_time=2026-01-01T00:00:00Z&end_time=2026-01-31T23:59:59Z&page_no=1&page_size=50 HTTP/1.1
+Host: api.bybit.com
+X-Request-Id: 550e8400-e29b-41d4-a716-446655440000
+X-Timestamp: 1736233200000
+X-Signature: {signature}
+Authorization: Bearer {access_token}
 ```
 
 ---

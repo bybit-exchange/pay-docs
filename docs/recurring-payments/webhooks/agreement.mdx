@@ -6,6 +6,10 @@ sidebar_position: 1
 
 Agreement webhooks notify merchants about agreement lifecycle changes. All agreement webhooks use `notifyType: AGREEMENT_STATUS`.
 
+:::info eventType Values
+Agreement webhooks use the following `eventType` values: `SIGNED`, `REJECTED`, `UNSIGNED`, `SUSPENDED`, `EXPIRED`, `TIMEOUT`
+:::
+
 ---
 
 ## Sign Result Notification
@@ -19,8 +23,8 @@ Notifies merchant when user completes or fails the sign process.
 | agreementNo | string | Platform agreement number |
 | externalAgreementNo | string | Merchant agreement number |
 | agreementType | string | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
-| eventType | string | Event type: `SIGNED` / `FAILED` |
-| status | string | Sign status: `SIGNED` / `FAILED` |
+| eventType | string | Event type: `SIGNED` |
+| status | string | Sign status: `SIGNED` |
 | userId | string | Platform user ID |
 | merchantUserId | string | Merchant-side user ID |
 | sceneCode | string | Scene code |
@@ -50,26 +54,80 @@ Notifies merchant when user completes or fails the sign process.
 }
 ```
 
-### Example (Failure)
+:::note Sign Failure Handling
+- If user actively cancels signing → See [Sign Rejected Notification](#sign-rejected-notification) below (eventType=`REJECTED`)
+- If system error causes sign failure → See [Sign Failed Notification](#sign-failed-notification-system-error) below (eventType=`AGREEMENT_SIGN_RESULT`)
+:::
+
+---
+
+## Sign Rejected Notification
+
+Notifies merchant when user actively cancels signing on the cashier page.
+
+### data Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| agreementNo | string | Platform agreement number |
+| externalAgreementNo | string | Merchant agreement number |
+| eventType | string | Event type: `REJECTED` |
+| status | string | Agreement status: `REJECTED` |
+| merchantId | string | Merchant ID |
+| failureReason | string | Rejection reason |
+
+### Example
 
 ```json
 {
-  "notifyId": "NOTIFY202601070002",
+  "notifyId": "NOTIFY202601070015",
   "notifyType": "AGREEMENT_STATUS",
-  "notifyTime": "2026-01-07T10:35:05+08:00",
+  "notifyTime": "2026-01-07T10:45:00+08:00",
   "merchantId": "M123456789",
   "data": {
-    "agreementNo": "AGR202601070002",
-    "externalAgreementNo": "MERCHANT_AGR_002",
-    "agreementType": "CYCLE",
-    "eventType": "FAILED",
+    "agreementNo": "AGR202601070003",
+    "externalAgreementNo": "MERCHANT_AGR_003",
+    "eventType": "REJECTED",
+    "status": "REJECTED",
+    "merchantId": "M123456789",
+    "failureReason": "User canceled signing"
+  }
+}
+```
+
+---
+
+## Sign Failed Notification (System Error)
+
+Notifies merchant when sign process fails due to system error (e.g., payment failure in sign-with-pay scenario). Uses `notifyType: TRANSACTION_RESULT`.
+
+### data Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| agreementNo | string | Platform agreement number |
+| externalAgreementNo | string | Merchant agreement number |
+| eventType | string | Event type: `AGREEMENT_SIGN_RESULT` |
+| status | string | Status: `FAILED` |
+| merchantId | string | Merchant ID |
+| failureReason | string | Failure reason |
+
+### Example
+
+```json
+{
+  "notifyId": "NOTIFY202601070016",
+  "notifyType": "TRANSACTION_RESULT",
+  "notifyTime": "2026-01-07T10:45:00+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "eventType": "AGREEMENT_SIGN_RESULT",
     "status": "FAILED",
-    "userId": "U_123456789",
-    "merchantUserId": "merchant_user_123",
-    "sceneCode": "SUBSCRIPTION",
-    "failureCode": "139001001",
-    "failureReason": "User authentication timeout (downstream code=300100002, msg=User auth timeout)"
-  },
+    "agreementNo": "AGR202601070004",
+    "externalAgreementNo": "MERCHANT_AGR_004",
+    "merchantId": "M123456789",
+    "failureReason": "Payment confirmation failed: Insufficient balance"
+  }
 }
 ```
 
@@ -176,6 +234,40 @@ Notifies merchant when a suspended agreement returns to normal.
     "status": "SIGNED",
     "resumeTime": "2026-01-07 18:30:00"
   },
+}
+```
+
+---
+
+## Expired Notification
+
+Notifies merchant when an agreement expires automatically (reaching validity period set at sign time).
+
+### data Fields
+
+| Parameter | Type | Description |
+|:----------|:-----|:------------|
+| agreementNo | string | Platform agreement number |
+| externalAgreementNo | string | Merchant agreement number |
+| eventType | string | Event type: `EXPIRED` |
+| status | string | Agreement status: `EXPIRED` |
+| expireTime | string | Expire time |
+
+### Example
+
+```json
+{
+  "notifyId": "NOTIFY202601070020",
+  "notifyType": "AGREEMENT_STATUS",
+  "notifyTime": "2026-01-07T23:59:05+08:00",
+  "merchantId": "M123456789",
+  "data": {
+    "agreementNo": "AGR202601070001",
+    "externalAgreementNo": "MERCHANT_AGR_001",
+    "eventType": "EXPIRED",
+    "status": "EXPIRED",
+    "expireTime": "2026-01-07 23:59:00"
+  }
 }
 ```
 

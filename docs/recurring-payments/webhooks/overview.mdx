@@ -62,14 +62,12 @@ Signature parameters (X-Signature, X-Sign-Type, X-Timestamp, X-Nonce) are provid
 
 | eventType | Description | Corresponding notifyType |
 |:----------|:------------|:-------------------------|
-| `SIGNED` | Sign event | `AGREEMENT_STATUS` |
+| `SIGNED` | Sign success | `AGREEMENT_STATUS` |
+| `REJECTED` | Sign rejected (user canceled) | `AGREEMENT_STATUS` |
 | `UNSIGNED` | Unsign event | `AGREEMENT_STATUS` |
 | `SUSPENDED` | Suspend event | `AGREEMENT_STATUS` |
-| `TIMEOUT` | Timeout event | `AGREEMENT_STATUS` |
-
-:::note
-The `TIMEOUT` eventType is used when agreement enters timeout status. This is different from `AGREEMENT_TIMEOUT` notifyType which is for sign link/QR code expiration.
-:::
+| `EXPIRED` | Agreement expired | `AGREEMENT_STATUS` |
+| `TIMEOUT` | Sign timeout | `AGREEMENT_STATUS` |
 
 ### Event Types (Transaction)
 
@@ -77,6 +75,7 @@ The `TIMEOUT` eventType is used when agreement enters timeout status. This is di
 |:----------|:------------|:-------------------------|
 | `PAY` | Deduction event | `TRANSACTION_RESULT` |
 | `REFUND` | Refund event | `TRANSACTION_RESULT` |
+| `AGREEMENT_SIGN_RESULT` | Sign failed (system error) | `TRANSACTION_RESULT` |
 
 ---
 

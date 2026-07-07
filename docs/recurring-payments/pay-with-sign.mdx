@@ -6,7 +6,7 @@ sidebar_position: 6
 
 ## HTTP Request
 
-POST `/v5/bybitpay/agreement/pay-with-sign`
+POST `/v5/pay/agreement/pay-with-sign`
 
 Complete both agreement signing and deduction payment in a single API call. This API supports two modes: Sign + Pay (for first-time users) and Pay Only (using existing agreement).
 
@@ -289,9 +289,11 @@ This API supports merchants to complete both agreement signing and deduction pay
 - If sign succeeds, user completes payment in app until success
 
 ### Webhook Notification Strategy
-- Uses **single notification** to return both sign and payment results
-- Sent to merchant configured `pay_notify_url`
-- For separate notifications, configure `sign_notify_url` in `sign_params`
+- Sign result and payment result are sent as **independent notifications** to their respective notify URLs
+- Sign result (success/rejected/failed) sent to `sign_notify_url`
+- Payment result (success/failed) sent to `pay_notify_url`
+- If user rejects sign, only sign rejected notification is sent, deduction will not be executed
+- If sign fails (system error), only sign failed notification is sent, deduction will not be executed
 
 ### Idempotency Guarantee
 - Idempotency guaranteed through `external_agreement_no` for signing
