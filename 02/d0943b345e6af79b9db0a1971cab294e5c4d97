@@ -1,0 +1,51 @@
+docs/recurring-payments/pay-with-sign.mdx
+  953d7944309f26f9 9,292-296
+docs/recurring-payments/query-agreement.mdx
+  953d7944309f26f9 9,40,52-57,120
+docs/recurring-payments/appendix.mdx
+  953d7944309f26f9 166-167
+docs/recurring-payments/unsign.mdx
+  953d7944309f26f9 9,51-52,54-57,72-73,75-78
+docs/recurring-payments/sign-request.mdx
+  953d7944309f26f9 9,66-67,69-72,87-88,90-93
+docs/recurring-payments/query-transaction.mdx
+  953d7944309f26f9 9,72-77,83-88
+docs/recurring-payments/webhooks/agreement.mdx
+  953d7944309f26f9 9-12,26-27,57-79,83,85,88-124,126-130,242-275
+docs/recurring-payments/list-agreements.mdx
+  953d7944309f26f9 9,59-64,70-75,81-86
+docs/recurring-payments/specifications.mdx
+  953d7944309f26f9 14-17,99
+docs/recurring-payments/signature.mdx
+  953d7944309f26f9 9,15-17,19-24,35,38,40-43,49,55-58,65-67,70-75,79-123,128-138,141-143,145-147,149-152,161-182,185-192,196-199,207-208,211-215,220-223,226-236,243-244,246-247,276-279,284,286,289,291,301
+docs/recurring-payments/deduction.mdx
+  953d7944309f26f9 9,80-81,83-86,114-115,117-120
+docs/recurring-payments/introduction.mdx
+  953d7944309f26f9 15,18,52-62,96,180-188,197,224,226,237,251-252
+docs/recurring-payments/list-transactions.mdx
+  953d7944309f26f9 9,77-82,88-93,99-104
+docs/recurring-payments/webhooks/overview.mdx
+  953d7944309f26f9 65-66,69-70,78
+docs/recurring-payments/refund.mdx
+  953d7944309f26f9 9,61-62,64-67,89-90,92-95
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2-bit.9+daa2e24",
+  "base_commit_sha": "02d0943b345e6af79b9db0a1971cab294e5c4d97",
+  "prompts": {
+    "953d7944309f26f9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1da9bd6b-b943-4a37-ac13-bb2bce92f290",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "dawson.hou",
+      "messages": [],
+      "total_additions": 441,
+      "total_deletions": 257,
+      "accepted_lines": 441,
+      "overriden_lines": 0
+    }
+  }
+}
