@@ -1,10 +1,11 @@
 # Agreement Payment API Documentation
 
-**Document Version**: v2.10
+**Document Version**: v2.11
 
-**Update Date**: 2026-03-29
+**Update Date**: 2026-06-09
 
 **Update History**:
+- v2.11: Added REJECTED agreement status (user actively canceled signing); Sign-with-pay Webhook changed to independent notifications to signNotifyUrl/payNotifyUrl; Added sign rejected notification (eventType=REJECTED) and sign failed notification (eventType=AGREEMENT_SIGN_RESULT); Added EXPIRED event type; Fixed timeout handling description (timeout does send Webhook notification); Completed all eventType enum tables
 - v2.10: Added merchant settlement configuration error code MERCHANT_SETTLEMENT_CONFIG_ERROR (139006004); Added merchant quota limit error code EXCEED_MERCHANT_QUOTA_LIMIT (139004008); Added chain_address field to amount and limit config in sign/deduction/sign-and-pay APIs
 - v2.9: Added Agreement Type Description section (7.5) detailing the usage scenarios and limit configuration differences for CYCLE/NON_CYCLE/SINGLE types; Fixed 4 instances of missing NON_CYCLE in English documentation
 - v2.8: Expanded agreement pay API supported scene codes from 6 to 17 (added FOOD/ENTERTAINMENT/EDUCATION/MEMBERSHIP/RENT/FITNESS/TELECOM/CLOUD/INSURANCE/LOAN/OTHERS), fully consistent with sign API scene codes
@@ -19,7 +20,7 @@
 - v1.9: binding_info field unified to snake_case naming; refund_amount.total field structure standardized; Added complete status response examples for sign confirmation/unsign/refund APIs; Added sign/refund notification failure examples; Deduction status added TIMEOUT; Added extra_params and scene_info.location field descriptions; Error codes grouped by module; Added chain network list (7.3); Added rate limiting description (2.10); Added sandbox environment description (7.5); Fixed notify_id duplication issue
 - v1.8: Unified scene_code enum values; Corrected bindStatus enum; Sign limit configuration supports chain field; Transaction list API supplemented REFUND response; Added API timeout recommendations and concurrency handling description; Added refund status flow diagram; Added API version compatibility description; Added risk_info risk control field; Added failure response and PROCESSING status examples; Added document directory
 - v1.7: Added agreement list query API; Transaction query API merged refund query (distinguished by record_type); Transaction list API supports refund record query; Added general specification section (request headers, response format, HTTP status codes, field length limits, idempotency, transaction status flow); GET API examples changed to Query String format; Webhook notification added notify_id deduplication field; Refund notification added user_id field; Sign request added sign_expire_minutes parameter
-- v1.6: Moved business flow diagrams and sign lifecycle state machine to Chapter 1 Overview; API paths unified to start with /v5/bybitpay/agreement; Added currency type (fiat/cryptocurrency) support; Added request and response examples for all APIs
+- v1.6: Moved business flow diagrams and sign lifecycle state machine to Chapter 1 Overview; API paths unified to start with /v5/pay/agreement; Added currency type (fiat/cryptocurrency) support; Added request and response examples for all APIs
 - v1.5: Clearly distinguished user_id (platform user ID) and merchant_user_id (merchant-side user ID); All APIs unified required common fields (merchant_id, user_id, agreement_type); Sign API added merchant_user_id for establishing merchant-side to platform-side user mapping
 - v1.4: Unified all API required common fields (merchant_id, user_id, agreement_type)
 - v1.3: Optimized sign flow, supports QR code sign; Added user identity association mechanism; Updated sign request to return QR code
@@ -107,7 +108,7 @@
 **API Version**: v5
 
 **Version Compatibility Description**:
-- All current API paths start with `/v5/bybitpay/agreement`
+- All current API paths start with `/v5/pay/agreement`
 - New fields are added in a backward-compatible manner, existing field semantics will not be deleted or modified
 - Merchants should handle new optional fields in responses compatibly (ignore unknown fields)
 - Major incompatible changes will be released through new version paths (e.g., /v6), with advance merchant notification
@@ -232,7 +233,8 @@ User/System → Trigger unsign → Platform updates agreement status
 | SUSPENDED | Suspended | Agreement paused, deduction temporarily not allowed (can be resumed) |
 | UNSIGNED | Unsigned | Agreement terminated (final state) |
 | EXPIRED | Expired | Agreement expired automatically (final state) |
-| FAILED | Sign Failed | Sign process abnormally terminated (final state) |
+| REJECTED | Rejected | User actively canceled signing (final state) |
+| FAILED | Sign Failed | System error caused sign process termination (final state) |
 | TIMEOUT | Sign Timeout | Sign link/QR code expired (final state) |
 
 #### State Transition Diagram
@@ -295,7 +297,8 @@ User/System → Trigger unsign → Platform updates agreement status
 | INIT | PENDING | User initiates scan confirmation | User scans and initiates sign confirmation flow |
 | INIT | TIMEOUT | Sign timeout (30 minutes) | Sign link/QR code expired, scheduled task auto-processes |
 | PENDING | SIGNED | Cashier calls sign confirmation API | User completes scan sign, cashier callback confirms, agreement becomes active |
-| PENDING | FAILED | Sign failed/rejected | User rejected sign or sign process abnormal |
+| PENDING | REJECTED | User rejected sign | User actively canceled signing on cashier page |
+| PENDING | FAILED | Sign process abnormal | System error or payment failure in sign-with-pay scenario |
 | PENDING | TIMEOUT | Sign timeout (30 minutes) | PENDING state timeout without completing sign, scheduled task auto-processes |
 | SIGNED | UNSIGNED | User active unsign | User initiates unsign in App/platform |
 | SIGNED | UNSIGNED | Merchant initiates unsign | Merchant calls unsign API |
@@ -315,6 +318,7 @@ User/System → Trigger unsign → Platform updates agreement status
 | SUSPENDED | ✗ | ✓ | ✓ | ✓ |
 | UNSIGNED | ✗ | ✓ | ✗ | ✓ |
 | EXPIRED | ✗ | ✓ | ✗ | ✓ |
+| REJECTED | ✗ | ✗ | ✗ | ✓ |
 | FAILED | ✗ | ✗ | ✗ | ✓ |
 | TIMEOUT | ✗ | ✗ | ✗ | ✓ |
 
@@ -338,7 +342,7 @@ WHERE status IN ('INIT', 'PENDING')
 1. Scheduled task executes every minute
 2. Scan sign records in `INIT` or `PENDING` state with creation time over 30 minutes
 3. Update status to `TIMEOUT`
-4. No Webhook notification sent to merchant (timeout is silent processing)
+4. Send sign timeout Webhook notification to merchant (eventType=TIMEOUT, see section 4.7)
 
 **Notes**:
 - Timeout is calculated from sign request creation time (`create_time`)
@@ -351,15 +355,15 @@ WHERE status IN ('INIT', 'PENDING')
 
 | API Name | Request Method | Path |
 | --- | --- | --- |
-| Sign Request | POST | /v5/bybitpay/agreement/sign |
-| Unsign | POST | /v5/bybitpay/agreement/unsign |
-| Agreement Deduction | POST | /v5/bybitpay/agreement/pay |
-| Pay with Sign | POST | /v5/bybitpay/agreement/pay-with-sign |
-| Deduction Refund | POST | /v5/bybitpay/agreement/refund |
-| Sign Status Query | GET | /v5/bybitpay/agreement/query |
-| Agreement List Query | GET | /v5/bybitpay/agreement/list |
-| Transaction/Refund Query | GET | /v5/bybitpay/agreement/pay/query |
-| Transaction/Refund List | GET | /v5/bybitpay/agreement/pay/list |
+| Sign Request | POST | /v5/pay/agreement/sign |
+| Unsign | POST | /v5/pay/agreement/unsign |
+| Agreement Deduction | POST | /v5/pay/agreement/deduction |
+| Pay with Sign | POST | /v5/pay/agreement/pay-with-sign |
+| Deduction Refund | POST | /v5/pay/agreement/refund |
+| Sign Status Query | GET | /v5/pay/agreement/query |
+| Agreement List Query | GET | /v5/pay/agreement/list |
+| Transaction/Refund Query | GET | /v5/pay/agreement/transaction/query |
+| Transaction/Refund List | GET | /v5/pay/agreement/transaction/list |
 
 ### 2.1 Common Request Headers
 
@@ -570,7 +574,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ### 3.1 Sign Request API
 
-**Request Path**: POST /v5/bybitpay/agreement/sign
+**Request Path**: POST /v5/pay/agreement/sign
 
 #### Request Parameters
 
@@ -678,7 +682,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ### 3.2 Unsign API
 
-**Request Path**: POST /v5/bybitpay/agreement/unsign
+**Request Path**: POST /v5/pay/agreement/unsign
 
 #### Request Parameters
 
@@ -755,7 +759,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ### 3.3 Agreement Deduction API (Core)
 
-**Request Path**: POST /v5/bybitpay/agreement/pay
+**Request Path**: POST /v5/pay/agreement/deduction
 
 #### Request Parameters
 
@@ -972,7 +976,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ### 3.4 Pay with Sign API (One-Step)
 
-**Request Path**: POST /v5/bybitpay/agreement/pay-with-sign
+**Request Path**: POST /v5/pay/agreement/pay-with-sign
 
 **Feature Description**: This API supports merchants to complete both agreement signing and deduction payment in a single call. Signing is optional, merchants can choose:
 1. **Sign + Pay Mode**: Pass sign parameters, system creates agreement first, then executes deduction immediately after successful signing
@@ -1222,73 +1226,109 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 - `pay_result.status = "PROCESSING"` - Deduction payment processing
 - Final result returned via Webhook async notification
 
-#### Webhook Async Notification Examples
+#### Webhook Async Notification
 
-After user completes sign and payment via scanning, system sends async notification to merchant configured `pay_notify_url`.
+Sign result and payment result are sent as **independent notifications** to their respective notify URLs:
 
-**Notification Example 1: Sign + Pay Success**
+| Scenario | Sent To | Format |
+| --- | --- | --- |
+| Sign + Pay success | signNotifyUrl receives sign success; payNotifyUrl receives pay success | Same format as 4.1 and 4.2 |
+| User rejected sign | signNotifyUrl receives sign rejected notification | eventType=REJECTED, notifyType=AGREEMENT_STATUS |
+| Sign failed (system error) | signNotifyUrl receives sign failed notification | eventType=AGREEMENT_SIGN_RESULT, notifyType=TRANSACTION_RESULT |
+
+**Notification Example 1: Sign Success (sent to sign_notify_url)**
 
 ```json
 {
-  "notify_type": "AGREEMENT_PAY_WITH_SIGN",
-  "merchant_id": "M123456789",
-  "sign_result": {
-    "agreement_no": "AGR202312230001",
-    "external_agreement_no": "MERCHANT_AGR_001",
-    "sign_order_id": "SIGN202312230001",
+  "notifyId": "NOTIFY202312230001",
+  "notifyType": "AGREEMENT_STATUS",
+  "notifyTime": "2023-12-23T10:35:05+00:00",
+  "merchantId": "M123456789",
+  "data": {
+    "eventType": "SIGNED",
     "status": "SIGNED",
-    "sign_time": "2023-12-23T10:35:00Z",
-    "valid_time": "2026-12-23T10:30:00Z"
-  },
-  "pay_result": {
-    "trade_no": "PAY202312230001",
-    "out_trade_no": "TAXI20231223001",
-    "status": "SUCCESS",
-    "amount": {
-      "total": "2350",
-      "currency": "USDT",
-      "currency_type": "CRYPTO",
-      "chain": "TRC20"
-    },
-    "crypto_payment": {
-      "currency": "USDT",
-      "amount": "2350",
-      "chain": "TRC20"
-    },
-    "pay_time": "2023-12-23T10:35:05Z"
-  },
-  "notify_id": "NOTIFY202312230001",
-  "notify_time": "2023-12-23T10:35:06Z"
+    "agreementNo": "AGR202312230001",
+    "externalAgreementNo": "MERCHANT_AGR_001",
+    "agreementType": "CYCLE",
+    "userId": "U_123456789",
+    "merchantUserId": "merchant_user_123",
+    "sceneCode": "TAXI",
+    "signTime": "2023-12-23T10:35:00+00:00"
+  }
 }
 ```
 
-**Notification Example 2: Sign Failed**
+**Notification Example 2: Pay Success (sent to pay_notify_url)**
 
 ```json
 {
-  "notify_type": "AGREEMENT_PAY_WITH_SIGN",
-  "merchant_id": "M123456789",
-  "sign_result": {
-    "agreement_no": null,
-    "external_agreement_no": "MERCHANT_AGR_003",
-    "sign_order_id": "SIGN202312230003",
+  "notifyId": "NOTIFY202312230002",
+  "notifyType": "TRANSACTION_RESULT",
+  "notifyTime": "2023-12-23T10:35:06+00:00",
+  "merchantId": "M123456789",
+  "data": {
+    "eventType": "PAY",
+    "orderType": "PAY",
+    "status": "SUCCESS",
+    "orderNo": "ORD202312230001",
+    "tradeNo": "PAY202312230001",
+    "outTradeNo": "TAXI20231223001",
+    "agreementNo": "AGR202312230001",
+    "amount": {
+      "total": "2350",
+      "currency": "USDT",
+      "currency_type": "CRYPTO"
+    },
+    "payTime": "2023-12-23T10:35:05+00:00"
+  }
+}
+```
+
+**Notification Example 3: User Rejected (sent to sign_notify_url)**
+
+```json
+{
+  "notifyId": "NOTIFY202312230003",
+  "notifyType": "AGREEMENT_STATUS",
+  "notifyTime": "2023-12-23T10:45:00+00:00",
+  "merchantId": "M123456789",
+  "data": {
+    "eventType": "REJECTED",
+    "status": "REJECTED",
+    "agreementNo": "AGR202312230003",
+    "externalAgreementNo": "MERCHANT_AGR_003",
+    "merchantId": "M123456789",
+    "failureReason": "User canceled signing"
+  }
+}
+```
+
+**Notification Example 4: Sign Failed - System Error (sent to sign_notify_url)**
+
+```json
+{
+  "notifyId": "NOTIFY202312230004",
+  "notifyType": "TRANSACTION_RESULT",
+  "notifyTime": "2023-12-23T10:45:00+00:00",
+  "merchantId": "M123456789",
+  "data": {
+    "eventType": "AGREEMENT_SIGN_RESULT",
     "status": "FAILED",
-    "sign_time": null,
-    "valid_time": null
-  },
-  "pay_result": null,
-  "notify_id": "NOTIFY202312230003",
-  "notify_time": "2023-12-23T10:45:00Z"
+    "agreementNo": "AGR202312230004",
+    "externalAgreementNo": "MERCHANT_AGR_004",
+    "merchantId": "M123456789",
+    "failureReason": "Payment confirmation failed: Insufficient balance"
+  }
 }
 ```
 
 **Webhook Notification Notes**:
-- Notification sent via **POST** to merchant configured `pay_notify_url`
+- Sign result notifications sent to `sign_notify_url`, payment result notifications sent to `pay_notify_url`
 - Signature verification method: refer to Section 5.4
-- Merchant should return `{"code": "SUCCESS"}` to confirm receipt
-- If sign fails, `pay_result` is `null`, deduction will not be executed
-- If sign succeeds, user completes payment in app, merchant receives notification when payment succeeds
-- Notification includes `notify_id` for deduplication, merchant should save processed `notify_id`
+- Merchant should return HTTP 200 + `success` to confirm receipt
+- If user rejects sign, only sign rejected notification is sent, deduction will not be executed
+- If sign fails (system error), only sign failed notification is sent, deduction will not be executed
+- Notification includes `notifyId` for deduplication, merchant should save processed `notifyId`
 
 ---
 
@@ -1311,9 +1351,9 @@ After user completes sign and payment via scanning, system sends async notificat
   - If sign succeeds, user completes payment in app until success
 
 4. **Webhook Notification Strategy**
-  - Uses **single notification** to return both sign and payment results
-  - Sent to merchant configured `pay_notify_url`
-  - For separate notifications, configure `sign_notify_url` in `sign_params`
+  - Sign result and payment result are sent as **independent notifications** to respective notify URLs
+  - Sign result (success/rejected/failed) sent to `sign_notify_url`
+  - Payment result (success/failed) sent to `pay_notify_url`
 
 5. **Idempotency Guarantee**
   - Idempotency guaranteed through `external_agreement_no` for signing
@@ -1327,7 +1367,7 @@ After user completes sign and payment via scanning, system sends async notificat
 
 ### 3.5 Deduction Refund API
 
-**Request Path**: POST /v5/bybitpay/agreement/refund
+**Request Path**: POST /v5/pay/agreement/refund
 
 **Description**: Initiate refund for successful deduction transaction, supports full and partial refund
 
@@ -1453,7 +1493,7 @@ After user completes sign and payment via scanning, system sends async notificat
 
 ### 3.6 Sign Status Query API
 
-**Request Path**: GET /v5/bybitpay/agreement/query
+**Request Path**: GET /v5/pay/agreement/query
 
 #### Request Parameters
 
@@ -1463,14 +1503,10 @@ After user completes sign and payment via scanning, system sends async notificat
 | agreement_no | string | Either | Platform agreement number |
 | external_agreement_no | string | Either | Merchant agreement number |
 
-:::info
-Either `agreement_no` or `external_agreement_no` must be provided.
-:::
-
 #### Request Example
 
 ```
-GET /v5/bybitpay/agreement/query?merchant_id=M123456789&agreement_no=AGR202312230001
+GET /v5/pay/agreement/query?merchant_id=M123456789&agreement_no=AGR202312230001
 ```
 
 #### Response Parameters
@@ -1484,7 +1520,7 @@ GET /v5/bybitpay/agreement/query?merchant_id=M123456789&agreement_no=AGR20231223
 | result.external_agreement_no | string | Merchant agreement number |
 | result.user_id | string | Platform user ID |
 | result.merchant_user_id | string | Merchant-side user ID |
-| result.status | string | Status: INIT/PENDING/SIGNED/SUSPENDED/UNSIGNED/EXPIRED/FAILED |
+| result.status | string | Status: INIT/PENDING/SIGNED/SUSPENDED/UNSIGNED/EXPIRED/REJECTED/FAILED/TIMEOUT |
 | result.sign_time | string | Sign time |
 | result.valid_time | string | Validity period |
 | result.single_limit | object | Single transaction limit |
@@ -1533,7 +1569,7 @@ GET /v5/bybitpay/agreement/query?merchant_id=M123456789&agreement_no=AGR20231223
 
 ### 3.7 Agreement List Query API
 
-**Request Path**: GET /v5/bybitpay/agreement/list
+**Request Path**: GET /v5/pay/agreement/list
 
 **Description**: Query agreement list under merchant, supports pagination and status filtering
 
@@ -1554,7 +1590,7 @@ GET /v5/bybitpay/agreement/query?merchant_id=M123456789&agreement_no=AGR20231223
 #### Request Example
 
 ```
-GET /v5/bybitpay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&page_size=20
+GET /v5/pay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&page_size=20
 ```
 
 #### Response Parameters
@@ -1608,7 +1644,7 @@ GET /v5/bybitpay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&p
 
 ### 3.8 Transaction/Refund Query API (Single)
 
-**Request Path**: GET /v5/bybitpay/agreement/pay/query
+**Request Path**: GET /v5/pay/agreement/transaction/query
 
 **Description**: Query single deduction transaction or refund record details, distinguished by record_type
 
@@ -1628,13 +1664,13 @@ GET /v5/bybitpay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&p
 #### Request Example (Query Deduction Transaction)
 
 ```
-GET /v5/bybitpay/agreement/pay/query?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&record_type=PAY&trade_no=PAY202312230001
+GET /v5/pay/agreement/transaction/query?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&record_type=PAY&trade_no=PAY202312230001
 ```
 
 #### Request Example (Query Refund Record)
 
 ```
-GET /v5/bybitpay/agreement/pay/query?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&record_type=REFUND&refund_no=RF202312230001
+GET /v5/pay/agreement/transaction/query?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&record_type=REFUND&refund_no=RF202312230001
 ```
 
 #### Response Parameters (Deduction Transaction record_type=PAY)
@@ -1725,7 +1761,7 @@ GET /v5/bybitpay/agreement/pay/query?merchant_id=M123456789&user_id=U_123456789&
 
 ### 3.9 Deduction Transaction List API
 
-**Request Path**: GET /v5/bybitpay/agreement/pay/list
+**Request Path**: GET /v5/pay/agreement/transaction/list
 
 **Description**: Query deduction transaction or refund record list under an agreement, supports pagination and time range filtering
 
@@ -1747,7 +1783,7 @@ GET /v5/bybitpay/agreement/pay/query?merchant_id=M123456789&user_id=U_123456789&
 #### Request Example
 
 ```
-GET /v5/bybitpay/agreement/pay/list?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202312230001&record_type=PAY&status=SUCCESS&page_no=1&page_size=20
+GET /v5/pay/agreement/transaction/list?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202312230001&record_type=PAY&status=SUCCESS&page_no=1&page_size=20
 ```
 
 #### Response Parameters (Deduction Transaction record_type=PAY)
@@ -1910,10 +1946,12 @@ All Webhook notifications use a unified three-part structure:
 
 | eventType | Description | Corresponding notifyType |
 | --- | --- | --- |
-| SIGNED | Sign event | AGREEMENT_STATUS |
+| SIGNED | Sign success | AGREEMENT_STATUS |
+| REJECTED | Sign rejected (user canceled) | AGREEMENT_STATUS |
 | UNSIGNED | Unsign event | AGREEMENT_STATUS |
 | SUSPENDED | Suspend event | AGREEMENT_STATUS |
-| TIMEOUT | Timeout event | AGREEMENT_STATUS |
+| EXPIRED | Agreement expired | AGREEMENT_STATUS |
+| TIMEOUT | Sign timeout | AGREEMENT_STATUS |
 
 ### eventType Event Type Enum (Transaction)
 
@@ -1921,6 +1959,7 @@ All Webhook notifications use a unified three-part structure:
 | --- | --- | --- |
 | PAY | Deduction event | TRANSACTION_RESULT |
 | REFUND | Refund event | TRANSACTION_RESULT |
+| AGREEMENT_SIGN_RESULT | Sign failed (system error) | TRANSACTION_RESULT |
 
 ---
 
@@ -2476,10 +2515,12 @@ Platform pushes Webhook request body containing business fields and signature fi
 
 | eventType | Description | Corresponding notifyType |
 | --- | --- | --- |
-| SIGNED | Sign event | AGREEMENT_STATUS |
+| SIGNED | Sign success | AGREEMENT_STATUS |
+| REJECTED | Sign rejected (user canceled) | AGREEMENT_STATUS |
 | UNSIGNED | Unsign event | AGREEMENT_STATUS |
 | SUSPENDED | Suspend event | AGREEMENT_STATUS |
-| TIMEOUT | Timeout event | AGREEMENT_STATUS |
+| EXPIRED | Agreement expired | AGREEMENT_STATUS |
+| TIMEOUT | Sign timeout | AGREEMENT_STATUS |
 
 ### eventType Event Type Enum (Transaction)
 
@@ -2487,8 +2528,7 @@ Platform pushes Webhook request body containing business fields and signature fi
 | --- | --- | --- |
 | PAY | Deduction event | TRANSACTION_RESULT |
 | REFUND | Refund event | TRANSACTION_RESULT |
-| AGREEMENT_TIMEOUT | Sign timeout notification | |
-| ORDER_TIMEOUT | Order timeout notification | |
+| AGREEMENT_SIGN_RESULT | Sign failed (system error) | TRANSACTION_RESULT |
 
 #### Merchant Response Format
 
@@ -2738,7 +2778,7 @@ function verifySignature(content, signature) {
 | Risk Interception | Real-time risk control: device fingerprint, location anomaly, behavior analysis | Transaction Service |
 | Deduction Notification | Real-time notification to user for each deduction (Push/SMS) | Transaction Service |
 
-**Note**: Quota verification (single limit, period limit, balance check) is handled by downstream transaction service (bybitpay-transaction-service).
+**Note**: Quota verification (single limit, period limit, balance check) is handled by downstream transaction service (bitpay-transaction-service).
 
 ### 5.3 API Security
 
@@ -2776,7 +2816,7 @@ String to sign = HTTP Method + "\n" + Request Path + "\n" + Timestamp + "\n" + R
 **Example**:
 ```
 POST
-/v5/bybitpay/agreement/pay
+/v5/pay/agreement/deduction
 1703318400000
 {"merchant_id":"M123456789","user_id":"U_123456789",...}
 ```
@@ -2903,7 +2943,7 @@ The following example shows how to initiate a signed request using cURL (using a
 
 # Configuration parameters
 API_HOST="https://api.bybit.com"
-API_PATH="/v5/bybitpay/agreement/pay"
+API_PATH="/v5/pay/agreement/deduction"
 MERCHANT_PRIVATE_KEY="./merchant_private_key.pem"
 ACCESS_TOKEN="your_access_token"
 
@@ -3447,8 +3487,8 @@ Agreement type (agreement_type) defines the deduction mode of agreement payment,
 
 | Environment | Domain | Description |
 | --- | --- | --- |
-| Sandbox | api2-testnet.bybit.com | Test environment, no real transactions |
-| Production | api2.bybit.com | Production environment, real transactions |
+| Sandbox | api-testnet.bybit.com | Test environment, no real transactions |
+| Production | api.bybit.com | Production environment, real transactions |
 
 #### Sandbox Environment Features
 
