@@ -111,15 +111,15 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
 **When:** Monthly/yearly fixed-cycle deduction (video membership, cloud service, gym card).
 
 ```
-1. POST /v5/bybitpay/agreement/sign   → get qr_code / sign_url for user to authorize
+1. POST /v5/pay/agreement/sign        → get qr_code / sign_url for user to authorize
 2. Display QR to user (user verifies with SMS/Face/Password)
 3. POST {notify_url}                  ← Bybit notifies SIGNED status (agreement_no returned)
 4. [Each billing cycle]
-   POST /v5/bybitpay/agreement/pay   → deduct using agreement_no
+   POST /v5/pay/agreement/deduction  → deduct using agreement_no
 5. POST {notify_url}                  ← Bybit notifies deduction result
-6. GET  /v5/bybitpay/agreement/pay/query → query if webhook not received
-7. POST /v5/bybitpay/agreement/refund  → refund if needed (see [Refund API](recurring-payments/refund))
-8. POST /v5/bybitpay/agreement/unsign  → terminate when user cancels (see [Unsign API](recurring-payments/unsign))
+6. GET  /v5/pay/agreement/transaction/query → query if webhook not received
+7. POST /v5/pay/agreement/refund      → refund if needed (see [Refund API](recurring-payments/refund))
+8. POST /v5/pay/agreement/unsign      → terminate when user cancels (see [Unsign API](recurring-payments/unsign))
 ```
 
 > **Step 1 sign key fields:** `agreement_type` · `merchant_user_id` · `external_agreement_no` (idempotency) · `scene_code` · `single_limit` · `notify_url`
@@ -138,10 +138,10 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
 **When:** Irregular deductions triggered by actual usage (ride-hailing, parking, food delivery).
 
 ```
-1. POST /v5/bybitpay/agreement/sign   → user authorizes once (agreement_type: NON_CYCLE)
+1. POST /v5/pay/agreement/sign        → user authorizes once (agreement_type: NON_CYCLE)
 2. User scans QR / opens sign_url; Bybit notifies SIGNED webhook → store agreement_no
 3. [Each consumption event]
-   POST /v5/bybitpay/agreement/pay   → deduct; include scene_info.device_ip & location
+   POST /v5/pay/agreement/deduction  → deduct; include scene_info.device_ip & location
 4. POST {notify_url}                  ← async result notification
 ```
 
@@ -154,9 +154,9 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
 **When:** Hotel deposit, car rental deposit — one authorization, one deduction, auto-expires.
 
 ```
-1. POST /v5/bybitpay/agreement/sign   (agreement_type: SINGLE)
+1. POST /v5/pay/agreement/sign        (agreement_type: SINGLE)
 2. User signs
-3. POST /v5/bybitpay/agreement/pay    → one deduction only
+3. POST /v5/pay/agreement/deduction   → one deduction only
    Agreement automatically becomes UNSIGNED after deduction
 ```
 
@@ -204,15 +204,15 @@ plain = "1736233200000<api_key>5000{"merchant_id":"M123456789",...}"
 
 | Method | Endpoint | Purpose |
 |:-------|:---------|:--------|
-| POST | `/v5/bybitpay/agreement/sign` | Create sign request (get QR for user) |
-| POST | `/v5/bybitpay/agreement/unsign` | Terminate agreement |
-| POST | `/v5/bybitpay/agreement/pay` | Execute deduction |
-| POST | `/v5/bybitpay/agreement/pay-with-sign` | Sign + deduct in one step — use when user is present to authorize and pay immediately (NON_CYCLE / SINGLE) |
-| POST | `/v5/bybitpay/agreement/refund` | Refund deduction |
-| GET | `/v5/bybitpay/agreement/query` | Query single agreement (check SIGNED status) |
-| GET | `/v5/bybitpay/agreement/list` | List agreements (paginated) |
-| GET | `/v5/bybitpay/agreement/pay/query` | Query single transaction/refund |
-| GET | `/v5/bybitpay/agreement/pay/list` | List transactions (paginated) |
+| POST | `/v5/pay/agreement/sign` | Create sign request (get QR for user) |
+| POST | `/v5/pay/agreement/unsign` | Terminate agreement |
+| POST | `/v5/pay/agreement/deduction` | Execute deduction |
+| POST | `/v5/pay/agreement/pay-with-sign` | Sign + deduct in one step — use when user is present to authorize and pay immediately (NON_CYCLE / SINGLE) |
+| POST | `/v5/pay/agreement/refund` | Refund deduction |
+| GET | `/v5/pay/agreement/query` | Query single agreement (check SIGNED status) |
+| GET | `/v5/pay/agreement/list` | List agreements (paginated) |
+| GET | `/v5/pay/agreement/transaction/query` | Query single transaction/refund |
+| GET | `/v5/pay/agreement/transaction/list` | List transactions (paginated) |
 
 ---
 
@@ -300,7 +300,7 @@ Recommended interval: every 3–5 seconds
 Max attempts: 10 times
 Stop on: SUCCESS, FAILED, TIMEOUT
 
-GET /v5/bybitpay/agreement/pay/query?merchant_id=...&trade_no={trade_no}
+GET /v5/pay/agreement/transaction/query?merchant_id=...&trade_no={trade_no}
 ```
 
 **Decision logic:**
@@ -493,7 +493,7 @@ Configure your **server IP whitelist** in Bybit Merchant Portal → API Manageme
 - [ ] Implement polling fallback using `GET /v5/bybitpay/pay_result`
 
 **Recurring Payments:**
-- [ ] Call `POST /v5/bybitpay/agreement/sign`; display QR to user
+- [ ] Call `POST /v5/pay/agreement/sign`; display QR to user
 - [ ] Receive `SIGNED` webhook; store `agreement_no`
 - [ ] Verify webhook using `X-Timestamp + X-Nonce + rawBody` with platform RSA public key
 - [ ] Use unique `out_trade_no` per deduction; store before calling API
