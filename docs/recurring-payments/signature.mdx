@@ -40,7 +40,7 @@ String to sign = HTTP Method + "\n" + Request Path + "\n" + Timestamp + "\n" + R
 POST
 /v5/pay/agreement/deduction
 1703318400000
-{"merchant_id":"M123456789","user_id":"U_123456789",...}
+{"merchantId":"M123456789","userId":"U_123456789",...}
 ```
 
 **2. Calculate Signature**
@@ -163,22 +163,22 @@ MERCHANT_PRIVATE_KEY="./merchant_private_key.pem"
 ACCESS_TOKEN="your_access_token"
 
 REQUEST_BODY='{
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "agreement_no": "AGR202312230001",
-  "out_trade_no": "TAXI20231224001",
-  "scene_code": "TAXI",
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "agreementNo": "AGR202312230001",
+  "outTradeNo": "TAXI20231224001",
+  "sceneCode": "TAXI",
   "amount": {
     "total": "2350",
     "currency": "USDT",
-    "currency_type": "CRYPTO",
+    "currencyType": "CRYPTO",
     "chain": "TRC20"
   },
-  "order_info": {
-    "order_title": "Ride fare"
+  "orderInfo": {
+    "orderTitle": "Ride fare"
   },
-  "notify_url": "https://merchant.com/notify/pay"
+  "notifyUrl": "https://merchant.com/notify/pay"
 }'
 
 TIMESTAMP=$(date +%s000)

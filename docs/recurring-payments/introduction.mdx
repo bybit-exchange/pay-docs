@@ -16,7 +16,7 @@ Recurring Payments (Auto-deduction) enables merchants to automatically deduct fu
 
 **Update History:**
 - **v2.11** (2026-06-09): Added REJECTED agreement status (user actively canceled signing); Sign-with-pay Webhook changed to independent notifications to signNotifyUrl/payNotifyUrl; Added sign rejected notification (eventType=REJECTED) and sign failed notification (eventType=AGREEMENT_SIGN_RESULT); Added EXPIRED event type; Fixed timeout handling description (timeout does send Webhook notification); Completed all eventType enum tables
-- **v2.10** (2026-03-29): Added merchant settlement configuration error code MERCHANT_SETTLEMENT_CONFIG_ERROR (139006004); Added merchant quota limit error code EXCEED_MERCHANT_QUOTA_LIMIT (139004008); Added chain_address field to amount and limit config in sign/deduction/sign-and-pay APIs
+- **v2.10** (2026-03-29): Added merchant settlement configuration error code MERCHANT_SETTLEMENT_CONFIG_ERROR (139006004); Added merchant quota limit error code EXCEED_MERCHANT_QUOTA_LIMIT (139004008); Added chainAddress field to amount and limit config in sign/deduction/sign-and-pay APIs
 - **v2.9** (2026-02-24): Added Agreement Type Description section detailing usage scenarios and limit configuration differences for CYCLE/NON_CYCLE/SINGLE types; Fixed missing NON_CYCLE in documentation
 - **v2.8** (2026-02-11): Expanded deduction API supported scene codes from 6 to 17, added FOOD, ENTERTAINMENT, EDUCATION, MEMBERSHIP, RENT, FITNESS, TELECOM, CLOUD, INSURANCE, LOAN, OTHERS
 - **v2.7**: Updated response format (retCode/retMsg/result), fixed field type descriptions, adjusted document structure
@@ -107,12 +107,12 @@ Recurring Payments (Auto-deduction) enables merchants to automatically deduct fu
 Merchant Server                  Platform                         User App
     │                         │                            │
     │  1.Sign Request         │                            │
-    │  (user_id +             │                            │
-    │   merchant_user_id)     │                            │
+    │  (userId +              │                            │
+    │   merchantUserId)       │                            │
     │ ──────────────────────→ │                            │
     │                         │                            │
     │  2.Return Sign QR Code  │                            │
-    │  (qr_code/sign_url)     │                            │
+    │  (qrCode/signUrl)       │                            │
     │ ←────────────────────── │                            │
     │                         │                            │
     │     Display QR Code     │        3.Scan              │
@@ -129,7 +129,7 @@ Merchant Server                  Platform                         User App
     │                         │ ←────────────────────────  │
     │                         │                            │
     │  7.Webhook Notification │                            │
-    │  (agreement_no)         │                            │
+    │  (agreementNo)          │                            │
     │ ←────────────────────── │                            │
     │                         │                            │
 ```
@@ -137,7 +137,7 @@ Merchant Server                  Platform                         User App
 ### 2. Deduction Flow (Automatic Payment)
 
 ```
-Merchant Server → Deduction Request(agreement_no) → Platform
+Merchant Server → Deduction Request(agreementNo) → Platform
                                       ↓
                             ┌─────────────────┐
                             │ 1. Agreement     │
@@ -156,7 +156,7 @@ User receives deduction notification (Push/SMS)
 ### 3. Refund Flow
 
 ```
-Merchant Server → Refund Request(trade_no + refund_amount) → Platform
+Merchant Server → Refund Request(tradeNo + refundAmount) → Platform
                                                    ↓
                                          ┌─────────────────┐
                                          │ 1. Transaction  │
@@ -199,23 +199,23 @@ POST /v5/pay/agreement/sign
 
 ```json
 {
-  "merchant_id": "M123456789",
-  "agreement_type": "CYCLE",
-  "merchant_user_id": "merchant_user_123",
-  "scene_code": "SUBSCRIPTION",
-  "external_agreement_no": "MERCHANT_AGR_001",
-  "single_limit": {
+  "merchantId": "M123456789",
+  "agreementType": "CYCLE",
+  "merchantUserId": "merchant_user_123",
+  "sceneCode": "SUBSCRIPTION",
+  "externalAgreementNo": "MERCHANT_AGR_001",
+  "singleLimit": {
     "amount": "100000",
     "currency": "USDT",
-    "currency_type": "CRYPTO"
+    "currencyType": "CRYPTO"
   },
-  "notify_url": "https://merchant.com/notify/sign"
+  "notifyUrl": "https://merchant.com/notify/sign"
 }
 ```
 
 ### Step 2: User Completes Sign
 
-Display the returned `qr_code` or `sign_url` to the user. User scans and completes identity verification.
+Display the returned `qrCode` or `signUrl` to the user. User scans and completes identity verification.
 
 ### Step 3: Receive Sign Webhook
 
@@ -239,22 +239,22 @@ POST /v5/pay/agreement/deduction
 
 ```json
 {
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "agreement_no": "AGR202312230001",
-  "out_trade_no": "ORDER20231223001",
-  "scene_code": "SUBSCRIPTION",
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "agreementNo": "AGR202312230001",
+  "outTradeNo": "ORDER20231223001",
+  "sceneCode": "SUBSCRIPTION",
   "amount": {
     "total": "2350",
     "currency": "USDT",
-    "currency_type": "CRYPTO",
+    "currencyType": "CRYPTO",
     "chain": "TRC20"
   },
-  "order_info": {
-    "order_title": "Monthly subscription"
+  "orderInfo": {
+    "orderTitle": "Monthly subscription"
   },
-  "notify_url": "https://merchant.com/notify/pay"
+  "notifyUrl": "https://merchant.com/notify/pay"
 }
 ```
 

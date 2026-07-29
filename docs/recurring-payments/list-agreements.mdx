@@ -16,15 +16,15 @@ Query agreement list under merchant with pagination and filtering support.
 
 | Parameter | Type | Required | Description |
 |:----------|:-----|:---------|:------------|
-| merchant_id | string | **Yes** | Merchant ID |
-| user_id | string | No | Platform user ID (filter by user) |
-| agreement_type | string | No | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` (query all if not provided) |
+| merchantId | string | **Yes** | Merchant ID |
+| userId | string | No | Platform user ID (filter by user) |
+| agreementType | string | No | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` (query all if not provided) |
 | status | string | No | Status filter: `INIT` / `PENDING` / `SIGNED` / `SUSPENDED` / `UNSIGNED` / `EXPIRED` / `FAILED` |
-| scene_code | string | No | Scene code filter |
-| start_time | string | No | Sign start time (ISO8601) |
-| end_time | string | No | Sign end time (ISO8601) |
-| page_no | int | No | Page number, default 1 |
-| page_size | int | No | Page size, default 20, max 100 |
+| sceneCode | string | No | Scene code filter |
+| startTime | string | No | Sign start time (ISO8601) |
+| endTime | string | No | Sign end time (ISO8601) |
+| pageNo | int | No | Page number, default 1 |
+| pageSize | int | No | Page size, default 20, max 100 |
 
 ---
 
@@ -36,18 +36,18 @@ Query agreement list under merchant with pagination and filtering support.
 | retMsg | string | Response message |
 | result | object | Response data |
 | result.total | int | Total record count |
-| result.page_no | int | Current page number |
-| result.page_size | int | Page size |
+| result.pageNo | int | Current page number |
+| result.pageSize | int | Page size |
 | result.list | array | Agreement list |
-| result.list[].agreement_no | string | Platform agreement number |
-| result.list[].external_agreement_no | string | Merchant agreement number |
-| result.list[].user_id | string | Platform user ID |
-| result.list[].merchant_user_id | string | Merchant-side user ID |
-| result.list[].agreement_type | string | Sign type |
-| result.list[].scene_code | string | Scene code |
+| result.list[].agreementNo | string | Platform agreement number |
+| result.list[].externalAgreementNo | string | Merchant agreement number |
+| result.list[].userId | string | Platform user ID |
+| result.list[].merchantUserId | string | Merchant-side user ID |
+| result.list[].agreementType | string | Sign type |
+| result.list[].sceneCode | string | Scene code |
 | result.list[].status | string | Agreement status |
-| result.list[].sign_time | string | Sign time |
-| result.list[].valid_time | string | Validity period |
+| result.list[].signTime | string | Sign time |
+| result.list[].validTime | string | Validity period |
 
 ---
 
@@ -56,7 +56,7 @@ Query agreement list under merchant with pagination and filtering support.
 ### List All Active Agreements
 
 ```
-GET /v5/pay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&page_size=20 HTTP/1.1
+GET /v5/pay/agreement/list?merchantId=M123456789&status=SIGNED&pageNo=1&pageSize=20 HTTP/1.1
 Host: api.bybit.com
 X-Request-Id: 550e8400-e29b-41d4-a716-446655440000
 X-Timestamp: 1736233200000
@@ -67,7 +67,7 @@ Authorization: Bearer {access_token}
 ### List Agreements for Specific User
 
 ```
-GET /v5/pay/agreement/list?merchant_id=M123456789&user_id=U_123456789&page_no=1&page_size=20 HTTP/1.1
+GET /v5/pay/agreement/list?merchantId=M123456789&userId=U_123456789&pageNo=1&pageSize=20 HTTP/1.1
 Host: api.bybit.com
 X-Request-Id: 550e8400-e29b-41d4-a716-446655440000
 X-Timestamp: 1736233200000
@@ -78,7 +78,7 @@ Authorization: Bearer {access_token}
 ### List Agreements by Scene and Time Range
 
 ```
-GET /v5/pay/agreement/list?merchant_id=M123456789&scene_code=SUBSCRIPTION&start_time=2026-01-01T00:00:00Z&end_time=2026-01-31T23:59:59Z&page_no=1&page_size=50 HTTP/1.1
+GET /v5/pay/agreement/list?merchantId=M123456789&sceneCode=SUBSCRIPTION&startTime=2026-01-01T00:00:00Z&endTime=2026-01-31T23:59:59Z&pageNo=1&pageSize=50 HTTP/1.1
 Host: api.bybit.com
 X-Request-Id: 550e8400-e29b-41d4-a716-446655440000
 X-Timestamp: 1736233200000
@@ -96,30 +96,30 @@ Authorization: Bearer {access_token}
   "retMsg": "Success",
   "result": {
     "total": 150,
-    "page_no": 1,
-    "page_size": 20,
+    "pageNo": 1,
+    "pageSize": 20,
     "list": [
       {
-        "agreement_no": "AGR202601070001",
-        "external_agreement_no": "MERCHANT_AGR_001",
-        "user_id": "U_123456789",
-        "merchant_user_id": "merchant_user_123",
-        "agreement_type": "CYCLE",
-        "scene_code": "SUBSCRIPTION",
+        "agreementNo": "AGR202601070001",
+        "externalAgreementNo": "MERCHANT_AGR_001",
+        "userId": "U_123456789",
+        "merchantUserId": "merchant_user_123",
+        "agreementType": "CYCLE",
+        "sceneCode": "SUBSCRIPTION",
         "status": "SIGNED",
-        "sign_time": "2026-01-07T10:30:00Z",
-        "valid_time": "2027-01-07T10:30:00Z"
+        "signTime": "2026-01-07T10:30:00Z",
+        "validTime": "2027-01-07T10:30:00Z"
       },
       {
-        "agreement_no": "AGR202601060001",
-        "external_agreement_no": "MERCHANT_AGR_002",
-        "user_id": "U_987654321",
-        "merchant_user_id": "merchant_user_456",
-        "agreement_type": "CYCLE",
-        "scene_code": "TAXI",
+        "agreementNo": "AGR202601060001",
+        "externalAgreementNo": "MERCHANT_AGR_002",
+        "userId": "U_987654321",
+        "merchantUserId": "merchant_user_456",
+        "agreementType": "CYCLE",
+        "sceneCode": "TAXI",
         "status": "SIGNED",
-        "sign_time": "2026-01-06T15:20:00Z",
-        "valid_time": "2027-01-06T15:20:00Z"
+        "signTime": "2026-01-06T15:20:00Z",
+        "validTime": "2027-01-06T15:20:00Z"
       }
     ]
   }
@@ -132,4 +132,4 @@ Authorization: Bearer {access_token}
 
 - Use pagination for large result sets to avoid timeout
 - Combine filters for efficient querying
-- `sign_time` is used for time range filtering
+- `signTime` is used for time range filtering

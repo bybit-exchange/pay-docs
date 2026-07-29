@@ -16,16 +16,16 @@ Terminate an active agreement. After unsign, no further deductions can be made. 
 
 | Parameter | Type | Required | Description |
 |:----------|:-----|:---------|:------------|
-| merchant_id | string | **Yes** | Merchant ID |
-| user_id | string | **Yes** | Platform user ID |
-| agreement_type | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
-| agreement_no | string | Either | Platform agreement number |
-| external_agreement_no | string | Either | Merchant agreement number |
-| unsign_type | string | No | Unsign type: `USER` / `MERCHANT` / `SYSTEM` |
-| unsign_reason | string | No | Unsign reason |
+| merchantId | string | **Yes** | Merchant ID |
+| userId | string | **Yes** | Platform user ID |
+| agreementType | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
+| agreementNo | string | Either | Platform agreement number |
+| externalAgreementNo | string | Either | Merchant agreement number |
+| unsignType | string | No | Unsign type: `USER` / `MERCHANT` / `SYSTEM` |
+| unsignReason | string | No | Unsign reason |
 
 :::info
-Either `agreement_no` or `external_agreement_no` must be provided.
+Either `agreementNo` or `externalAgreementNo` must be provided.
 :::
 
 ---
@@ -37,9 +37,9 @@ Either `agreement_no` or `external_agreement_no` must be provided.
 | retCode | int | Response code |
 | retMsg | string | Response message |
 | result | object | Response data |
-| result.agreement_no | string | Platform agreement number |
+| result.agreementNo | string | Platform agreement number |
 | result.status | string | Status: `UNSIGNED` |
-| result.unsign_time | string | Unsign time |
+| result.unsignTime | string | Unsign time |
 
 ---
 
@@ -57,12 +57,12 @@ X-Signature: {signature}
 Authorization: Bearer {access_token}
 
 {
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "agreement_no": "AGR202601070001",
-  "unsign_type": "USER",
-  "unsign_reason": "User cancelled subscription"
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "agreementNo": "AGR202601070001",
+  "unsignType": "USER",
+  "unsignReason": "User cancelled subscription"
 }
 ```
 
@@ -78,12 +78,12 @@ X-Signature: {signature}
 Authorization: Bearer {access_token}
 
 {
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "external_agreement_no": "MERCHANT_AGR_001",
-  "unsign_type": "MERCHANT",
-  "unsign_reason": "Service terminated"
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "externalAgreementNo": "MERCHANT_AGR_001",
+  "unsignType": "MERCHANT",
+  "unsignReason": "Service terminated"
 }
 ```
 
@@ -98,9 +98,9 @@ Authorization: Bearer {access_token}
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "agreement_no": "AGR202601070001",
+    "agreementNo": "AGR202601070001",
     "status": "UNSIGNED",
-    "unsign_time": "2026-01-07T15:30:00Z"
+    "unsignTime": "2026-01-07T15:30:00Z"
   }
 }
 ```

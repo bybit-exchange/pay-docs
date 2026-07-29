@@ -16,36 +16,36 @@ Execute automatic deduction from user's account using a signed agreement. This i
 
 | Parameter | Type | Required | Description |
 |:----------|:-----|:---------|:------------|
-| merchant_id | string | **Yes** | Merchant ID |
-| user_id | string | **Yes** | Platform user ID |
-| agreement_type | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
-| agreement_no | string | **Yes** | Platform agreement number |
-| out_trade_no | string | **Yes** | Merchant order number (unique) |
-| scene_code | string | **Yes** | [Scene code](appendix#scene-codes) - Supports 17 scenarios including TAXI, PARKING, SUBSCRIPTION, FOOD, ENTERTAINMENT, EDUCATION, etc. |
+| merchantId | string | **Yes** | Merchant ID |
+| userId | string | **Yes** | Platform user ID |
+| agreementType | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
+| agreementNo | string | **Yes** | Platform agreement number |
+| outTradeNo | string | **Yes** | Merchant order number (unique) |
+| sceneCode | string | **Yes** | [Scene code](appendix#scene-codes) - Supports 17 scenarios including TAXI, PARKING, SUBSCRIPTION, FOOD, ENTERTAINMENT, EDUCATION, etc. |
 | amount | object | **Yes** | Deduction amount |
 | amount.total | string | **Yes** | Amount (minimum unit) |
 | amount.currency | string | **Yes** | Currency code |
-| amount.currency_type | string | **Yes** | `FIAT` or `CRYPTO` |
+| amount.currencyType | string | **Yes** | `FIAT` or `CRYPTO` |
 | amount.chain | string | No | Chain network (required for crypto, e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
-| amount.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
-| order_info | object | **Yes** | Order information |
-| order_info.order_title | string | **Yes** | Order title (displayed to user) |
-| order_info.order_desc | string | No | Order description |
-| order_info.goods_name | string | No | Goods name |
-| order_info.goods_id | string | No | Goods ID |
-| order_info.goods_category | string | No | Goods category |
-| scene_info | object | No | Scene information |
-| scene_info.device_id | string | No | Device ID |
-| scene_info.device_ip | string | No | Device IP |
-| scene_info.location | object | No | Location information |
-| scene_info.location.latitude | string | No | Latitude |
-| scene_info.location.longitude | string | No | Longitude |
-| scene_info.location.address | string | No | Detailed address |
-| notify_url | string | **Yes** | Deduction result webhook URL |
-| risk_info | object | No | Risk control information |
-| risk_info.user_ip | string | No | User IP address |
-| risk_info.device_fingerprint | string | No | Device fingerprint |
-| risk_info.user_agent | string | No | User agent string |
+| amount.chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| orderInfo | object | **Yes** | Order information |
+| orderInfo.orderTitle | string | **Yes** | Order title (displayed to user) |
+| orderInfo.orderDesc | string | No | Order description |
+| orderInfo.goodsName | string | No | Goods name |
+| orderInfo.goodsId | string | No | Goods ID |
+| orderInfo.goodsCategory | string | No | Goods category |
+| sceneInfo | object | No | Scene information |
+| sceneInfo.deviceId | string | No | Device ID |
+| sceneInfo.deviceIp | string | No | Device IP |
+| sceneInfo.location | object | No | Location information |
+| sceneInfo.location.latitude | string | No | Latitude |
+| sceneInfo.location.longitude | string | No | Longitude |
+| sceneInfo.location.address | string | No | Detailed address |
+| notifyUrl | string | **Yes** | Deduction result webhook URL |
+| riskInfo | object | No | Risk control information |
+| riskInfo.userIp | string | No | User IP address |
+| riskInfo.deviceFingerprint | string | No | Device fingerprint |
+| riskInfo.userAgent | string | No | User agent string |
 
 ---
 
@@ -56,19 +56,19 @@ Execute automatic deduction from user's account using a signed agreement. This i
 | retCode | int | Response code |
 | retMsg | string | Response message |
 | result | object | Response data |
-| result.order_no | string | Platform order number |
-| result.trade_no | string | Platform trade number |
-| result.out_trade_no | string | Merchant order number |
+| result.orderNo | string | Platform order number |
+| result.tradeNo | string | Platform trade number |
+| result.outTradeNo | string | Merchant order number |
 | result.status | string | Transaction status: `PROCESSING` / `SUCCESS` / `FAILED` / `TIMEOUT` |
 | result.amount | object | Requested amount |
-| result.crypto_payment | object | Actual crypto payment info (for fiat orders) |
-| result.crypto_payment.currency | string | Cryptocurrency (e.g., USDT) |
-| result.crypto_payment.amount | string | Cryptocurrency amount |
-| result.crypto_payment.chain | string | Chain network (e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
-| result.crypto_payment.exchange_rate | string | Exchange rate |
-| result.crypto_payment.rate_time | string | Rate lock time |
-| result.pay_time | string | Payment time (on success) |
-| result.failure_reason | string | Failure reason (on failure) |
+| result.cryptoPayment | object | Actual crypto payment info (for fiat orders) |
+| result.cryptoPayment.currency | string | Cryptocurrency (e.g., USDT) |
+| result.cryptoPayment.amount | string | Cryptocurrency amount |
+| result.cryptoPayment.chain | string | Chain network (e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
+| result.cryptoPayment.exchangeRate | string | Exchange rate |
+| result.cryptoPayment.rateTime | string | Rate lock time |
+| result.payTime | string | Payment time (on success) |
+| result.failureReason | string | Failure reason (on failure) |
 
 ---
 
@@ -86,25 +86,25 @@ X-Signature: {signature}
 Authorization: Bearer {access_token}
 
 {
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "agreement_no": "AGR202601070001",
-  "out_trade_no": "ORDER20260107001",
-  "scene_code": "SUBSCRIPTION",
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "agreementNo": "AGR202601070001",
+  "outTradeNo": "ORDER20260107001",
+  "sceneCode": "SUBSCRIPTION",
   "amount": {
     "total": "2350",
     "currency": "USDT",
-    "currency_type": "CRYPTO",
+    "currencyType": "CRYPTO",
     "chain": "TRC20"
   },
-  "order_info": {
-    "order_title": "Monthly subscription - January 2026",
-    "order_desc": "Premium membership",
-    "goods_name": "Premium Plan",
-    "goods_id": "PREMIUM_001"
+  "orderInfo": {
+    "orderTitle": "Monthly subscription - January 2026",
+    "orderDesc": "Premium membership",
+    "goodsName": "Premium Plan",
+    "goodsId": "PREMIUM_001"
   },
-  "notify_url": "https://merchant.com/notify/pay"
+  "notifyUrl": "https://merchant.com/notify/pay"
 }
 ```
 
@@ -120,35 +120,35 @@ X-Signature: {signature}
 Authorization: Bearer {access_token}
 
 {
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "agreement_no": "AGR202601070001",
-  "out_trade_no": "ORDER20260107002",
-  "scene_code": "TAXI",
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "agreementNo": "AGR202601070001",
+  "outTradeNo": "ORDER20260107002",
+  "sceneCode": "TAXI",
   "amount": {
     "total": "10000",
     "currency": "USD",
-    "currency_type": "FIAT"
+    "currencyType": "FIAT"
   },
-  "order_info": {
-    "order_title": "Ride fare",
-    "order_desc": "Trip from A to B"
+  "orderInfo": {
+    "orderTitle": "Ride fare",
+    "orderDesc": "Trip from A to B"
   },
-  "scene_info": {
-    "device_id": "DEVICE_001",
-    "device_ip": "192.168.1.1",
+  "sceneInfo": {
+    "deviceId": "DEVICE_001",
+    "deviceIp": "192.168.1.1",
     "location": {
       "latitude": "39.9042",
       "longitude": "116.4074",
       "address": "Beijing, China"
     }
   },
-  "risk_info": {
-    "user_ip": "203.0.113.45",
-    "device_fingerprint": "fp_abc123xyz"
+  "riskInfo": {
+    "userIp": "203.0.113.45",
+    "deviceFingerprint": "fp_abc123xyz"
   },
-  "notify_url": "https://merchant.com/notify/pay"
+  "notifyUrl": "https://merchant.com/notify/pay"
 }
 ```
 
@@ -163,17 +163,17 @@ Authorization: Bearer {access_token}
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "order_no": "ORD202601070001",
-    "trade_no": "PAY202601070001",
-    "out_trade_no": "ORDER20260107001",
+    "orderNo": "ORD202601070001",
+    "tradeNo": "PAY202601070001",
+    "outTradeNo": "ORDER20260107001",
     "status": "SUCCESS",
     "amount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "pay_time": "2026-01-07T10:30:00Z"
+    "payTime": "2026-01-07T10:30:00Z"
   }
 }
 ```
@@ -185,23 +185,23 @@ Authorization: Bearer {access_token}
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "order_no": "ORD202601070002",
-    "trade_no": "PAY202601070002",
-    "out_trade_no": "ORDER20260107002",
+    "orderNo": "ORD202601070002",
+    "tradeNo": "PAY202601070002",
+    "outTradeNo": "ORDER20260107002",
     "status": "SUCCESS",
     "amount": {
       "total": "10000",
       "currency": "USD",
-      "currency_type": "FIAT"
+      "currencyType": "FIAT"
     },
-    "crypto_payment": {
+    "cryptoPayment": {
       "currency": "USDT",
       "amount": "10005.50",
       "chain": "TRC20",
-      "exchange_rate": "1.00055",
-      "rate_time": "2026-01-07T10:29:55Z"
+      "exchangeRate": "1.00055",
+      "rateTime": "2026-01-07T10:29:55Z"
     },
-    "pay_time": "2026-01-07T10:30:00Z"
+    "payTime": "2026-01-07T10:30:00Z"
   }
 }
 ```
@@ -213,14 +213,14 @@ Authorization: Bearer {access_token}
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "order_no": "ORD202601070003",
-    "trade_no": "PAY202601070003",
-    "out_trade_no": "ORDER20260107003",
+    "orderNo": "ORD202601070003",
+    "tradeNo": "PAY202601070003",
+    "outTradeNo": "ORDER20260107003",
     "status": "PROCESSING",
     "amount": {
       "total": "5000",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     }
   }
@@ -234,17 +234,17 @@ Authorization: Bearer {access_token}
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "order_no": "ORD202601070004",
-    "trade_no": "PAY202601070004",
-    "out_trade_no": "ORDER20260107004",
+    "orderNo": "ORD202601070004",
+    "tradeNo": "PAY202601070004",
+    "outTradeNo": "ORDER20260107004",
     "status": "FAILED",
     "amount": {
       "total": "5000",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "failure_reason": "BALANCE_NOT_ENOUGH"
+    "failureReason": "BALANCE_NOT_ENOUGH"
   }
 }
 ```
@@ -265,7 +265,7 @@ Platform performs the following checks before executing deduction:
 
 ## Notes
 
-1. **Idempotency**: Same `out_trade_no` returns result of first request
+1. **Idempotency**: Same `outTradeNo` returns result of first request
 2. **Async Processing**: `PROCESSING` status requires waiting for webhook or query
 3. **Timeout Handling**: Set 30-second timeout, query if timeout occurs
-4. **Fiat Orders**: User pays with cryptocurrency; `crypto_payment` shows actual payment details
+4. **Fiat Orders**: User pays with cryptocurrency; `cryptoPayment` shows actual payment details

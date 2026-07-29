@@ -16,12 +16,12 @@ Query single agreement status and details.
 
 | Parameter | Type | Required | Description |
 |:----------|:-----|:---------|:------------|
-| merchant_id | string | **Yes** | Merchant ID |
-| agreement_no | string | Either | Platform agreement number |
-| external_agreement_no | string | Either | Merchant agreement number |
+| merchantId | string | **Yes** | Merchant ID |
+| agreementNo | string | Either | Platform agreement number |
+| externalAgreementNo | string | Either | Merchant agreement number |
 
 :::info
-Either `agreement_no` or `external_agreement_no` must be provided.
+Either `agreementNo` or `externalAgreementNo` must be provided.
 :::
 
 ---
@@ -33,23 +33,23 @@ Either `agreement_no` or `external_agreement_no` must be provided.
 | retCode | int | Response code |
 | retMsg | string | Response message |
 | result | object | Response data |
-| result.agreement_no | string | Platform agreement number |
-| result.external_agreement_no | string | Merchant agreement number |
-| result.user_id | string | Platform user ID |
-| result.merchant_user_id | string | Merchant-side user ID |
+| result.agreementNo | string | Platform agreement number |
+| result.externalAgreementNo | string | Merchant agreement number |
+| result.userId | string | Platform user ID |
+| result.merchantUserId | string | Merchant-side user ID |
 | result.status | string | Status: `INIT`/`PENDING`/`SIGNED`/`SUSPENDED`/`UNSIGNED`/`EXPIRED`/`REJECTED`/`FAILED`/`TIMEOUT` |
-| result.sign_time | string | Sign time |
-| result.valid_time | string | Validity period |
-| result.single_limit | object | Single transaction limit |
-| result.period_limits | array | Period limits list |
-| result.used_quota | object | Used quota |
+| result.signTime | string | Sign time |
+| result.validTime | string | Validity period |
+| result.singleLimit | object | Single transaction limit |
+| result.periodLimits | array | Period limits list |
+| result.usedQuota | object | Used quota |
 
 ---
 
 ## Request Example
 
 ```
-GET /v5/pay/agreement/query?merchant_id=M123456789&agreement_no=AGR202601070001 HTTP/1.1
+GET /v5/pay/agreement/query?merchantId=M123456789&agreementNo=AGR202601070001 HTTP/1.1
 Host: api.bybit.com
 X-Request-Id: 550e8400-e29b-41d4-a716-446655440000
 X-Timestamp: 1736233200000
@@ -66,40 +66,40 @@ Authorization: Bearer {access_token}
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "agreement_no": "AGR202601070001",
-    "external_agreement_no": "MERCHANT_AGR_001",
-    "user_id": "U_123456789",
-    "merchant_user_id": "merchant_user_123",
+    "agreementNo": "AGR202601070001",
+    "externalAgreementNo": "MERCHANT_AGR_001",
+    "userId": "U_123456789",
+    "merchantUserId": "merchant_user_123",
     "status": "SIGNED",
-    "sign_time": "2026-01-07T10:30:00Z",
-    "valid_time": "2027-01-07T10:30:00Z",
-    "single_limit": {
+    "signTime": "2026-01-07T10:30:00Z",
+    "validTime": "2027-01-07T10:30:00Z",
+    "singleLimit": {
       "amount": "100000",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "period_limits": [
+    "periodLimits": [
       {
-        "period_type": "DAY",
+        "periodType": "DAY",
         "amount": "500000",
         "currency": "USDT",
-        "currency_type": "CRYPTO",
+        "currencyType": "CRYPTO",
         "chain": "TRC20"
       },
       {
-        "period_type": "MONTH",
+        "periodType": "MONTH",
         "amount": "5000000",
         "currency": "USDT",
-        "currency_type": "CRYPTO",
+        "currencyType": "CRYPTO",
         "chain": "TRC20"
       }
     ],
-    "used_quota": {
-      "day_used": "50000",
-      "month_used": "150000",
+    "usedQuota": {
+      "dayUsed": "50000",
+      "monthUsed": "150000",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     }
   }
 }
@@ -126,5 +126,5 @@ Authorization: Bearer {access_token}
 ## Notes
 
 - Use this API to check agreement status before deduction
-- `used_quota` shows current period usage (resets based on period type)
+- `usedQuota` shows current period usage (resets based on period type)
 - All states support query operation

@@ -71,17 +71,17 @@ All API requests must include the following headers:
 
 | Field Type | Max Length | Example Fields |
 |:-----------|:-----------|:---------------|
-| Merchant ID | 32 | `merchant_id` |
-| User ID | 64 | `user_id`, `merchant_user_id` |
-| Agreement No | 64 | `agreement_no`, `external_agreement_no` |
-| Order No | 64 | `out_trade_no`, `out_refund_no` |
-| Trade No | 64 | `trade_no`, `refund_no` |
+| Merchant ID | 32 | `merchantId` |
+| User ID | 64 | `userId`, `merchantUserId` |
+| Agreement No | 64 | `agreementNo`, `externalAgreementNo` |
+| Order No | 64 | `outTradeNo`, `outRefundNo` |
+| Trade No | 64 | `tradeNo`, `refundNo` |
 | Amount | 32 | `amount.total` |
 | Currency Code | 16 | `currency` |
-| URL | 512 | `notify_url`, `return_url` |
-| Description | 256 | `order_desc`, `refund_reason` |
-| Title | 128 | `order_title` |
-| Extra Params | 2048 | `extra_params` (JSON string) |
+| URL | 512 | `notifyUrl`, `returnUrl` |
+| Description | 256 | `orderDesc`, `refundReason` |
+| Title | 128 | `orderTitle` |
+| Extra Params | 2048 | `extraParams` (JSON string) |
 
 ---
 
@@ -91,9 +91,9 @@ Idempotency is guaranteed through business unique indexes:
 
 | Business Scenario | Idempotency Key | Unique Index |
 |:------------------|:----------------|:-------------|
-| Sign Request | external_agreement_no | (merchant_id, external_agreement_no) |
-| Deduction Order | out_trade_no | (merchant_id, out_trade_no) |
-| Refund Request | out_refund_no | (merchant_id, out_refund_no) |
+| Sign Request | externalAgreementNo | (merchantId, externalAgreementNo) |
+| Deduction Order | outTradeNo | (merchantId, outTradeNo) |
+| Refund Request | outRefundNo | (merchantId, outRefundNo) |
 
 **Notes:**
 - `X-Request-Id` format requirement: UUID v4, e.g., `550e8400-e29b-41d4-a716-446655440000`
@@ -124,14 +124,14 @@ Idempotency is guaranteed through business unique indexes:
 ### Same Agreement Concurrent Deductions
 
 - Same agreement supports concurrent deduction requests
-- Each deduction needs different `out_trade_no`
+- Each deduction needs different `outTradeNo`
 - Limit verification is real-time; concurrent requests may be rejected if exceeding quota
 
 ### Same Order Repeated Requests
 
-- Requests with same `out_trade_no` are treated as the same transaction
+- Requests with same `outTradeNo` are treated as the same transaction
 - After first request succeeds, repeated requests return the first result (idempotent)
-- After first request fails, use a new `out_trade_no` to retry
+- After first request fails, use a new `outTradeNo` to retry
 
 ---
 
@@ -208,7 +208,7 @@ HTTP status `429` with body:
   "retCode": 42900,
   "retMsg": "Too many requests, please try again later",
   "result": {
-    "retry_after": 1000
+    "retryAfter": 1000
   }
 }
 ```
@@ -224,7 +224,7 @@ HTTP status `429` with body:
 
 ## Agreement Type Description
 
-Agreement type (`agreement_type`) defines the deduction mode of agreement payment, affecting deduction frequency, limit configuration, and agreement lifecycle.
+Agreement type (`agreementType`) defines the deduction mode of agreement payment, affecting deduction frequency, limit configuration, and agreement lifecycle.
 
 ### Agreement Type Comparison
 
@@ -255,8 +255,8 @@ Agreement type (`agreement_type`) defines the deduction mode of agreement paymen
 ### Limit Configuration Description
 
 **CYCLE and NON_CYCLE Types**:
-- Support **Single Limit** (`single_limit`): Maximum amount per deduction
-- Support **Period Limits** (`period_limits`):
+- Support **Single Limit** (`singleLimit`): Maximum amount per deduction
+- Support **Period Limits** (`periodLimits`):
   - DAY: Daily accumulated deduction limit
   - WEEK: Weekly accumulated deduction limit
   - MONTH: Monthly accumulated deduction limit
@@ -264,7 +264,7 @@ Agreement type (`agreement_type`) defines the deduction mode of agreement paymen
 - Multiple period limits can be configured simultaneously, platform validates all limits
 
 **SINGLE Type**:
-- Only supports **Single Limit** (`single_limit`)
+- Only supports **Single Limit** (`singleLimit`)
 - Period limits not supported (as agreement expires after deduction)
 
 ### Agreement Lifecycle Comparison
@@ -294,4 +294,4 @@ Agreement type (`agreement_type`) defines the deduction mode of agreement paymen
 3. **Agreement Management**:
    - CYCLE/NON_CYCLE agreements require active cancellation or await expiration
    - SINGLE agreements auto-expire after deduction, no management needed
-   - Recommend setting reasonable validity period (`sign_valid_time`) for long-term agreements
+   - Recommend setting reasonable validity period (`signValidTime`) for long-term agreements

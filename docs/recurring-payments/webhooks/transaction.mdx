@@ -26,7 +26,7 @@ Notifies merchant when a deduction is completed or fails.
 | amount | object | Amount object |
 | amount.total | string | Amount (minimum unit) |
 | amount.currency | string | Currency code |
-| amount.currency_type | string | Currency type |
+| amount.currencyType | string | Currency type |
 | payTime | string | Payment time (on success) |
 | failureCode | string | Failure error code (on failure, 9-digit string) |
 | failureReason | string | Failure reason description (on failure) |
@@ -50,7 +50,7 @@ Notifies merchant when a deduction is completed or fails.
     "amount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     },
     "payTime": "2026-01-07 10:30:00"
   },
@@ -76,7 +76,7 @@ Notifies merchant when a deduction is completed or fails.
     "amount": {
       "total": "5000",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     },
     "failureCode": "139002003",
     "failureReason": "Insufficient balance (downstream code=120100006, msg=Balance insufficient)"
@@ -103,7 +103,7 @@ Notifies merchant when a refund is completed or fails.
 | eventType | string | Event type: `REFUND` |
 | orderType | string | Order type: `REFUND` |
 | status | string | Refund status: `SUCCESS` / `FAILED` |
-| refund_amount | object | Refund amount object |
+| refundAmount | object | Refund amount object |
 | refundTime | string | Refund time (on success) |
 | failureCode | string | Failure error code (on failure, 9-digit string) |
 | failureReason | string | Failure reason description (on failure) |
@@ -126,10 +126,10 @@ Notifies merchant when a refund is completed or fails.
     "eventType": "REFUND",
     "orderType": "REFUND",
     "status": "SUCCESS",
-    "refund_amount": {
+    "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     },
     "refundTime": "2026-01-07 11:30:00"
   },
@@ -154,10 +154,10 @@ Notifies merchant when a refund is completed or fails.
     "eventType": "REFUND",
     "orderType": "REFUND",
     "status": "FAILED",
-    "refund_amount": {
+    "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     },
     "failureCode": "139002003",
     "failureReason": "Insufficient balance (downstream code=120100006, msg=Balance insufficient)"
@@ -187,7 +187,7 @@ Notifies merchant when a deduction order times out without completion.
 | amount | object | Amount object |
 | amount.total | string | Amount (minimum unit) |
 | amount.currency | string | Currency code |
-| amount.currency_type | string | Currency type |
+| amount.currencyType | string | Currency type |
 | failureReason | string | Failure reason |
 | timeoutTime | string | Timeout time |
 
@@ -212,7 +212,7 @@ Notifies merchant when a deduction order times out without completion.
     "amount": {
       "total": "5000",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     },
     "failureReason": "ORDER_TIMEOUT",
     "timeoutTime": "2026-01-07 12:00:00"

@@ -16,22 +16,22 @@ Initiate refund for a successful deduction transaction. Supports full and partia
 
 | Parameter | Type | Required | Description |
 |:----------|:-----|:---------|:------------|
-| merchant_id | string | **Yes** | Merchant ID |
-| user_id | string | **Yes** | Platform user ID |
-| agreement_type | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
-| trade_no | string | Either | Platform trade number |
-| out_trade_no | string | Either | Merchant order number |
-| out_refund_no | string | **Yes** | Merchant refund number (unique) |
-| refund_amount | object | **Yes** | Refund amount |
-| refund_amount.total | string | **Yes** | Refund amount (minimum unit) |
-| refund_amount.currency | string | **Yes** | Currency code |
-| refund_amount.currency_type | string | **Yes** | `FIAT` or `CRYPTO` |
-| refund_amount.chain | string | No | Chain network (required for crypto, e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
-| refund_reason | string | No | Refund reason |
-| notify_url | string | **Yes** | Refund result webhook URL |
+| merchantId | string | **Yes** | Merchant ID |
+| userId | string | **Yes** | Platform user ID |
+| agreementType | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
+| tradeNo | string | Either | Platform trade number |
+| outTradeNo | string | Either | Merchant order number |
+| outRefundNo | string | **Yes** | Merchant refund number (unique) |
+| refundAmount | object | **Yes** | Refund amount |
+| refundAmount.total | string | **Yes** | Refund amount (minimum unit) |
+| refundAmount.currency | string | **Yes** | Currency code |
+| refundAmount.currencyType | string | **Yes** | `FIAT` or `CRYPTO` |
+| refundAmount.chain | string | No | Chain network (required for crypto, e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
+| refundReason | string | No | Refund reason |
+| notifyUrl | string | **Yes** | Refund result webhook URL |
 
 :::info
-Either `trade_no` or `out_trade_no` must be provided.
+Either `tradeNo` or `outTradeNo` must be provided.
 :::
 
 ---
@@ -43,13 +43,13 @@ Either `trade_no` or `out_trade_no` must be provided.
 | retCode | int | Response code |
 | retMsg | string | Response message |
 | result | object | Response data |
-| result.refund_no | string | Platform refund number |
-| result.out_refund_no | string | Merchant refund number |
-| result.trade_no | string | Original trade number |
+| result.refundNo | string | Platform refund number |
+| result.outRefundNo | string | Merchant refund number |
+| result.tradeNo | string | Original trade number |
 | result.status | string | Refund status: `PROCESSING` / `SUCCESS` / `FAILED` |
-| result.refund_amount | object | Refund amount |
-| result.refund_time | string | Refund success time (on success) |
-| result.failure_reason | string | Failure reason (on failure) |
+| result.refundAmount | object | Refund amount |
+| result.refundTime | string | Refund success time (on success) |
+| result.failureReason | string | Failure reason (on failure) |
 
 ---
 
@@ -67,19 +67,19 @@ X-Signature: {signature}
 Authorization: Bearer {access_token}
 
 {
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "trade_no": "PAY202601070001",
-  "out_refund_no": "REFUND20260107001",
-  "refund_amount": {
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "tradeNo": "PAY202601070001",
+  "outRefundNo": "REFUND20260107001",
+  "refundAmount": {
     "total": "2350",
     "currency": "USDT",
-    "currency_type": "CRYPTO",
+    "currencyType": "CRYPTO",
     "chain": "TRC20"
   },
-  "refund_reason": "User requested cancellation",
-  "notify_url": "https://merchant.com/notify/refund"
+  "refundReason": "User requested cancellation",
+  "notifyUrl": "https://merchant.com/notify/refund"
 }
 ```
 
@@ -95,19 +95,19 @@ X-Signature: {signature}
 Authorization: Bearer {access_token}
 
 {
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "out_trade_no": "ORDER20260107001",
-  "out_refund_no": "REFUND20260107002",
-  "refund_amount": {
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "outTradeNo": "ORDER20260107001",
+  "outRefundNo": "REFUND20260107002",
+  "refundAmount": {
     "total": "1000",
     "currency": "USDT",
-    "currency_type": "CRYPTO",
+    "currencyType": "CRYPTO",
     "chain": "TRC20"
   },
-  "refund_reason": "Partial service not provided",
-  "notify_url": "https://merchant.com/notify/refund"
+  "refundReason": "Partial service not provided",
+  "notifyUrl": "https://merchant.com/notify/refund"
 }
 ```
 
@@ -122,17 +122,17 @@ Authorization: Bearer {access_token}
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "refund_no": "RF202601070001",
-    "out_refund_no": "REFUND20260107001",
-    "trade_no": "PAY202601070001",
+    "refundNo": "RF202601070001",
+    "outRefundNo": "REFUND20260107001",
+    "tradeNo": "PAY202601070001",
     "status": "SUCCESS",
-    "refund_amount": {
+    "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "refund_time": "2026-01-07T11:30:00Z"
+    "refundTime": "2026-01-07T11:30:00Z"
   }
 }
 ```
@@ -144,14 +144,14 @@ Authorization: Bearer {access_token}
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "refund_no": "RF202601070002",
-    "out_refund_no": "REFUND20260107002",
-    "trade_no": "PAY202601070001",
+    "refundNo": "RF202601070002",
+    "outRefundNo": "REFUND20260107002",
+    "tradeNo": "PAY202601070001",
     "status": "PROCESSING",
-    "refund_amount": {
+    "refundAmount": {
       "total": "1000",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     }
   }
@@ -165,17 +165,17 @@ Authorization: Bearer {access_token}
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "refund_no": "RF202601070003",
-    "out_refund_no": "REFUND20260107003",
-    "trade_no": "PAY202601070001",
+    "refundNo": "RF202601070003",
+    "outRefundNo": "REFUND20260107003",
+    "tradeNo": "PAY202601070001",
     "status": "FAILED",
-    "refund_amount": {
+    "refundAmount": {
       "total": "5000",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "failure_reason": "REFUND_AMOUNT_EXCEED"
+    "failureReason": "REFUND_AMOUNT_EXCEED"
   }
 }
 ```
@@ -204,7 +204,7 @@ Authorization: Bearer {access_token}
 
 ## Notes
 
-1. **Idempotency**: Same `out_refund_no` returns result of first request
+1. **Idempotency**: Same `outRefundNo` returns result of first request
 2. **Currency Matching**: Refund currency must match original transaction currency
 3. **Async Processing**: `PROCESSING` status requires waiting for webhook or query
 4. **Timeout Handling**: Set 30-second timeout, query if timeout occurs

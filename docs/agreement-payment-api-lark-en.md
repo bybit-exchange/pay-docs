@@ -6,23 +6,23 @@
 
 **Update History**:
 - v2.11: Added REJECTED agreement status (user actively canceled signing); Sign-with-pay Webhook changed to independent notifications to signNotifyUrl/payNotifyUrl; Added sign rejected notification (eventType=REJECTED) and sign failed notification (eventType=AGREEMENT_SIGN_RESULT); Added EXPIRED event type; Fixed timeout handling description (timeout does send Webhook notification); Completed all eventType enum tables
-- v2.10: Added merchant settlement configuration error code MERCHANT_SETTLEMENT_CONFIG_ERROR (139006004); Added merchant quota limit error code EXCEED_MERCHANT_QUOTA_LIMIT (139004008); Added chain_address field to amount and limit config in sign/deduction/sign-and-pay APIs
+- v2.10: Added merchant settlement configuration error code MERCHANT_SETTLEMENT_CONFIG_ERROR (139006004); Added merchant quota limit error code EXCEED_MERCHANT_QUOTA_LIMIT (139004008); Added chainAddress field to amount and limit config in sign/deduction/sign-and-pay APIs
 - v2.9: Added Agreement Type Description section (7.5) detailing the usage scenarios and limit configuration differences for CYCLE/NON_CYCLE/SINGLE types; Fixed 4 instances of missing NON_CYCLE in English documentation
 - v2.8: Expanded agreement pay API supported scene codes from 6 to 17 (added FOOD/ENTERTAINMENT/EDUCATION/MEMBERSHIP/RENT/FITNESS/TELECOM/CLOUD/INSURANCE/LOAN/OTHERS), fully consistent with sign API scene codes
 - v2.7: Fixed unsign API failure response example field names (code→retCode, message→retMsg); Fixed rate limiting response format field names
-- v2.6: Fixed failure response format field names (code→retCode, message→retMsg); Fixed extra_params type description (object→string JSON string); Adjusted section order (3.5 deduction refund API moved to correct position)
+- v2.6: Fixed failure response format field names (code→retCode, message→retMsg); Fixed extraParams type description (object→string JSON string); Adjusted section order (3.5 deduction refund API moved to correct position)
 - v2.5: Fixed success response code from 0 to 20000 (aligned with ResultCode.SUCCESS); Fixed success response message from "success" to "Success"; All API response examples fully consistent with actual code implementation
-- v2.4: Fixed response format field names (code→retCode, message→retMsg, data→result); Fixed error code numbers (UNAUTHORIZED=40002, PARAM_INVALID=40001); Removed redundant user_id field from sign request example; Added NON_CYCLE type description; All API examples fully aligned with Proto definition
-- v2.3: Fixed chapter numbering (3.3-3.9), refund API number adjusted to 3.5; Added agreement_no and external_agreement_no fields in sign request response; Added sign_valid_time validation requirement (must be at least 24 hours after current time); Optimized product_code field description; Chinese and English documentation fully aligned
+- v2.4: Fixed response format field names (code→retCode, message→retMsg, data→result); Fixed error code numbers (UNAUTHORIZED=40002, PARAM_INVALID=40001); Removed redundant userId field from sign request example; Added NON_CYCLE type description; All API examples fully aligned with Proto definition
+- v2.3: Fixed chapter numbering (3.3-3.9), refund API number adjusted to 3.5; Added agreementNo and externalAgreementNo fields in sign request response; Added signValidTime validation requirement (must be at least 24 hours after current time); Optimized productCode field description; Chinese and English documentation fully aligned
 - v2.2: Webhook signature mechanism optimized: Signature parameters moved from request body to HTTP Headers (X-Signature/X-Timestamp/X-Nonce/X-Sign-Type), fresh signature generated for each send/retry, request body remains pure JSON; Fixed document TOC chapter numbering (4.7-4.9)
 - v2.1: Internal optimization of deduction API: Support user-defined limit verification (users can set single/daily limits through cashier), downstream payment uses user-configured paymentType (payNow/payLater)
-- v2.0: Async notification parameter table supplemented with notify_id/notify_time common fields (4.1-4.6); Deduction API supplemented with fiat currency order request example (3.4); Webhook section added complete Java/Python/Node.js handling code examples (4.7); Signature algorithm section added complete cURL request example (5.4)
-- v1.9: binding_info field unified to snake_case naming; refund_amount.total field structure standardized; Added complete status response examples for sign confirmation/unsign/refund APIs; Added sign/refund notification failure examples; Deduction status added TIMEOUT; Added extra_params and scene_info.location field descriptions; Error codes grouped by module; Added chain network list (7.3); Added rate limiting description (2.10); Added sandbox environment description (7.5); Fixed notify_id duplication issue
-- v1.8: Unified scene_code enum values; Corrected bindStatus enum; Sign limit configuration supports chain field; Transaction list API supplemented REFUND response; Added API timeout recommendations and concurrency handling description; Added refund status flow diagram; Added API version compatibility description; Added risk_info risk control field; Added failure response and PROCESSING status examples; Added document directory
-- v1.7: Added agreement list query API; Transaction query API merged refund query (distinguished by record_type); Transaction list API supports refund record query; Added general specification section (request headers, response format, HTTP status codes, field length limits, idempotency, transaction status flow); GET API examples changed to Query String format; Webhook notification added notify_id deduplication field; Refund notification added user_id field; Sign request added sign_expire_minutes parameter
+- v2.0: Async notification parameter table supplemented with notifyId/notifyTime common fields (4.1-4.6); Deduction API supplemented with fiat currency order request example (3.4); Webhook section added complete Java/Python/Node.js handling code examples (4.7); Signature algorithm section added complete cURL request example (5.4)
+- v1.9: bindingInfo field naming unified; refundAmount.total field structure standardized; Added complete status response examples for sign confirmation/unsign/refund APIs; Added sign/refund notification failure examples; Deduction status added TIMEOUT; Added extraParams and sceneInfo.location field descriptions; Error codes grouped by module; Added chain network list (7.3); Added rate limiting description (2.10); Added sandbox environment description (7.5); Fixed notifyId duplication issue
+- v1.8: Unified sceneCode enum values; Corrected bindStatus enum; Sign limit configuration supports chain field; Transaction list API supplemented REFUND response; Added API timeout recommendations and concurrency handling description; Added refund status flow diagram; Added API version compatibility description; Added riskInfo risk control field; Added failure response and PROCESSING status examples; Added document directory
+- v1.7: Added agreement list query API; Transaction query API merged refund query (distinguished by recordType); Transaction list API supports refund record query; Added general specification section (request headers, response format, HTTP status codes, field length limits, idempotency, transaction status flow); GET API examples changed to Query String format; Webhook notification added notifyId deduplication field; Refund notification added userId field; Sign request added signExpireMinutes parameter
 - v1.6: Moved business flow diagrams and sign lifecycle state machine to Chapter 1 Overview; API paths unified to start with /v5/pay/agreement; Added currency type (fiat/cryptocurrency) support; Added request and response examples for all APIs
-- v1.5: Clearly distinguished user_id (platform user ID) and merchant_user_id (merchant-side user ID); All APIs unified required common fields (merchant_id, user_id, agreement_type); Sign API added merchant_user_id for establishing merchant-side to platform-side user mapping
-- v1.4: Unified all API required common fields (merchant_id, user_id, agreement_type)
+- v1.5: Clearly distinguished userId (platform user ID) and merchantUserId (merchant-side user ID); All APIs unified required common fields (merchantId, userId, agreementType); Sign API added merchantUserId for establishing merchant-side to platform-side user mapping
+- v1.4: Unified all API required common fields (merchantId, userId, agreementType)
 - v1.3: Optimized sign flow, supports QR code sign; Added user identity association mechanism; Updated sign request to return QR code
 - v1.2: Added sign lifecycle state machine (state definition, state transition diagram, state transition description, allowed operations per state)
 - v1.1: Added refund API, refund query API, agreement unsign Webhook, refund result Webhook
@@ -117,20 +117,20 @@
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────┐
-│                            User Identity Association and Sign Flow                │
+│                            User Identity Association and Sign Flow               │
 ├──────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                  │
-│  1. Merchant App → Sign Request(user_id + merchant_user_id) → Platform returns   │
+│  1. Merchant App → Sign Request(userId + merchantUserId) → Platform returns      │
 │     sign QR code and URL                                                         │
 │                                                                                  │
 │  2. User opens platform App to scan → Login/Register platform account →          │
 │     Complete identity verification (SMS/Face/Password)                           │
 │                                                                                  │
 │  3. Platform binds user relationship:                                            │
-│     user_id(platform) binding merchant_user_id(merchant-side)                    │
+│     userId(platform) binding merchantUserId(merchant-side)                       │
 │                                                                                  │
-│  4. Sign success → Webhook notifies merchant (agreement_no + user_id +           │
-│     merchant_user_id)                                                            │
+│  4. Sign success → Webhook notifies merchant (agreementNo + userId +             │
+│     merchantUserId)                                                              │
 │                                                                                  │
 │                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────┘
@@ -142,12 +142,12 @@
 Merchant Server                  Platform                         User App
     │                         │                            │
     │  1.Sign Request         │                            │
-    │  (user_id +             │                            │
-    │   merchant_user_id)     │                            │
+    │  (userId +             │                            │
+    │   merchantUserId)     │                            │
     │ ──────────────────────→ │                            │
     │                         │                            │
     │  2.Return Sign QR Code  │                            │
-    │  (qr_code/sign_url)     │                            │
+    │  (qrCode/signUrl)     │                            │
     │ ←────────────────────── │                            │
     │                         │                            │
     │     Display QR Code     │        3.Scan              │
@@ -164,9 +164,9 @@ Merchant Server                  Platform                         User App
     │                         │ ←────────────────────────  │
     │                         │                            │
     │  7.Webhook Notification │                            │
-    │  (agreement_no +        │                            │
-    │   user_id +             │                            │
-    │   merchant_user_id)     │                            │
+    │  (agreementNo +        │                            │
+    │   userId +             │                            │
+    │   merchantUserId)     │                            │
     │                         │                            │
     │ ←────────────────────── │                            │
     │                         │                            │
@@ -175,7 +175,7 @@ Merchant Server                  Platform                         User App
 ### 1.3 Deduction Flow
 
 ```
-Merchant Server → Deduction Request(agreement_no) → Platform
+Merchant Server → Deduction Request(agreementNo) → Platform
                                       ↓
                             ┌─────────────────┐
                             │ 1. Agreement     │
@@ -194,7 +194,7 @@ User receives deduction notification (Push/SMS)
 ### 1.4 Refund Flow
 
 ```
-Merchant Server → Refund Request(trade_no + refund_amount) → Platform
+Merchant Server → Refund Request(tradeNo + refundAmount) → Platform
                                                    ↓
                                          ┌─────────────────┐
                                          │ 1. Transaction  │
@@ -345,7 +345,7 @@ WHERE status IN ('INIT', 'PENDING')
 4. Send sign timeout Webhook notification to merchant (eventType=TIMEOUT, see section 4.7)
 
 **Notes**:
-- Timeout is calculated from sign request creation time (`create_time`)
+- Timeout is calculated from sign request creation time (`createTime`)
 - Merchant can actively query sign result through sign status query API
 - After timeout, merchant can re-initiate sign request
 
@@ -426,17 +426,17 @@ All API requests must include the following request headers:
 
 | Field Type | Max Length | Example Fields |
 | --- | --- | --- |
-| Merchant ID | 32 | merchant_id |
-| User ID | 64 | user_id, merchant_user_id |
-| Agreement No | 64 | agreement_no, external_agreement_no |
-| Order No | 64 | out_trade_no, out_refund_no |
-| Trade No | 64 | trade_no, refund_no |
+| Merchant ID | 32 | merchantId |
+| User ID | 64 | userId, merchantUserId |
+| Agreement No | 64 | agreementNo, externalAgreementNo |
+| Order No | 64 | outTradeNo, outRefundNo |
+| Trade No | 64 | tradeNo, refundNo |
 | Amount | 32 | amount.total |
 | Currency Code | 16 | currency |
-| URL | 512 | notify_url, return_url |
-| Description | 256 | order_desc, refund_reason |
-| Title | 128 | order_title |
-| Extra Params | 2048 | extra_params (JSON string) |
+| URL | 512 | notifyUrl, returnUrl |
+| Description | 256 | orderDesc, refundReason |
+| Title | 128 | orderTitle |
+| Extra Params | 2048 | extraParams (JSON string) |
 
 ### 2.5 Idempotency Description
 
@@ -444,13 +444,13 @@ Idempotency is guaranteed through business unique indexes:
 
 | Business Scenario | Idempotency Key | Unique Index |
 | --- | --- | --- |
-| Sign Request | external_agreement_no | (merchant_id, external_agreement_no) |
-| Deduction Order | out_trade_no | (merchant_id, out_trade_no) |
-| Refund Request | out_refund_no | (merchant_id, out_refund_no) |
+| Sign Request | externalAgreementNo | (merchantId, externalAgreementNo) |
+| Deduction Order | outTradeNo | (merchantId, outTradeNo) |
+| Refund Request | outRefundNo | (merchantId, outRefundNo) |
 
 - **X-Request-Id** is used for request tracing and troubleshooting
 - X-Request-Id format requirement: UUID v4, e.g., `550e8400-e29b-41d4-a716-446655440000`
-- Repeated requests with the same merchant order number (out_trade_no) return the result of the first request
+- Repeated requests with the same merchant order number (outTradeNo) return the result of the first request
 
 ### 2.6 API Timeout Recommendations
 
@@ -471,13 +471,13 @@ Idempotency is guaranteed through business unique indexes:
 
 **Same Agreement Concurrent Deductions**:
 - Same agreement supports concurrent initiation of multiple deduction requests
-- Each deduction needs to use different `out_trade_no`
+- Each deduction needs to use different `outTradeNo`
 - Limit verification is based on real-time used quota, concurrent requests may cause some requests to be rejected due to exceeding quota
 
 **Same Order Repeated Requests**:
-- Requests with the same `out_trade_no` are treated as the same transaction
+- Requests with the same `outTradeNo` are treated as the same transaction
 - After the first request succeeds, repeated requests return the first result (idempotent)
-- After the first request fails, can use a new `out_trade_no` to re-initiate
+- After the first request fails, can use a new `outTradeNo` to re-initiate
 
 ### 2.8 Deduction Transaction Status Flow
 
@@ -552,14 +552,14 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   "retCode": 42900,
   "retMsg": "Too many requests, please try again later",
   "result": {
-    "retry_after": 1000
+    "retryAfter": 1000
   }
 }
 ```
 
 | Field | Description |
 | --- | --- |
-| retry_after | Recommended retry wait time (milliseconds) |
+| retryAfter | Recommended retry wait time (milliseconds) |
 
 #### Handling Recommendations
 
@@ -580,60 +580,60 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| merchant_id | string | Yes | Merchant ID |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
-| merchant_user_id | string | No | Merchant-side user ID (optional, used for merchant internal user association. If not provided, agreement will only be bound to platform userId) |
-| scene_code | string | Yes | Scene code (see 7.1 Scene Code List): TAXI/PARKING/SUBSCRIPTION/UTILITY/TOLL/TRANSIT/FOOD/ENTERTAINMENT/EDUCATION/MEMBERSHIP/RENT/FITNESS/TELECOM/CLOUD/INSURANCE/LOAN/OTHERS |
-| product_code | string | Yes | Product code, assigned by platform |
-| external_agreement_no | string | Yes | Merchant agreement number (unique on merchant side) |
-| sign_valid_time | string | No | Sign validity period, ISO8601 format (UTC timezone), **must be at least 24 hours after current time** |
-| single_limit | object | No | Single transaction limit configuration |
-| single_limit.amount | string | No | Limit amount (required when passing single_limit) |
-| single_limit.currency | string | No | Currency code (required when passing single_limit) |
-| single_limit.currency_type | string | No | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) (required when passing single_limit) |
-| single_limit.chain | string | No | Chain network (optional for cryptocurrency, e.g.: ERC20/TRC20/Arbitrum) |
-| single_limit.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
-| period_limits | array | No | Period limit configuration list (supports configuring limits for multiple period types) |
-| period_limits[].period_type | string | No | Period type: DAY/WEEK/MONTH/YEAR (required when passing period_limits) |
-| period_limits[].amount | string | No | Period limit amount (required when passing period_limits) |
-| period_limits[].currency | string | No | Currency code (required when passing period_limits) |
-| period_limits[].currency_type | string | No | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) (required when passing period_limits) |
-| period_limits[].chain | string | No | Chain network (optional for cryptocurrency, e.g.: ERC20/TRC20/Arbitrum) |
-| period_limits[].chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
-| notify_url | string | Yes | Sign result async notification URL |
-| return_url | string | No | Redirect URL after sign completion (can be omitted for App scan scenario) |
-| sign_expire_minutes | int | No | Sign link validity period (minutes), default 30, max 1440 (24 hours) |
-| extra_params | string | No | Extension parameters (JSON string, used for passing business custom data, platform passes through without processing) |
+| merchantId | string | Yes | Merchant ID |
+| agreementType | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
+| merchantUserId | string | No | Merchant-side user ID (optional, used for merchant internal user association. If not provided, agreement will only be bound to platform userId) |
+| sceneCode | string | Yes | Scene code (see 7.1 Scene Code List): TAXI/PARKING/SUBSCRIPTION/UTILITY/TOLL/TRANSIT/FOOD/ENTERTAINMENT/EDUCATION/MEMBERSHIP/RENT/FITNESS/TELECOM/CLOUD/INSURANCE/LOAN/OTHERS |
+| productCode | string | Yes | Product code, assigned by platform |
+| externalAgreementNo | string | Yes | Merchant agreement number (unique on merchant side) |
+| signValidTime | string | No | Sign validity period, ISO8601 format (UTC timezone), **must be at least 24 hours after current time** |
+| singleLimit | object | No | Single transaction limit configuration |
+| singleLimit.amount | string | No | Limit amount (required when passing singleLimit) |
+| singleLimit.currency | string | No | Currency code (required when passing singleLimit) |
+| singleLimit.currencyType | string | No | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) (required when passing singleLimit) |
+| singleLimit.chain | string | No | Chain network (optional for cryptocurrency, e.g.: ERC20/TRC20/Arbitrum) |
+| singleLimit.chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| periodLimits | array | No | Period limit configuration list (supports configuring limits for multiple period types) |
+| periodLimits[].periodType | string | No | Period type: DAY/WEEK/MONTH/YEAR (required when passing periodLimits) |
+| periodLimits[].amount | string | No | Period limit amount (required when passing periodLimits) |
+| periodLimits[].currency | string | No | Currency code (required when passing periodLimits) |
+| periodLimits[].currencyType | string | No | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) (required when passing periodLimits) |
+| periodLimits[].chain | string | No | Chain network (optional for cryptocurrency, e.g.: ERC20/TRC20/Arbitrum) |
+| periodLimits[].chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| notifyUrl | string | Yes | Sign result async notification URL |
+| returnUrl | string | No | Redirect URL after sign completion (can be omitted for App scan scenario) |
+| signExpireMinutes | int | No | Sign link validity period (minutes), default 30, max 1440 (24 hours) |
+| extraParams | string | No | Extension parameters (JSON string, used for passing business custom data, platform passes through without processing) |
 
 #### Request Example
 
 ```json
 {
-  "merchant_id": "M123456789",
-  "agreement_type": "CYCLE",
-  "merchant_user_id": "merchant_user_123",
-  "scene_code": "SUBSCRIPTION",
-  "product_code": "PROD_001",
-  "external_agreement_no": "MERCHANT_AGR_001",
-  "sign_valid_time": "2026-12-23T10:30:00Z",
-  "single_limit": {
+  "merchantId": "M123456789",
+  "agreementType": "CYCLE",
+  "merchantUserId": "merchant_user_123",
+  "sceneCode": "SUBSCRIPTION",
+  "productCode": "PROD_001",
+  "externalAgreementNo": "MERCHANT_AGR_001",
+  "signValidTime": "2026-12-23T10:30:00Z",
+  "singleLimit": {
     "amount": "100000",
     "currency": "USDT",
-    "currency_type": "CRYPTO",
+    "currencyType": "CRYPTO",
     "chain": "TRC20"
   },
-  "period_limits": [
+  "periodLimits": [
     {
-      "period_type": "DAY",
+      "periodType": "DAY",
       "amount": "500000",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     }
   ],
-  "notify_url": "https://merchant.com/notify/sign",
-  "return_url": "https://merchant.com/return",
-  "sign_expire_minutes": 60
+  "notifyUrl": "https://merchant.com/notify/sign",
+  "returnUrl": "https://merchant.com/return",
+  "signExpireMinutes": 60
 }
 ```
 
@@ -644,11 +644,11 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | retCode | int | Response code, 20000-success, non-20000-failure |
 | retMsg | string | Response message |
 | result | object | Response data |
-| result.sign_order_id | string | Platform sign order number |
-| result.sign_url | string | Sign page URL (for H5 redirect) |
-| result.qr_code | string | Sign QR code content (for user App scan) |
-| result.qr_code_url | string | Sign QR code image URL (can be displayed directly) |
-| result.expire_time | string | Sign link/QR code expiration time |
+| result.signOrderId | string | Platform sign order number |
+| result.signUrl | string | Sign page URL (for H5 redirect) |
+| result.qrCode | string | Sign QR code content (for user App scan) |
+| result.qrCodeUrl | string | Sign QR code image URL (can be displayed directly) |
+| result.expireTime | string | Sign link/QR code expiration time |
 
 #### Response Example (Success)
 
@@ -657,11 +657,11 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "sign_order_id": "AGR202312230001",
-    "sign_url": "https://pay.example.com/sign?token=xxx",
-    "qr_code": "https://pay.example.com/sign?token=xxx",
-    "qr_code_url": "https://pay.example.com/qr/AGR202312230001.png",
-    "expire_time": "2023-12-23T12:30:00Z"
+    "signOrderId": "AGR202312230001",
+    "signUrl": "https://pay.example.com/sign?token=xxx",
+    "qrCode": "https://pay.example.com/sign?token=xxx",
+    "qrCodeUrl": "https://pay.example.com/qr/AGR202312230001.png",
+    "expireTime": "2023-12-23T12:30:00Z"
   }
 }
 ```
@@ -671,7 +671,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 ```json
 {
   "retCode": 40001,
-  "retMsg": "Parameter error: external_agreement_no already exists",
+  "retMsg": "Parameter error: externalAgreementNo already exists",
   "result": null
 }
 ```
@@ -688,24 +688,24 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| merchant_id | string | Yes | Merchant ID |
-| user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
-| agreement_no | string | Either | Platform agreement number |
-| external_agreement_no | string | Either | Merchant agreement number |
-| unsign_type | string | No | Unsign type: USER(user active)/MERCHANT(merchant initiated)/SYSTEM(system unsign) |
-| unsign_reason | string | No | Unsign reason |
+| merchantId | string | Yes | Merchant ID |
+| userId | string | Yes | Platform user ID (our platform's user identifier) |
+| agreementType | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
+| agreementNo | string | Either | Platform agreement number |
+| externalAgreementNo | string | Either | Merchant agreement number |
+| unsignType | string | No | Unsign type: USER(user active)/MERCHANT(merchant initiated)/SYSTEM(system unsign) |
+| unsignReason | string | No | Unsign reason |
 
 #### Request Example
 
 ```json
 {
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "agreement_no": "AGR202312230001",
-  "unsign_type": "USER",
-  "unsign_reason": "User active unsign"
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "agreementNo": "AGR202312230001",
+  "unsignType": "USER",
+  "unsignReason": "User active unsign"
 }
 ```
 
@@ -716,9 +716,9 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | retCode | int | Response code, 20000-success, non-20000-failure |
 | retMsg | string | Response message |
 | result | object | Response data |
-| result.agreement_no | string | Platform agreement number |
+| result.agreementNo | string | Platform agreement number |
 | result.status | string | Status: UNSIGNED |
-| result.unsign_time | string | Unsign time |
+| result.unsignTime | string | Unsign time |
 
 #### Response Example (Success)
 
@@ -727,10 +727,10 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "agreement_no": "AGR202312230001",
+    "agreementNo": "AGR202312230001",
     "eventType": "UNSIGNED",
     "status": "UNSIGNED",
-    "unsign_time": "2023-12-23T15:30:00Z"
+    "unsignTime": "2023-12-23T15:30:00Z"
   }
 }
 ```
@@ -765,36 +765,36 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| merchant_id | string | Yes | Merchant ID |
-| user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
-| agreement_no | string | Yes | Platform agreement number |
-| out_trade_no | string | Yes | Merchant order number (unique on merchant side) |
-| scene_code | string | Yes | Scene code (see 7.1 Scene Code List): TAXI/PARKING/SUBSCRIPTION/UTILITY/TOLL/TRANSIT/FOOD/ENTERTAINMENT/EDUCATION/MEMBERSHIP/RENT/FITNESS/TELECOM/CLOUD/INSURANCE/LOAN/OTHERS |
+| merchantId | string | Yes | Merchant ID |
+| userId | string | Yes | Platform user ID (our platform's user identifier) |
+| agreementType | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
+| agreementNo | string | Yes | Platform agreement number |
+| outTradeNo | string | Yes | Merchant order number (unique on merchant side) |
+| sceneCode | string | Yes | Scene code (see 7.1 Scene Code List): TAXI/PARKING/SUBSCRIPTION/UTILITY/TOLL/TRANSIT/FOOD/ENTERTAINMENT/EDUCATION/MEMBERSHIP/RENT/FITNESS/TELECOM/CLOUD/INSURANCE/LOAN/OTHERS |
 | amount | object | Yes | Deduction amount |
 | amount.total | string | Yes | Deduction amount (minimum unit) |
 | amount.currency | string | Yes | Currency code |
-| amount.currency_type | string | Yes | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) |
+| amount.currencyType | string | Yes | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) |
 | amount.chain | string | No | Chain network (required for cryptocurrency, e.g.: ERC20/TRC20/Arbitrum) |
-| amount.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
-| order_info | object | Yes | Order information |
-| order_info.order_title | string | Yes | Order title (displayed to user) |
-| order_info.order_desc | string | No | Order description |
-| order_info.goods_name | string | No | Goods name |
-| order_info.goods_id | string | No | Goods ID |
-| order_info.goods_category | string | No | Goods category |
-| scene_info | object | No | Scene information |
-| scene_info.device_id | string | No | Device ID |
-| scene_info.device_ip | string | No | Device IP |
-| scene_info.location | object | No | Location information |
-| scene_info.location.latitude | string | No | Latitude (e.g.: 39.9042) |
-| scene_info.location.longitude | string | No | Longitude (e.g.: 116.4074) |
-| scene_info.location.address | string | No | Detailed address |
-| notify_url | string | Yes | Deduction result async notification URL |
-| risk_info | object | No | Risk control information (optional, for merchant to pass risk-related data) |
-| risk_info.user_ip | string | No | User IP address |
-| risk_info.device_fingerprint | string | No | Device fingerprint |
-| risk_info.user_agent | string | No | User agent string |
+| amount.chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| orderInfo | object | Yes | Order information |
+| orderInfo.orderTitle | string | Yes | Order title (displayed to user) |
+| orderInfo.orderDesc | string | No | Order description |
+| orderInfo.goodsName | string | No | Goods name |
+| orderInfo.goodsId | string | No | Goods ID |
+| orderInfo.goodsCategory | string | No | Goods category |
+| sceneInfo | object | No | Scene information |
+| sceneInfo.deviceId | string | No | Device ID |
+| sceneInfo.deviceIp | string | No | Device IP |
+| sceneInfo.location | object | No | Location information |
+| sceneInfo.location.latitude | string | No | Latitude (e.g.: 39.9042) |
+| sceneInfo.location.longitude | string | No | Longitude (e.g.: 116.4074) |
+| sceneInfo.location.address | string | No | Detailed address |
+| notifyUrl | string | Yes | Deduction result async notification URL |
+| riskInfo | object | No | Risk control information (optional, for merchant to pass risk-related data) |
+| riskInfo.userIp | string | No | User IP address |
+| riskInfo.deviceFingerprint | string | No | Device fingerprint |
+| riskInfo.userAgent | string | No | User agent string |
 
 #### Response Parameters
 
@@ -803,56 +803,56 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | retCode | int | Response code, 20000-success, non-20000-failure |
 | retMsg | string | Response message |
 | result | object | Response data |
-| result.order_no | string | Platform order number (internal use) |
-| result.trade_no | string | Platform trade number (external display) |
-| result.out_trade_no | string | Merchant order number |
+| result.orderNo | string | Platform order number (internal use) |
+| result.tradeNo | string | Platform trade number (external display) |
+| result.outTradeNo | string | Merchant order number |
 | result.status | string | Transaction status: PROCESSING/SUCCESS/FAILED/TIMEOUT |
 | result.amount | object | Merchant requested amount (same as request) |
 | result.amount.total | string | Amount (minimum unit) |
 | result.amount.currency | string | Currency code |
-| result.amount.currency_type | string | Currency type: FIAT/CRYPTO |
-| result.crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
-| result.crypto_payment.currency | string | Cryptocurrency currency (e.g.: USDT/BTC/ETH) |
-| result.crypto_payment.amount | string | Cryptocurrency amount |
-| result.crypto_payment.chain | string | Chain network (e.g.: TRC20/ERC20) |
-| result.crypto_payment.exchange_rate | string | Exchange rate (1 fiat = ? cryptocurrency) |
-| result.crypto_payment.rate_time | string | Exchange rate lock time |
-| result.pay_time | string | Payment success time (returned on success) |
-| result.failure_reason | string | Failure reason (returned on failure) |
+| result.amount.currencyType | string | Currency type: FIAT/CRYPTO |
+| result.cryptoPayment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
+| result.cryptoPayment.currency | string | Cryptocurrency currency (e.g.: USDT/BTC/ETH) |
+| result.cryptoPayment.amount | string | Cryptocurrency amount |
+| result.cryptoPayment.chain | string | Chain network (e.g.: TRC20/ERC20) |
+| result.cryptoPayment.exchangeRate | string | Exchange rate (1 fiat = ? cryptocurrency) |
+| result.cryptoPayment.rateTime | string | Exchange rate lock time |
+| result.payTime | string | Payment success time (returned on success) |
+| result.failureReason | string | Failure reason (returned on failure) |
 
 #### Request Example (Cryptocurrency Order)
 
 ```json
 {
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "agreement_no": "AGR202312230001",
-  "out_trade_no": "TAXI20231223001",
-  "scene_code": "TAXI",
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "agreementNo": "AGR202312230001",
+  "outTradeNo": "TAXI20231223001",
+  "sceneCode": "TAXI",
   "amount": {
     "total": "2350",
     "currency": "USDT",
-    "currency_type": "CRYPTO",
+    "currencyType": "CRYPTO",
     "chain": "TRC20"
   },
-  "order_info": {
-    "order_title": "Ride fare",
-    "order_desc": "December 23 trip fare",
-    "goods_name": "Express service",
-    "goods_id": "TAXI_SERVICE_001",
-    "goods_category": "Transportation service"
+  "orderInfo": {
+    "orderTitle": "Ride fare",
+    "orderDesc": "December 23 trip fare",
+    "goodsName": "Express service",
+    "goodsId": "TAXI_SERVICE_001",
+    "goodsCategory": "Transportation service"
   },
-  "scene_info": {
-    "device_id": "DEVICE_001",
-    "device_ip": "192.168.1.1"
+  "sceneInfo": {
+    "deviceId": "DEVICE_001",
+    "deviceIp": "192.168.1.1"
   },
-  "risk_info": {
-    "user_ip": "203.0.113.45",
-    "device_fingerprint": "fp_abc123xyz",
-    "user_agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0)"
+  "riskInfo": {
+    "userIp": "203.0.113.45",
+    "deviceFingerprint": "fp_abc123xyz",
+    "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0)"
   },
-  "notify_url": "https://merchant.com/notify/pay"
+  "notifyUrl": "https://merchant.com/notify/pay"
 }
 ```
 
@@ -860,22 +860,22 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 ```json
 {
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "agreement_no": "AGR202312230001",
-  "out_trade_no": "TAXI20231223002",
-  "scene_code": "TAXI",
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "agreementNo": "AGR202312230001",
+  "outTradeNo": "TAXI20231223002",
+  "sceneCode": "TAXI",
   "amount": {
     "total": "10000",
     "currency": "USD",
-    "currency_type": "FIAT"
+    "currencyType": "FIAT"
   },
-  "order_info": {
-    "order_title": "Ride fare",
-    "order_desc": "December 23 trip fare"
+  "orderInfo": {
+    "orderTitle": "Ride fare",
+    "orderDesc": "December 23 trip fare"
   },
-  "notify_url": "https://merchant.com/notify/pay"
+  "notifyUrl": "https://merchant.com/notify/pay"
 }
 ```
 
@@ -886,17 +886,17 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "order_no": "ORD202312230001",
-    "trade_no": "PAY202312230001",
-    "out_trade_no": "TAXI20231223001",
+    "orderNo": "ORD202312230001",
+    "tradeNo": "PAY202312230001",
+    "outTradeNo": "TAXI20231223001",
     "status": "SUCCESS",
     "amount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "pay_time": "2023-12-23T10:30:00Z"
+    "payTime": "2023-12-23T10:30:00Z"
   }
 }
 ```
@@ -908,23 +908,23 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "order_no": "ORD202312230002",
-    "trade_no": "PAY202312230002",
-    "out_trade_no": "TAXI20231223002",
+    "orderNo": "ORD202312230002",
+    "tradeNo": "PAY202312230002",
+    "outTradeNo": "TAXI20231223002",
     "status": "SUCCESS",
     "amount": {
       "total": "10000",
       "currency": "USD",
-      "currency_type": "FIAT"
+      "currencyType": "FIAT"
     },
-    "crypto_payment": {
+    "cryptoPayment": {
       "currency": "USDT",
       "amount": "10005.50",
       "chain": "TRC20",
-      "exchange_rate": "1.00055",
-      "rate_time": "2023-12-23T10:29:55Z"
+      "exchangeRate": "1.00055",
+      "rateTime": "2023-12-23T10:29:55Z"
     },
-    "pay_time": "2023-12-23T10:30:00Z"
+    "payTime": "2023-12-23T10:30:00Z"
   }
 }
 ```
@@ -936,14 +936,14 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "order_no": "ORD202312230003",
-    "trade_no": "PAY202312230003",
-    "out_trade_no": "TAXI20231223003",
+    "orderNo": "ORD202312230003",
+    "tradeNo": "PAY202312230003",
+    "outTradeNo": "TAXI20231223003",
     "status": "PROCESSING",
     "amount": {
       "total": "5000",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     }
   }
@@ -957,17 +957,17 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "order_no": "ORD202312230004",
-    "trade_no": "PAY202312230004",
-    "out_trade_no": "TAXI20231223004",
+    "orderNo": "ORD202312230004",
+    "tradeNo": "PAY202312230004",
+    "outTradeNo": "TAXI20231223004",
     "status": "FAILED",
     "amount": {
       "total": "5000",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "failure_reason": "BALANCE_NOT_ENOUGH"
+    "failureReason": "BALANCE_NOT_ENOUGH"
   }
 }
 ```
@@ -980,7 +980,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 **Feature Description**: This API supports merchants to complete both agreement signing and deduction payment in a single call. Signing is optional, merchants can choose:
 1. **Sign + Pay Mode**: Pass sign parameters, system creates agreement first, then executes deduction immediately after successful signing
-2. **Pay Only Mode**: Do not pass sign parameters, only pass existing `agreement_no`, execute deduction directly based on signed agreement
+2. **Pay Only Mode**: Do not pass sign parameters, only pass existing `agreementNo`, execute deduction directly based on signed agreement
 
 **Applicable Scenarios**:
 - First payment scenario: Complete both signing and first payment in one step when user uses the service for the first time
@@ -990,59 +990,59 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| merchant_id | string | Yes | Merchant ID |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
-| sign_params | object | No | Sign parameters (required for first sign + payment) |
-| sign_params.merchant_user_id | string | No | Merchant-side user ID (optional, used for merchant internal user association) |
-| sign_params.scene_code | string | Conditional | Scene code (required when passing sign_params, see 7.1 Scene Code List) |
-| sign_params.product_code | string | No | Product code, assigned by platform |
-| sign_params.external_agreement_no | string | Conditional | Merchant agreement number (required when passing sign_params, unique on merchant side) |
-| sign_params.sign_valid_time | string | No | Sign validity period, ISO8601 format |
-| sign_params.single_limit | object | No | Single transaction limit configuration |
-| sign_params.single_limit.amount | string | Conditional | Limit amount (required when passing single_limit) |
-| sign_params.single_limit.currency | string | Conditional | Currency code (required when passing single_limit) |
-| sign_params.single_limit.currency_type | string | Conditional | Currency type: FIAT/CRYPTO (required when passing single_limit) |
-| sign_params.single_limit.chain | string | No | Chain network (optional for cryptocurrency) |
-| sign_params.single_limit.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
-| sign_params.period_limits | array | No | Period limit configuration list |
-| sign_params.period_limits[].period_type | string | Conditional | Period type: DAY/WEEK/MONTH/YEAR (required when passing period_limits) |
-| sign_params.period_limits[].amount | string | Conditional | Period limit amount (required when passing period_limits) |
-| sign_params.period_limits[].currency | string | Conditional | Currency code (required when passing period_limits) |
-| sign_params.period_limits[].currency_type | string | Conditional | Currency type: FIAT/CRYPTO (required when passing period_limits) |
-| sign_params.period_limits[].chain | string | No | Chain network (optional for cryptocurrency) |
-| sign_params.period_limits[].chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
-| sign_params.sign_notify_url | string | No | Sign result async notification URL |
-| sign_params.return_url | string | No | Redirect URL after sign completion |
-| sign_params.sign_expire_minutes | int | No | Sign link validity period (minutes), default 30 |
-| sign_params.extra_params | string | No | Extension parameters (JSON string) |
-| pay_params | object | Yes | Deduction payment parameters |
-| pay_params.agreement_no | string | Conditional | Platform agreement number (required when not passing sign_params, use existing agreement) |
-| pay_params.out_trade_no | string | Yes | Merchant order number (unique on merchant side) |
-| pay_params.scene_code | string | Yes | Scene code (see 7.1 Scene Code List) |
-| pay_params.amount | object | Yes | Deduction amount |
-| pay_params.amount.total | string | Yes | Deduction amount (minimum unit) |
-| pay_params.amount.currency | string | Yes | Currency code |
-| pay_params.amount.currency_type | string | Yes | Currency type: FIAT/CRYPTO |
-| pay_params.amount.chain | string | No | Chain network (required for cryptocurrency) |
-| pay_params.amount.chain_address | string | No | Chain address (required for dynamic on-chain settlement) |
-| pay_params.order_info | object | Yes | Order information |
-| pay_params.order_info.order_title | string | Yes | Order title |
-| pay_params.order_info.order_desc | string | No | Order description |
-| pay_params.order_info.goods_name | string | No | Goods name |
-| pay_params.order_info.goods_id | string | No | Goods ID |
-| pay_params.order_info.goods_category | string | No | Goods category |
-| pay_params.scene_info | object | No | Scene information |
-| pay_params.scene_info.device_id | string | No | Device ID |
-| pay_params.scene_info.device_ip | string | No | Device IP |
-| pay_params.scene_info.location | object | No | Location information |
-| pay_params.scene_info.location.latitude | string | No | Latitude |
-| pay_params.scene_info.location.longitude | string | No | Longitude |
-| pay_params.scene_info.location.address | string | No | Detailed address |
-| pay_params.pay_notify_url | string | Yes | Payment result async notification URL |
-| pay_params.risk_info | object | No | Risk control information |
-| pay_params.risk_info.user_ip | string | No | User IP address |
-| pay_params.risk_info.device_fingerprint | string | No | Device fingerprint |
-| pay_params.risk_info.user_agent | string | No | User agent string |
+| merchantId | string | Yes | Merchant ID |
+| agreementType | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
+| signParams | object | No | Sign parameters (required for first sign + payment) |
+| signParams.merchantUserId | string | No | Merchant-side user ID (optional, used for merchant internal user association) |
+| signParams.sceneCode | string | Conditional | Scene code (required when passing signParams, see 7.1 Scene Code List) |
+| signParams.productCode | string | No | Product code, assigned by platform |
+| signParams.externalAgreementNo | string | Conditional | Merchant agreement number (required when passing signParams, unique on merchant side) |
+| signParams.signValidTime | string | No | Sign validity period, ISO8601 format |
+| signParams.singleLimit | object | No | Single transaction limit configuration |
+| signParams.singleLimit.amount | string | Conditional | Limit amount (required when passing singleLimit) |
+| signParams.singleLimit.currency | string | Conditional | Currency code (required when passing singleLimit) |
+| signParams.singleLimit.currencyType | string | Conditional | Currency type: FIAT/CRYPTO (required when passing singleLimit) |
+| signParams.singleLimit.chain | string | No | Chain network (optional for cryptocurrency) |
+| signParams.singleLimit.chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| signParams.periodLimits | array | No | Period limit configuration list |
+| signParams.periodLimits[].periodType | string | Conditional | Period type: DAY/WEEK/MONTH/YEAR (required when passing periodLimits) |
+| signParams.periodLimits[].amount | string | Conditional | Period limit amount (required when passing periodLimits) |
+| signParams.periodLimits[].currency | string | Conditional | Currency code (required when passing periodLimits) |
+| signParams.periodLimits[].currencyType | string | Conditional | Currency type: FIAT/CRYPTO (required when passing periodLimits) |
+| signParams.periodLimits[].chain | string | No | Chain network (optional for cryptocurrency) |
+| signParams.periodLimits[].chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| signParams.signNotifyUrl | string | No | Sign result async notification URL |
+| signParams.returnUrl | string | No | Redirect URL after sign completion |
+| signParams.signExpireMinutes | int | No | Sign link validity period (minutes), default 30 |
+| signParams.extraParams | string | No | Extension parameters (JSON string) |
+| payParams | object | Yes | Deduction payment parameters |
+| payParams.agreementNo | string | Conditional | Platform agreement number (required when not passing signParams, use existing agreement) |
+| payParams.outTradeNo | string | Yes | Merchant order number (unique on merchant side) |
+| payParams.sceneCode | string | Yes | Scene code (see 7.1 Scene Code List) |
+| payParams.amount | object | Yes | Deduction amount |
+| payParams.amount.total | string | Yes | Deduction amount (minimum unit) |
+| payParams.amount.currency | string | Yes | Currency code |
+| payParams.amount.currencyType | string | Yes | Currency type: FIAT/CRYPTO |
+| payParams.amount.chain | string | No | Chain network (required for cryptocurrency) |
+| payParams.amount.chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| payParams.orderInfo | object | Yes | Order information |
+| payParams.orderInfo.orderTitle | string | Yes | Order title |
+| payParams.orderInfo.orderDesc | string | No | Order description |
+| payParams.orderInfo.goodsName | string | No | Goods name |
+| payParams.orderInfo.goodsId | string | No | Goods ID |
+| payParams.orderInfo.goodsCategory | string | No | Goods category |
+| payParams.sceneInfo | object | No | Scene information |
+| payParams.sceneInfo.deviceId | string | No | Device ID |
+| payParams.sceneInfo.deviceIp | string | No | Device IP |
+| payParams.sceneInfo.location | object | No | Location information |
+| payParams.sceneInfo.location.latitude | string | No | Latitude |
+| payParams.sceneInfo.location.longitude | string | No | Longitude |
+| payParams.sceneInfo.location.address | string | No | Detailed address |
+| payParams.payNotifyUrl | string | Yes | Payment result async notification URL |
+| payParams.riskInfo | object | No | Risk control information |
+| payParams.riskInfo.userIp | string | No | User IP address |
+| payParams.riskInfo.deviceFingerprint | string | No | Device fingerprint |
+| payParams.riskInfo.userAgent | string | No | User agent string |
 
 #### Response Parameters
 
@@ -1051,79 +1051,79 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | retCode | int | Response code, 20000-success, non-20000-failure |
 | retMsg | string | Response message |
 | result | object | Response data |
-| result.sign_result | object | Sign result (if signing was initiated) |
-| result.sign_result.agreement_no | string | Platform agreement number |
-| result.sign_result.external_agreement_no | string | Merchant agreement number |
-| result.sign_result.sign_order_id | string | Platform sign order number |
-| result.sign_result.status | string | Sign status: INIT/PENDING/SIGNED/FAILED |
-| result.sign_result.sign_time | string | Sign success time (returned on success) |
-| result.sign_result.valid_time | string | Agreement validity period |
-| result.sign_result.sign_url | string | Sign page URL (for H5 redirect) |
-| result.sign_result.qr_code | string | Sign QR code content (for user App scan) |
-| result.sign_result.qr_code_url | string | Sign QR code image URL (can be displayed directly) |
-| result.sign_result.expire_time | string | Sign link/QR code expiration time |
-| result.pay_result | object | Deduction result |
-| result.pay_result.trade_no | string | Platform transaction number |
-| result.pay_result.out_trade_no | string | Merchant order number |
-| result.pay_result.status | string | Transaction status: PROCESSING/SUCCESS/FAILED/TIMEOUT |
-| result.pay_result.amount | object | Merchant requested amount |
-| result.pay_result.amount.total | string | Amount (minimum unit) |
-| result.pay_result.amount.currency | string | Currency code |
-| result.pay_result.amount.currency_type | string | Currency type: FIAT/CRYPTO |
-| result.pay_result.crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat order) |
-| result.pay_result.crypto_payment.currency | string | Cryptocurrency currency |
-| result.pay_result.crypto_payment.amount | string | Cryptocurrency amount |
-| result.pay_result.crypto_payment.chain | string | Chain network |
-| result.pay_result.crypto_payment.exchange_rate | string | Exchange rate |
-| result.pay_result.crypto_payment.rate_time | string | Rate lock time |
-| result.pay_result.pay_time | string | Payment success time (returned on success) |
-| result.pay_result.failure_reason | string | Failure reason (returned on failure) |
+| result.signResult | object | Sign result (if signing was initiated) |
+| result.signResult.agreementNo | string | Platform agreement number |
+| result.signResult.externalAgreementNo | string | Merchant agreement number |
+| result.signResult.signOrderId | string | Platform sign order number |
+| result.signResult.status | string | Sign status: INIT/PENDING/SIGNED/FAILED |
+| result.signResult.signTime | string | Sign success time (returned on success) |
+| result.signResult.validTime | string | Agreement validity period |
+| result.signResult.signUrl | string | Sign page URL (for H5 redirect) |
+| result.signResult.qrCode | string | Sign QR code content (for user App scan) |
+| result.signResult.qrCodeUrl | string | Sign QR code image URL (can be displayed directly) |
+| result.signResult.expireTime | string | Sign link/QR code expiration time |
+| result.payResult | object | Deduction result |
+| result.payResult.tradeNo | string | Platform transaction number |
+| result.payResult.outTradeNo | string | Merchant order number |
+| result.payResult.status | string | Transaction status: PROCESSING/SUCCESS/FAILED/TIMEOUT |
+| result.payResult.amount | object | Merchant requested amount |
+| result.payResult.amount.total | string | Amount (minimum unit) |
+| result.payResult.amount.currency | string | Currency code |
+| result.payResult.amount.currencyType | string | Currency type: FIAT/CRYPTO |
+| result.payResult.cryptoPayment | object | User's actual cryptocurrency payment info (returned for fiat order) |
+| result.payResult.cryptoPayment.currency | string | Cryptocurrency currency |
+| result.payResult.cryptoPayment.amount | string | Cryptocurrency amount |
+| result.payResult.cryptoPayment.chain | string | Chain network |
+| result.payResult.cryptoPayment.exchangeRate | string | Exchange rate |
+| result.payResult.cryptoPayment.rateTime | string | Rate lock time |
+| result.payResult.payTime | string | Payment success time (returned on success) |
+| result.payResult.failureReason | string | Failure reason (returned on failure) |
 
 #### Request Example 1: Sign + Pay (First Use)
 
 ```json
 {
-  "merchant_id": "M123456789",
-  "agreement_type": "CYCLE",
-  "sign_params": {
-    "merchant_user_id": "merchant_user_123",
-    "scene_code": "TAXI",
-    "external_agreement_no": "MERCHANT_AGR_001",
-    "sign_valid_time": "2026-12-23T10:30:00Z",
-    "single_limit": {
+  "merchantId": "M123456789",
+  "agreementType": "CYCLE",
+  "signParams": {
+    "merchantUserId": "merchant_user_123",
+    "sceneCode": "TAXI",
+    "externalAgreementNo": "MERCHANT_AGR_001",
+    "signValidTime": "2026-12-23T10:30:00Z",
+    "singleLimit": {
       "amount": "100000",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "period_limits": [
+    "periodLimits": [
       {
-        "period_type": "DAY",
+        "periodType": "DAY",
         "amount": "500000",
         "currency": "USDT",
-        "currency_type": "CRYPTO",
+        "currencyType": "CRYPTO",
         "chain": "TRC20"
       }
     ],
-    "sign_notify_url": "https://merchant.com/notify/sign"
+    "signNotifyUrl": "https://merchant.com/notify/sign"
   },
-  "pay_params": {
-    "out_trade_no": "TAXI20231223001",
-    "scene_code": "TAXI",
+  "payParams": {
+    "outTradeNo": "TAXI20231223001",
+    "sceneCode": "TAXI",
     "amount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "order_info": {
-      "order_title": "Taxi Fare",
-      "order_desc": "Trip on December 23"
+    "orderInfo": {
+      "orderTitle": "Taxi Fare",
+      "orderDesc": "Trip on December 23"
     },
-    "pay_notify_url": "https://merchant.com/notify/pay",
-    "risk_info": {
-      "user_ip": "203.0.113.45",
-      "device_fingerprint": "fp_abc123xyz"
+    "payNotifyUrl": "https://merchant.com/notify/pay",
+    "riskInfo": {
+      "userIp": "203.0.113.45",
+      "deviceFingerprint": "fp_abc123xyz"
     }
   }
 }
@@ -1136,62 +1136,62 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "sign_result": {
-      "agreement_no": null,
-      "external_agreement_no": "MERCHANT_AGR_001",
-      "sign_order_id": "SIGN202312230001",
+    "signResult": {
+      "agreementNo": null,
+      "externalAgreementNo": "MERCHANT_AGR_001",
+      "signOrderId": "SIGN202312230001",
       "status": "INIT",
-      "sign_time": null,
-      "valid_time": "2026-12-23T10:30:00Z",
-      "sign_url": "https://pay.example.com/sign?token=xxx",
-      "qr_code": "https://pay.example.com/sign?token=xxx",
-      "qr_code_url": "https://pay.example.com/qr/SIGN202312230001.png",
-      "expire_time": "2023-12-23T11:00:00Z"
+      "signTime": null,
+      "validTime": "2026-12-23T10:30:00Z",
+      "signUrl": "https://pay.example.com/sign?token=xxx",
+      "qrCode": "https://pay.example.com/sign?token=xxx",
+      "qrCodeUrl": "https://pay.example.com/qr/SIGN202312230001.png",
+      "expireTime": "2023-12-23T11:00:00Z"
     },
-    "pay_result": {
-      "trade_no": null,
-      "out_trade_no": "TAXI20231223001",
+    "payResult": {
+      "tradeNo": null,
+      "outTradeNo": "TAXI20231223001",
       "status": "PENDING",
       "amount": {
         "total": "2350",
         "currency": "USDT",
-        "currency_type": "CRYPTO",
+        "currencyType": "CRYPTO",
         "chain": "TRC20"
       },
-      "pay_time": null,
-      "failure_reason": null
+      "payTime": null,
+      "failureReason": null
     }
   }
 }
 ```
 
 **Notes**:
-- `sign_result.status = "INIT"` - Sign request created, waiting for user scan
-- `pay_result.status = "PENDING"` - Payment order created, waiting for sign completion to auto-execute
-- Merchant should display `qr_code_url` or `sign_url` for user to scan
+- `signResult.status = "INIT"` - Sign request created, waiting for user scan
+- `payResult.status = "PENDING"` - Payment order created, waiting for sign completion to auto-execute
+- Merchant should display `qrCodeUrl` or `signUrl` for user to scan
 - Final result returned via Webhook async notification (see examples below)
 
 #### Request Example 2: Pay Only (Using Existing Agreement)
 
 ```json
 {
-  "merchant_id": "M123456789",
-  "agreement_type": "CYCLE",
-  "pay_params": {
-    "agreement_no": "AGR202312230001",
-    "out_trade_no": "TAXI20231223002",
-    "scene_code": "TAXI",
+  "merchantId": "M123456789",
+  "agreementType": "CYCLE",
+  "payParams": {
+    "agreementNo": "AGR202312230001",
+    "outTradeNo": "TAXI20231223002",
+    "sceneCode": "TAXI",
     "amount": {
       "total": "3500",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "order_info": {
-      "order_title": "Taxi Fare",
-      "order_desc": "Second trip on December 23"
+    "orderInfo": {
+      "orderTitle": "Taxi Fare",
+      "orderDesc": "Second trip on December 23"
     },
-    "pay_notify_url": "https://merchant.com/notify/pay"
+    "payNotifyUrl": "https://merchant.com/notify/pay"
   }
 }
 ```
@@ -1203,27 +1203,27 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "sign_result": null,
-    "pay_result": {
-      "trade_no": "PAY202312230002",
-      "out_trade_no": "TAXI20231223002",
+    "signResult": null,
+    "payResult": {
+      "tradeNo": "PAY202312230002",
+      "outTradeNo": "TAXI20231223002",
       "status": "PROCESSING",
       "amount": {
         "total": "3500",
         "currency": "USDT",
-        "currency_type": "CRYPTO",
+        "currencyType": "CRYPTO",
         "chain": "TRC20"
       },
-      "pay_time": null,
-      "failure_reason": null
+      "payTime": null,
+      "failureReason": null
     }
   }
 }
 ```
 
 **Notes**:
-- `sign_result = null` - No sign initiated, using existing agreement
-- `pay_result.status = "PROCESSING"` - Deduction payment processing
+- `signResult = null` - No sign initiated, using existing agreement
+- `payResult.status = "PROCESSING"` - Deduction payment processing
 - Final result returned via Webhook async notification
 
 #### Webhook Async Notification
@@ -1236,7 +1236,7 @@ Sign result and payment result are sent as **independent notifications** to thei
 | User rejected sign | signNotifyUrl receives sign rejected notification | eventType=REJECTED, notifyType=AGREEMENT_STATUS |
 | Sign failed (system error) | signNotifyUrl receives sign failed notification | eventType=AGREEMENT_SIGN_RESULT, notifyType=TRANSACTION_RESULT |
 
-**Notification Example 1: Sign Success (sent to sign_notify_url)**
+**Notification Example 1: Sign Success (sent to signNotifyUrl)**
 
 ```json
 {
@@ -1258,7 +1258,7 @@ Sign result and payment result are sent as **independent notifications** to thei
 }
 ```
 
-**Notification Example 2: Pay Success (sent to pay_notify_url)**
+**Notification Example 2: Pay Success (sent to payNotifyUrl)**
 
 ```json
 {
@@ -1277,14 +1277,14 @@ Sign result and payment result are sent as **independent notifications** to thei
     "amount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     },
     "payTime": "2023-12-23T10:35:05+00:00"
   }
 }
 ```
 
-**Notification Example 3: User Rejected (sent to sign_notify_url)**
+**Notification Example 3: User Rejected (sent to signNotifyUrl)**
 
 ```json
 {
@@ -1303,7 +1303,7 @@ Sign result and payment result are sent as **independent notifications** to thei
 }
 ```
 
-**Notification Example 4: Sign Failed - System Error (sent to sign_notify_url)**
+**Notification Example 4: Sign Failed - System Error (sent to signNotifyUrl)**
 
 ```json
 {
@@ -1323,7 +1323,7 @@ Sign result and payment result are sent as **independent notifications** to thei
 ```
 
 **Webhook Notification Notes**:
-- Sign result notifications sent to `sign_notify_url`, payment result notifications sent to `pay_notify_url`
+- Sign result notifications sent to `signNotifyUrl`, payment result notifications sent to `payNotifyUrl`
 - Signature verification method: refer to Section 5.4
 - Merchant should return HTTP 200 + `success` to confirm receipt
 - If user rejects sign, only sign rejected notification is sent, deduction will not be executed
@@ -1346,21 +1346,21 @@ Sign result and payment result are sent as **independent notifications** to thei
   - ④ Webhook notification → Returns sign and payment results
 
 3. **Result Processing**
-  - Results returned separately in `sign_result` and `pay_result`
-  - If sign fails, deduction not executed, `pay_result` is `null`
+  - Results returned separately in `signResult` and `payResult`
+  - If sign fails, deduction not executed, `payResult` is `null`
   - If sign succeeds, user completes payment in app until success
 
 4. **Webhook Notification Strategy**
   - Sign result and payment result are sent as **independent notifications** to respective notify URLs
-  - Sign result (success/rejected/failed) sent to `sign_notify_url`
-  - Payment result (success/failed) sent to `pay_notify_url`
+  - Sign result (success/rejected/failed) sent to `signNotifyUrl`
+  - Payment result (success/failed) sent to `payNotifyUrl`
 
 5. **Idempotency Guarantee**
-  - Idempotency guaranteed through `external_agreement_no` for signing
-  - Idempotency guaranteed through `out_trade_no` for payment
+  - Idempotency guaranteed through `externalAgreementNo` for signing
+  - Idempotency guaranteed through `outTradeNo` for payment
 
 6. **Optional Signing**
-  - When `sign_params` is empty, must pass existing agreement number in `pay_params.agreement_no`
+  - When `signParams` is empty, must pass existing agreement number in `payParams.agreementNo`
   - When using existing agreement, no scan needed, direct deduction execution
 
 ---
@@ -1375,37 +1375,37 @@ Sign result and payment result are sent as **independent notifications** to thei
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| merchant_id | string | Yes | Merchant ID |
-| user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
-| trade_no | string | Either | Platform trade number |
-| out_trade_no | string | Either | Merchant order number |
-| out_refund_no | string | Yes | Merchant refund number (unique on merchant side) |
-| refund_amount | object | Yes | Refund amount |
-| refund_amount.total | string | Yes | Refund amount (minimum unit) |
-| refund_amount.currency | string | Yes | Currency code |
-| refund_amount.currency_type | string | Yes | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) |
-| refund_amount.chain | string | No | Chain network (required for cryptocurrency) |
-| refund_reason | string | No | Refund reason |
-| notify_url | string | Yes | Refund result async notification URL |
+| merchantId | string | Yes | Merchant ID |
+| userId | string | Yes | Platform user ID (our platform's user identifier) |
+| agreementType | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
+| tradeNo | string | Either | Platform trade number |
+| outTradeNo | string | Either | Merchant order number |
+| outRefundNo | string | Yes | Merchant refund number (unique on merchant side) |
+| refundAmount | object | Yes | Refund amount |
+| refundAmount.total | string | Yes | Refund amount (minimum unit) |
+| refundAmount.currency | string | Yes | Currency code |
+| refundAmount.currencyType | string | Yes | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) |
+| refundAmount.chain | string | No | Chain network (required for cryptocurrency) |
+| refundReason | string | No | Refund reason |
+| notifyUrl | string | Yes | Refund result async notification URL |
 
 #### Request Example
 
 ```json
 {
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "trade_no": "PAY202312230001",
-  "out_refund_no": "TAXI_RF20231223001",
-  "refund_amount": {
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "tradeNo": "PAY202312230001",
+  "outRefundNo": "TAXI_RF20231223001",
+  "refundAmount": {
     "total": "2350",
     "currency": "USDT",
-    "currency_type": "CRYPTO",
+    "currencyType": "CRYPTO",
     "chain": "TRC20"
   },
-  "refund_reason": "User cancelled order",
-  "notify_url": "https://merchant.com/notify/refund"
+  "refundReason": "User cancelled order",
+  "notifyUrl": "https://merchant.com/notify/refund"
 }
 ```
 
@@ -1416,13 +1416,13 @@ Sign result and payment result are sent as **independent notifications** to thei
 | retCode | int | Response code, 20000-success, non-20000-failure |
 | retMsg | string | Response message |
 | result | object | Response data |
-| result.refund_no | string | Platform refund number |
-| result.out_refund_no | string | Merchant refund number |
-| result.trade_no | string | Original trade number |
+| result.refundNo | string | Platform refund number |
+| result.outRefundNo | string | Merchant refund number |
+| result.tradeNo | string | Original trade number |
 | result.status | string | Refund status: PROCESSING/SUCCESS/FAILED |
-| result.refund_amount | object | Refund amount |
-| result.refund_time | string | Refund success time (returned on success) |
-| result.failure_reason | string | Failure reason (returned on failure) |
+| result.refundAmount | object | Refund amount |
+| result.refundTime | string | Refund success time (returned on success) |
+| result.failureReason | string | Failure reason (returned on failure) |
 
 #### Response Example (Success)
 
@@ -1431,17 +1431,17 @@ Sign result and payment result are sent as **independent notifications** to thei
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "refund_no": "RF202312230001",
-    "out_refund_no": "TAXI_RF20231223001",
-    "trade_no": "PAY202312230001",
+    "refundNo": "RF202312230001",
+    "outRefundNo": "TAXI_RF20231223001",
+    "tradeNo": "PAY202312230001",
     "status": "SUCCESS",
-    "refund_amount": {
+    "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "refund_time": "2023-12-23T11:30:00Z"
+    "refundTime": "2023-12-23T11:30:00Z"
   }
 }
 ```
@@ -1453,14 +1453,14 @@ Sign result and payment result are sent as **independent notifications** to thei
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "refund_no": "RF202312230002",
-    "out_refund_no": "TAXI_RF20231223002",
-    "trade_no": "PAY202312230001",
+    "refundNo": "RF202312230002",
+    "outRefundNo": "TAXI_RF20231223002",
+    "tradeNo": "PAY202312230001",
     "status": "PROCESSING",
-    "refund_amount": {
+    "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     }
   }
@@ -1474,17 +1474,17 @@ Sign result and payment result are sent as **independent notifications** to thei
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "refund_no": "RF202312230003",
-    "out_refund_no": "TAXI_RF20231223003",
-    "trade_no": "PAY202312230001",
+    "refundNo": "RF202312230003",
+    "outRefundNo": "TAXI_RF20231223003",
+    "tradeNo": "PAY202312230001",
     "status": "FAILED",
-    "refund_amount": {
+    "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "failure_reason": "REFUND_AMOUNT_EXCEED"
+    "failureReason": "REFUND_AMOUNT_EXCEED"
   }
 }
 ```
@@ -1499,14 +1499,14 @@ Sign result and payment result are sent as **independent notifications** to thei
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| merchant_id | string | Yes | Merchant ID |
-| agreement_no | string | Either | Platform agreement number |
-| external_agreement_no | string | Either | Merchant agreement number |
+| merchantId | string | Yes | Merchant ID |
+| agreementNo | string | Either | Platform agreement number |
+| externalAgreementNo | string | Either | Merchant agreement number |
 
 #### Request Example
 
 ```
-GET /v5/pay/agreement/query?merchant_id=M123456789&agreement_no=AGR202312230001
+GET /v5/pay/agreement/query?merchantId=M123456789&agreementNo=AGR202312230001
 ```
 
 #### Response Parameters
@@ -1516,16 +1516,16 @@ GET /v5/pay/agreement/query?merchant_id=M123456789&agreement_no=AGR202312230001
 | retCode | int | Response code, 20000-success, non-20000-failure |
 | retMsg | string | Response message |
 | result | object | Response data |
-| result.agreement_no | string | Platform agreement number |
-| result.external_agreement_no | string | Merchant agreement number |
-| result.user_id | string | Platform user ID |
-| result.merchant_user_id | string | Merchant-side user ID |
+| result.agreementNo | string | Platform agreement number |
+| result.externalAgreementNo | string | Merchant agreement number |
+| result.userId | string | Platform user ID |
+| result.merchantUserId | string | Merchant-side user ID |
 | result.status | string | Status: INIT/PENDING/SIGNED/SUSPENDED/UNSIGNED/EXPIRED/REJECTED/FAILED/TIMEOUT |
-| result.sign_time | string | Sign time |
-| result.valid_time | string | Validity period |
-| result.single_limit | object | Single transaction limit |
-| result.period_limits | array | Period limits list (supports multiple period types) |
-| result.used_quota | object | Used quota |
+| result.signTime | string | Sign time |
+| result.validTime | string | Validity period |
+| result.singleLimit | object | Single transaction limit |
+| result.periodLimits | array | Period limits list (supports multiple period types) |
+| result.usedQuota | object | Used quota |
 
 #### Response Example
 
@@ -1534,32 +1534,32 @@ GET /v5/pay/agreement/query?merchant_id=M123456789&agreement_no=AGR202312230001
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "agreement_no": "AGR202312230001",
-    "external_agreement_no": "MERCHANT_AGR_001",
-    "user_id": "U_123456789",
-    "merchant_user_id": "merchant_user_123",
+    "agreementNo": "AGR202312230001",
+    "externalAgreementNo": "MERCHANT_AGR_001",
+    "userId": "U_123456789",
+    "merchantUserId": "merchant_user_123",
     "status": "SIGNED",
-    "sign_time": "2023-12-23T10:30:00Z",
-    "valid_time": "2024-12-23T10:30:00Z",
-    "single_limit": {
+    "signTime": "2023-12-23T10:30:00Z",
+    "validTime": "2024-12-23T10:30:00Z",
+    "singleLimit": {
       "amount": "100000",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "period_limits": [
+    "periodLimits": [
       {
-        "period_type": "DAY",
+        "periodType": "DAY",
         "amount": "500000",
         "currency": "USDT",
-        "currency_type": "CRYPTO",
+        "currencyType": "CRYPTO",
         "chain": "TRC20"
       }
     ],
-    "used_quota": {
-      "day_used": "50000",
+    "usedQuota": {
+      "dayUsed": "50000",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     }
   }
 }
@@ -1577,20 +1577,20 @@ GET /v5/pay/agreement/query?merchant_id=M123456789&agreement_no=AGR202312230001
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| merchant_id | string | Yes | Merchant ID |
-| user_id | string | No | Platform user ID (filter agreements for specified user) |
-| agreement_type | string | No | Sign type: CYCLE/NON_CYCLE/SINGLE (query all if not passed) |
+| merchantId | string | Yes | Merchant ID |
+| userId | string | No | Platform user ID (filter agreements for specified user) |
+| agreementType | string | No | Sign type: CYCLE/NON_CYCLE/SINGLE (query all if not passed) |
 | status | string | No | Agreement status filter: INIT/PENDING/SIGNED/SUSPENDED/UNSIGNED/EXPIRED/FAILED |
-| scene_code | string | No | Scene code filter |
-| start_time | string | No | Sign start time (ISO8601 format) |
-| end_time | string | No | Sign end time (ISO8601 format) |
-| page_no | int | No | Page number, default 1 |
-| page_size | int | No | Page size, default 20, max 100 |
+| sceneCode | string | No | Scene code filter |
+| startTime | string | No | Sign start time (ISO8601 format) |
+| endTime | string | No | Sign end time (ISO8601 format) |
+| pageNo | int | No | Page number, default 1 |
+| pageSize | int | No | Page size, default 20, max 100 |
 
 #### Request Example
 
 ```
-GET /v5/pay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&page_size=20
+GET /v5/pay/agreement/list?merchantId=M123456789&status=SIGNED&pageNo=1&pageSize=20
 ```
 
 #### Response Parameters
@@ -1600,18 +1600,18 @@ GET /v5/pay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&page_s
 | retCode | int | Response code, 20000-success, non-20000-failure |
 | result | object | Response data |
 | result.total | int | Total record count |
-| result.page_no | int | Current page number |
-| result.page_size | int | Page size |
+| result.pageNo | int | Current page number |
+| result.pageSize | int | Page size |
 | result.list | array | Agreement list |
-| result.list[].agreement_no | string | Platform agreement number |
-| result.list[].external_agreement_no | string | Merchant agreement number |
-| result.list[].user_id | string | Platform user ID |
-| result.list[].merchant_user_id | string | Merchant-side user ID |
-| result.list[].agreement_type | string | Sign type |
-| result.list[].scene_code | string | Scene code |
+| result.list[].agreementNo | string | Platform agreement number |
+| result.list[].externalAgreementNo | string | Merchant agreement number |
+| result.list[].userId | string | Platform user ID |
+| result.list[].merchantUserId | string | Merchant-side user ID |
+| result.list[].agreementType | string | Sign type |
+| result.list[].sceneCode | string | Scene code |
 | result.list[].status | string | Agreement status |
-| result.list[].sign_time | string | Sign time |
-| result.list[].valid_time | string | Validity period |
+| result.list[].signTime | string | Sign time |
+| result.list[].validTime | string | Validity period |
 
 #### Response Example
 
@@ -1621,19 +1621,19 @@ GET /v5/pay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&page_s
   "retMsg": "Success",
   "result": {
     "total": 100,
-    "page_no": 1,
-    "page_size": 20,
+    "pageNo": 1,
+    "pageSize": 20,
     "list": [
       {
-        "agreement_no": "AGR202312230001",
-        "external_agreement_no": "MERCHANT_AGR_001",
-        "user_id": "U_123456789",
-        "merchant_user_id": "merchant_user_123",
-        "agreement_type": "CYCLE",
-        "scene_code": "SUBSCRIPTION",
+        "agreementNo": "AGR202312230001",
+        "externalAgreementNo": "MERCHANT_AGR_001",
+        "userId": "U_123456789",
+        "merchantUserId": "merchant_user_123",
+        "agreementType": "CYCLE",
+        "sceneCode": "SUBSCRIPTION",
         "status": "SIGNED",
-        "sign_time": "2023-12-23T10:30:00Z",
-        "valid_time": "2024-12-23T10:30:00Z"
+        "signTime": "2023-12-23T10:30:00Z",
+        "validTime": "2024-12-23T10:30:00Z"
       }
     ]
   }
@@ -1646,62 +1646,62 @@ GET /v5/pay/agreement/list?merchant_id=M123456789&status=SIGNED&page_no=1&page_s
 
 **Request Path**: GET /v5/pay/agreement/transaction/query
 
-**Description**: Query single deduction transaction or refund record details, distinguished by record_type
+**Description**: Query single deduction transaction or refund record details, distinguished by recordType
 
 #### Request Parameters
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| merchant_id | string | Yes | Merchant ID |
-| user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
-| record_type | string | No | Record type: PAY(deduction transaction)/REFUND(refund record), default PAY |
-| trade_no | string | Conditional | Platform trade number (when record_type=PAY, either this or out_trade_no) |
-| out_trade_no | string | Conditional | Merchant order number (when record_type=PAY, either this or trade_no) |
-| refund_no | string | Conditional | Platform refund number (when record_type=REFUND, either this or out_refund_no) |
-| out_refund_no | string | Conditional | Merchant refund number (when record_type=REFUND, either this or refund_no) |
+| merchantId | string | Yes | Merchant ID |
+| userId | string | Yes | Platform user ID (our platform's user identifier) |
+| agreementType | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
+| recordType | string | No | Record type: PAY(deduction transaction)/REFUND(refund record), default PAY |
+| tradeNo | string | Conditional | Platform trade number (when recordType=PAY, either this or outTradeNo) |
+| outTradeNo | string | Conditional | Merchant order number (when recordType=PAY, either this or tradeNo) |
+| refundNo | string | Conditional | Platform refund number (when recordType=REFUND, either this or outRefundNo) |
+| outRefundNo | string | Conditional | Merchant refund number (when recordType=REFUND, either this or refundNo) |
 
 #### Request Example (Query Deduction Transaction)
 
 ```
-GET /v5/pay/agreement/transaction/query?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&record_type=PAY&trade_no=PAY202312230001
+GET /v5/pay/agreement/transaction/query?merchantId=M123456789&userId=U_123456789&agreementType=CYCLE&recordType=PAY&tradeNo=PAY202312230001
 ```
 
 #### Request Example (Query Refund Record)
 
 ```
-GET /v5/pay/agreement/transaction/query?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&record_type=REFUND&refund_no=RF202312230001
+GET /v5/pay/agreement/transaction/query?merchantId=M123456789&userId=U_123456789&agreementType=CYCLE&recordType=REFUND&refundNo=RF202312230001
 ```
 
-#### Response Parameters (Deduction Transaction record_type=PAY)
+#### Response Parameters (Deduction Transaction recordType=PAY)
 
 | Parameter | Type | Description |
 | --- | --- | --- |
 | retCode | int | Response code, 20000-success, non-20000-failure |
 | retMsg | string | Response message |
 | result | object | Transaction details |
-| result.trade_no | string | Platform trade number |
-| result.out_trade_no | string | Merchant order number |
+| result.tradeNo | string | Platform trade number |
+| result.outTradeNo | string | Merchant order number |
 | result.status | string | Transaction status |
 | result.amount | object | Merchant requested amount |
-| result.crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
-| result.pay_time | string | Payment time |
-| result.refund_amount | object | Refunded amount |
+| result.cryptoPayment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
+| result.payTime | string | Payment time |
+| result.refundAmount | object | Refunded amount |
 
-#### Response Parameters (Refund Record record_type=REFUND)
+#### Response Parameters (Refund Record recordType=REFUND)
 
 | Parameter | Type | Description |
 | --- | --- | --- |
 | retCode | int | Response code, 20000-success, non-20000-failure |
 | retMsg | string | Response message |
 | result | object | Refund details |
-| result.refund_no | string | Platform refund number |
-| result.out_refund_no | string | Merchant refund number |
-| result.trade_no | string | Original trade number |
+| result.refundNo | string | Platform refund number |
+| result.outRefundNo | string | Merchant refund number |
+| result.tradeNo | string | Original trade number |
 | result.status | string | Refund status: PROCESSING/SUCCESS/FAILED |
-| result.refund_amount | object | Refund amount |
-| result.refund_time | string | Refund success time |
-| result.failure_reason | string | Failure reason |
+| result.refundAmount | object | Refund amount |
+| result.refundTime | string | Refund success time |
+| result.failureReason | string | Failure reason |
 
 #### Response Example (Deduction Transaction)
 
@@ -1710,26 +1710,26 @@ GET /v5/pay/agreement/transaction/query?merchant_id=M123456789&user_id=U_1234567
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "trade_no": "PAY202312230002",
-    "out_trade_no": "TAXI20231223002",
+    "tradeNo": "PAY202312230002",
+    "outTradeNo": "TAXI20231223002",
     "status": "SUCCESS",
     "amount": {
       "total": "10000",
       "currency": "USD",
-      "currency_type": "FIAT"
+      "currencyType": "FIAT"
     },
-    "crypto_payment": {
+    "cryptoPayment": {
       "currency": "USDT",
       "amount": "10005.50",
       "chain": "TRC20",
-      "exchange_rate": "1.00055",
-      "rate_time": "2023-12-23T10:29:55Z"
+      "exchangeRate": "1.00055",
+      "rateTime": "2023-12-23T10:29:55Z"
     },
-    "pay_time": "2023-12-23T10:30:00Z",
-    "refund_amount": {
+    "payTime": "2023-12-23T10:30:00Z",
+    "refundAmount": {
       "total": "0",
       "currency": "USD",
-      "currency_type": "FIAT"
+      "currencyType": "FIAT"
     }
   }
 }
@@ -1742,17 +1742,17 @@ GET /v5/pay/agreement/transaction/query?merchant_id=M123456789&user_id=U_1234567
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "refund_no": "RF202312230001",
-    "out_refund_no": "TAXI_RF20231223001",
-    "trade_no": "PAY202312230001",
+    "refundNo": "RF202312230001",
+    "outRefundNo": "TAXI_RF20231223001",
+    "tradeNo": "PAY202312230001",
     "status": "SUCCESS",
-    "refund_amount": {
+    "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     },
-    "refund_time": "2023-12-23T11:30:00Z"
+    "refundTime": "2023-12-23T11:30:00Z"
   }
 }
 ```
@@ -1769,42 +1769,42 @@ GET /v5/pay/agreement/transaction/query?merchant_id=M123456789&user_id=U_1234567
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
-| merchant_id | string | Yes | Merchant ID |
-| user_id | string | Yes | Platform user ID (our platform's user identifier) |
-| agreement_type | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
-| agreement_no | string | Yes | Platform agreement number |
-| record_type | string | No | Record type: PAY(deduction transaction)/REFUND(refund record), default PAY |
+| merchantId | string | Yes | Merchant ID |
+| userId | string | Yes | Platform user ID (our platform's user identifier) |
+| agreementType | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
+| agreementNo | string | Yes | Platform agreement number |
+| recordType | string | No | Record type: PAY(deduction transaction)/REFUND(refund record), default PAY |
 | status | string | No | Status filter: SUCCESS/FAILED/PROCESSING |
-| start_time | string | No | Start time (ISO8601 format) |
-| end_time | string | No | End time (ISO8601 format) |
-| page_no | int | No | Page number, default 1 |
-| page_size | int | No | Page size, default 20, max 100 |
+| startTime | string | No | Start time (ISO8601 format) |
+| endTime | string | No | End time (ISO8601 format) |
+| pageNo | int | No | Page number, default 1 |
+| pageSize | int | No | Page size, default 20, max 100 |
 
 #### Request Example
 
 ```
-GET /v5/pay/agreement/transaction/list?merchant_id=M123456789&user_id=U_123456789&agreement_type=CYCLE&agreement_no=AGR202312230001&record_type=PAY&status=SUCCESS&page_no=1&page_size=20
+GET /v5/pay/agreement/transaction/list?merchantId=M123456789&userId=U_123456789&agreementType=CYCLE&agreementNo=AGR202312230001&recordType=PAY&status=SUCCESS&pageNo=1&pageSize=20
 ```
 
-#### Response Parameters (Deduction Transaction record_type=PAY)
+#### Response Parameters (Deduction Transaction recordType=PAY)
 
 | Parameter | Type | Description |
 | --- | --- | --- |
 | retCode | int | Response code, 20000-success, non-20000-failure |
 | result | object | Response data |
 | result.total | int | Total record count |
-| result.page_no | int | Current page number |
-| result.page_size | int | Page size |
+| result.pageNo | int | Current page number |
+| result.pageSize | int | Page size |
 | result.list | array | Transaction list |
-| result.list[].trade_no | string | Platform trade number |
-| result.list[].out_trade_no | string | Merchant order number |
+| result.list[].tradeNo | string | Platform trade number |
+| result.list[].outTradeNo | string | Merchant order number |
 | result.list[].status | string | Transaction status |
 | result.list[].amount | object | Merchant requested amount |
-| result.list[].crypto_payment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
-| result.list[].pay_time | string | Payment time |
-| result.list[].refund_amount | object | Refunded amount |
+| result.list[].cryptoPayment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
+| result.list[].payTime | string | Payment time |
+| result.list[].refundAmount | object | Refunded amount |
 
-#### Response Parameters (Refund Record record_type=REFUND)
+#### Response Parameters (Refund Record recordType=REFUND)
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -1812,18 +1812,18 @@ GET /v5/pay/agreement/transaction/list?merchant_id=M123456789&user_id=U_12345678
 | retMsg | string | Response message |
 | result | object | Response data |
 | result.total | int | Total record count |
-| result.page_no | int | Current page number |
-| result.page_size | int | Page size |
+| result.pageNo | int | Current page number |
+| result.pageSize | int | Page size |
 | result.list | array | Refund list |
-| result.list[].refund_no | string | Platform refund number |
-| result.list[].out_refund_no | string | Merchant refund number |
-| result.list[].trade_no | string | Original trade number |
+| result.list[].refundNo | string | Platform refund number |
+| result.list[].outRefundNo | string | Merchant refund number |
+| result.list[].tradeNo | string | Original trade number |
 | result.list[].status | string | Refund status: PROCESSING/SUCCESS/FAILED |
-| result.list[].refund_amount | object | Refund amount |
-| result.list[].refund_time | string | Refund success time |
-| result.list[].failure_reason | string | Failure reason (returned on failure) |
+| result.list[].refundAmount | object | Refund amount |
+| result.list[].refundTime | string | Refund success time |
+| result.list[].failureReason | string | Failure reason (returned on failure) |
 
-#### Response Example (Deduction Transaction record_type=PAY)
+#### Response Example (Deduction Transaction recordType=PAY)
 
 ```json
 {
@@ -1831,30 +1831,30 @@ GET /v5/pay/agreement/transaction/list?merchant_id=M123456789&user_id=U_12345678
   "retMsg": "Success",
   "result": {
     "total": 50,
-    "page_no": 1,
-    "page_size": 20,
+    "pageNo": 1,
+    "pageSize": 20,
     "list": [
       {
-        "trade_no": "PAY202312230001",
-        "out_trade_no": "TAXI20231223001",
+        "tradeNo": "PAY202312230001",
+        "outTradeNo": "TAXI20231223001",
         "status": "SUCCESS",
         "amount": {
           "total": "10000",
           "currency": "USD",
-          "currency_type": "FIAT"
+          "currencyType": "FIAT"
         },
-        "crypto_payment": {
+        "cryptoPayment": {
           "currency": "USDT",
           "amount": "10005.50",
           "chain": "TRC20",
-          "exchange_rate": "1.00055",
-          "rate_time": "2023-12-23T10:29:55Z"
+          "exchangeRate": "1.00055",
+          "rateTime": "2023-12-23T10:29:55Z"
         },
-        "pay_time": "2023-12-23T10:30:00Z",
-        "refund_amount": {
+        "payTime": "2023-12-23T10:30:00Z",
+        "refundAmount": {
           "total": "0",
           "currency": "USD",
-          "currency_type": "FIAT"
+          "currencyType": "FIAT"
         }
       }
     ]
@@ -1862,7 +1862,7 @@ GET /v5/pay/agreement/transaction/list?merchant_id=M123456789&user_id=U_12345678
 }
 ```
 
-#### Response Example (Refund Record record_type=REFUND)
+#### Response Example (Refund Record recordType=REFUND)
 
 ```json
 {
@@ -1870,21 +1870,21 @@ GET /v5/pay/agreement/transaction/list?merchant_id=M123456789&user_id=U_12345678
   "retMsg": "Success",
   "result": {
     "total": 10,
-    "page_no": 1,
-    "page_size": 20,
+    "pageNo": 1,
+    "pageSize": 20,
     "list": [
       {
-        "refund_no": "RF202312230001",
-        "out_refund_no": "TAXI_RF20231223001",
-        "trade_no": "PAY202312230001",
+        "refundNo": "RF202312230001",
+        "outRefundNo": "TAXI_RF20231223001",
+        "tradeNo": "PAY202312230001",
         "status": "SUCCESS",
-        "refund_amount": {
+        "refundAmount": {
           "total": "2350",
           "currency": "USDT",
-          "currency_type": "CRYPTO",
+          "currencyType": "CRYPTO",
           "chain": "TRC20"
         },
-        "refund_time": "2023-12-23T11:30:00Z"
+        "refundTime": "2023-12-23T11:30:00Z"
       }
     ]
   }
@@ -2049,7 +2049,7 @@ All Webhook notifications use a unified three-part structure:
 | amount | object | Amount object |
 | amount.total | string | Amount (minimum unit) |
 | amount.currency | string | Currency code |
-| amount.currency_type | string | Currency type: FIAT/CRYPTO |
+| amount.currencyType | string | Currency type: FIAT/CRYPTO |
 | payTime | string | Payment time |
 | failureCode | string | Failure error code (returned on failure, 9-digit string) |
 | failureReason | string | Failure reason description (returned on failure) |
@@ -2073,7 +2073,7 @@ All Webhook notifications use a unified three-part structure:
     "amount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     },
     "payTime": "2023-12-23 10:30:00"
   },
@@ -2101,7 +2101,7 @@ All Webhook notifications use a unified three-part structure:
     "amount": {
       "total": "5000",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     },
     "failureCode": "139002003",
     "failureReason": "Insufficient balance (downstream code=120100006, msg=Balance insufficient)"
@@ -2161,10 +2161,10 @@ All Webhook notifications use a unified three-part structure:
 | outTradeNo | string | Original merchant order number |
 | agreementNo | string | Platform agreement number |
 | status | string | Refund status: SUCCESS/FAILED |
-| refund_amount | object | Refund amount object |
-| refund_amount.total | string | Refund amount (minimum unit) |
-| refund_amount.currency | string | Currency code |
-| refund_amount.currency_type | string | Currency type: FIAT/CRYPTO |
+| refundAmount | object | Refund amount object |
+| refundAmount.total | string | Refund amount (minimum unit) |
+| refundAmount.currency | string | Currency code |
+| refundAmount.currencyType | string | Currency type: FIAT/CRYPTO |
 | refundTime | string | Refund success time |
 | failureCode | string | Failure error code (returned on failure, 9-digit string) |
 | failureReason | string | Failure reason description (returned on failure) |
@@ -2189,10 +2189,10 @@ All Webhook notifications use a unified three-part structure:
     "eventType": "REFUND",
     "orderType": "REFUND",
     "status": "SUCCESS",
-    "refund_amount": {
+    "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     },
     "refundTime": "2023-12-23 11:30:00"
   },
@@ -2221,10 +2221,10 @@ All Webhook notifications use a unified three-part structure:
     "eventType": "REFUND",
     "orderType": "REFUND",
     "status": "FAILED",
-    "refund_amount": {
+    "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     },
     "failureCode": "139002003",
     "failureReason": "Insufficient balance (downstream code=120100006, msg=Balance insufficient)"
@@ -2361,7 +2361,7 @@ All Webhook notifications use a unified three-part structure:
 | amount | object | Amount object |
 | amount.total | string | Amount (minimum unit) |
 | amount.currency | string | Currency code |
-| amount.currency_type | string | Currency type: FIAT/CRYPTO |
+| amount.currencyType | string | Currency type: FIAT/CRYPTO |
 | failureReason | string | Failure reason |
 | timeoutTime | string | Timeout time |
 
@@ -2385,7 +2385,7 @@ All Webhook notifications use a unified three-part structure:
     "amount": {
       "total": "5000",
       "currency": "USDT",
-      "currency_type": "CRYPTO"
+      "currencyType": "CRYPTO"
     },
     "failureReason": "ORDER_TIMEOUT",
     "timeoutTime": "2023-12-23 12:00:00"
@@ -2464,11 +2464,11 @@ All Webhook notifications include the following common fields:
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| notify_id | string | Notification unique identifier (for merchant deduplication) |
-| notify_type | string | Notification type |
-| notify_time | string | Notification send time (ISO8601 format) |
+| notifyId | string | Notification unique identifier (for merchant deduplication) |
+| notifyType | string | Notification type |
+| notifyTime | string | Notification send time (ISO8601 format) |
 
-**Deduplication Note**: Merchant should deduplicate based on `notify_id`, same notify_id notification only needs to be processed once
+**Deduplication Note**: Merchant should deduplicate based on `notifyId`, same notifyId notification only needs to be processed once
 
 #### Retry Mechanism
 
@@ -2818,7 +2818,7 @@ String to sign = HTTP Method + "\n" + Request Path + "\n" + Timestamp + "\n" + R
 POST
 /v5/pay/agreement/deduction
 1703318400000
-{"merchant_id":"M123456789","user_id":"U_123456789",...}
+{"merchantId":"M123456789","userId":"U_123456789",...}
 ```
 
 **2. Signature Calculation**
@@ -2949,22 +2949,22 @@ ACCESS_TOKEN="your_access_token"
 
 # Request body
 REQUEST_BODY='{
-  "merchant_id": "M123456789",
-  "user_id": "U_123456789",
-  "agreement_type": "CYCLE",
-  "agreement_no": "AGR202312230001",
-  "out_trade_no": "TAXI20231224001",
-  "scene_code": "TAXI",
+  "merchantId": "M123456789",
+  "userId": "U_123456789",
+  "agreementType": "CYCLE",
+  "agreementNo": "AGR202312230001",
+  "outTradeNo": "TAXI20231224001",
+  "sceneCode": "TAXI",
   "amount": {
     "total": "2350",
     "currency": "USDT",
-    "currency_type": "CRYPTO",
+    "currencyType": "CRYPTO",
     "chain": "TRC20"
   },
-  "order_info": {
-    "order_title": "Ride fare"
+  "orderInfo": {
+    "orderTitle": "Ride fare"
   },
-  "notify_url": "https://merchant.com/notify/pay"
+  "notifyUrl": "https://merchant.com/notify/pay"
 }'
 
 # Generate timestamp and request ID
@@ -2997,13 +2997,13 @@ curl -X POST "${API_HOST}${API_PATH}" \
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "trade_no": "PAY202312240001",
-    "out_trade_no": "TAXI20231224001",
+    "tradeNo": "PAY202312240001",
+    "outTradeNo": "TAXI20231224001",
     "status": "PROCESSING",
     "amount": {
       "total": "2350",
       "currency": "USDT",
-      "currency_type": "CRYPTO",
+      "currencyType": "CRYPTO",
       "chain": "TRC20"
     }
   }
@@ -3409,7 +3409,7 @@ Scene codes are defined with reference to bank MCC (Merchant Category Code) indu
 
 ### 7.5 Agreement Type Description
 
-Agreement type (agreement_type) defines the deduction mode of agreement payment, affecting deduction frequency, limit configuration, and agreement lifecycle.
+Agreement type (agreementType) defines the deduction mode of agreement payment, affecting deduction frequency, limit configuration, and agreement lifecycle.
 
 #### Agreement Type Comparison
 
@@ -3440,8 +3440,8 @@ Agreement type (agreement_type) defines the deduction mode of agreement payment,
 #### Limit Configuration Description
 
 **CYCLE and NON_CYCLE Types**:
-- Support **Single Limit** (single_limit): Maximum amount per deduction
-- Support **Period Limits** (period_limits):
+- Support **Single Limit** (singleLimit): Maximum amount per deduction
+- Support **Period Limits** (periodLimits):
   - DAY: Daily accumulated deduction limit
   - WEEK: Weekly accumulated deduction limit
   - MONTH: Monthly accumulated deduction limit
@@ -3449,7 +3449,7 @@ Agreement type (agreement_type) defines the deduction mode of agreement payment,
 - Multiple period limits can be configured simultaneously, platform validates all limits
 
 **SINGLE Type**:
-- Only supports **Single Limit** (single_limit)
+- Only supports **Single Limit** (singleLimit)
 - Period limits not supported (as agreement expires after deduction)
 
 #### Agreement Lifecycle Comparison
@@ -3479,7 +3479,7 @@ Agreement type (agreement_type) defines the deduction mode of agreement payment,
 3. **Agreement Management**:
   - CYCLE/NON_CYCLE agreements require active cancellation or await expiration
   - SINGLE agreements auto-expire after deduction, no management needed
-  - Recommend setting reasonable validity period (sign_valid_time) for long-term agreements
+  - Recommend setting reasonable validity period (signValidTime) for long-term agreements
 
 ### 7.6 Sandbox Environment
 
@@ -3525,4 +3525,4 @@ Agreement type (agreement_type) defines the deduction mode of agreement payment,
 **Examples**:
 - Amount `100001` → Immediately returns SUCCESS
 - Amount `100002` → Keeps PROCESSING, wait for async notification
-- Amount `100003` → Returns FAILED, failure_reason=BALANCE_NOT_ENOUGH
+- Amount `100003` → Returns FAILED, failureReason=BALANCE_NOT_ENOUGH
