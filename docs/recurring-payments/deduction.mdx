@@ -26,8 +26,8 @@ Execute automatic deduction from user's account using a signed agreement. This i
 | amount.total | string | **Yes** | Amount (minimum unit) |
 | amount.currency | string | **Yes** | Currency code |
 | amount.currencyType | string | **Yes** | `FIAT` or `CRYPTO` |
-| amount.chain | string | No | Chain network (required for crypto, e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
-| amount.chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| amount.chain | string | No | Chain network (required in dynamic chain settlement mode, e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
+| amount.chainAddress | string | No | Chain address (required in dynamic chain settlement mode) |
 | orderInfo | object | **Yes** | Order information |
 | orderInfo.orderTitle | string | **Yes** | Order title (displayed to user) |
 | orderInfo.orderDesc | string | No | Order description |

@@ -26,7 +26,6 @@ Initiate refund for a successful deduction transaction. Supports full and partia
 | refundAmount.total | string | **Yes** | Refund amount (minimum unit) |
 | refundAmount.currency | string | **Yes** | Currency code |
 | refundAmount.currencyType | string | **Yes** | `FIAT` or `CRYPTO` |
-| refundAmount.chain | string | No | Chain network (required for crypto, e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
 | refundReason | string | No | Refund reason |
 | notifyUrl | string | **Yes** | Refund result webhook URL |
 
@@ -75,8 +74,7 @@ Authorization: Bearer {access_token}
   "refundAmount": {
     "total": "2350",
     "currency": "USDT",
-    "currencyType": "CRYPTO",
-    "chain": "TRC20"
+    "currencyType": "CRYPTO"
   },
   "refundReason": "User requested cancellation",
   "notifyUrl": "https://merchant.com/notify/refund"
@@ -103,8 +101,7 @@ Authorization: Bearer {access_token}
   "refundAmount": {
     "total": "1000",
     "currency": "USDT",
-    "currencyType": "CRYPTO",
-    "chain": "TRC20"
+    "currencyType": "CRYPTO"
   },
   "refundReason": "Partial service not provided",
   "notifyUrl": "https://merchant.com/notify/refund"
@@ -129,8 +126,7 @@ Authorization: Bearer {access_token}
     "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currencyType": "CRYPTO",
-      "chain": "TRC20"
+      "currencyType": "CRYPTO"
     },
     "refundTime": "2026-01-07T11:30:00Z"
   }
@@ -151,8 +147,7 @@ Authorization: Bearer {access_token}
     "refundAmount": {
       "total": "1000",
       "currency": "USDT",
-      "currencyType": "CRYPTO",
-      "chain": "TRC20"
+      "currencyType": "CRYPTO"
     }
   }
 }
@@ -172,8 +167,7 @@ Authorization: Bearer {access_token}
     "refundAmount": {
       "total": "5000",
       "currency": "USDT",
-      "currencyType": "CRYPTO",
-      "chain": "TRC20"
+      "currencyType": "CRYPTO"
     },
     "failureReason": "REFUND_AMOUNT_EXCEED"
   }

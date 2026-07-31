@@ -775,8 +775,8 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | amount.total | string | Yes | Deduction amount (minimum unit) |
 | amount.currency | string | Yes | Currency code |
 | amount.currencyType | string | Yes | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) |
-| amount.chain | string | No | Chain network (required for cryptocurrency, e.g.: ERC20/TRC20/Arbitrum) |
-| amount.chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| amount.chain | string | No | Chain network (required in dynamic chain settlement mode, e.g.: ERC20/TRC20/Arbitrum) |
+| amount.chainAddress | string | No | Chain address (required in dynamic chain settlement mode) |
 | orderInfo | object | Yes | Order information |
 | orderInfo.orderTitle | string | Yes | Order title (displayed to user) |
 | orderInfo.orderDesc | string | No | Order description |
@@ -1023,8 +1023,8 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | payParams.amount.total | string | Yes | Deduction amount (minimum unit) |
 | payParams.amount.currency | string | Yes | Currency code |
 | payParams.amount.currencyType | string | Yes | Currency type: FIAT/CRYPTO |
-| payParams.amount.chain | string | No | Chain network (required for cryptocurrency) |
-| payParams.amount.chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| payParams.amount.chain | string | No | Chain network (required in dynamic chain settlement mode) |
+| payParams.amount.chainAddress | string | No | Chain address (required in dynamic chain settlement mode) |
 | payParams.orderInfo | object | Yes | Order information |
 | payParams.orderInfo.orderTitle | string | Yes | Order title |
 | payParams.orderInfo.orderDesc | string | No | Order description |
@@ -1335,33 +1335,33 @@ Sign result and payment result are sent as **independent notifications** to thei
 **Important Notes**:
 
 1. **Async Flow**
-  - Signing requires user scan confirmation, it's an async flow
-  - Sync response returns sign QR code and initial status (`INIT`/`PENDING`)
-  - Final result returned via Webhook async notification
+- Signing requires user scan confirmation, it's an async flow
+- Sync response returns sign QR code and initial status (`INIT`/`PENDING`)
+- Final result returned via Webhook async notification
 
 2. **Business Flow**
-  - ① Call API → Returns sign QR code
-  - ② Merchant displays QR code → User scans with App
-  - ③ User completes sign → System auto-triggers deduction
-  - ④ Webhook notification → Returns sign and payment results
+- ① Call API → Returns sign QR code
+- ② Merchant displays QR code → User scans with App
+- ③ User completes sign → System auto-triggers deduction
+- ④ Webhook notification → Returns sign and payment results
 
 3. **Result Processing**
-  - Results returned separately in `signResult` and `payResult`
-  - If sign fails, deduction not executed, `payResult` is `null`
-  - If sign succeeds, user completes payment in app until success
+- Results returned separately in `signResult` and `payResult`
+- If sign fails, deduction not executed, `payResult` is `null`
+- If sign succeeds, user completes payment in app until success
 
 4. **Webhook Notification Strategy**
-  - Sign result and payment result are sent as **independent notifications** to respective notify URLs
-  - Sign result (success/rejected/failed) sent to `signNotifyUrl`
-  - Payment result (success/failed) sent to `payNotifyUrl`
+- Sign result and payment result are sent as **independent notifications** to respective notify URLs
+- Sign result (success/rejected/failed) sent to `signNotifyUrl`
+- Payment result (success/failed) sent to `payNotifyUrl`
 
 5. **Idempotency Guarantee**
-  - Idempotency guaranteed through `externalAgreementNo` for signing
-  - Idempotency guaranteed through `outTradeNo` for payment
+- Idempotency guaranteed through `externalAgreementNo` for signing
+- Idempotency guaranteed through `outTradeNo` for payment
 
 6. **Optional Signing**
-  - When `signParams` is empty, must pass existing agreement number in `payParams.agreementNo`
-  - When using existing agreement, no scan needed, direct deduction execution
+- When `signParams` is empty, must pass existing agreement number in `payParams.agreementNo`
+- When using existing agreement, no scan needed, direct deduction execution
 
 ---
 
@@ -1385,7 +1385,6 @@ Sign result and payment result are sent as **independent notifications** to thei
 | refundAmount.total | string | Yes | Refund amount (minimum unit) |
 | refundAmount.currency | string | Yes | Currency code |
 | refundAmount.currencyType | string | Yes | Currency type: FIAT(fiat) / CRYPTO(cryptocurrency) |
-| refundAmount.chain | string | No | Chain network (required for cryptocurrency) |
 | refundReason | string | No | Refund reason |
 | notifyUrl | string | Yes | Refund result async notification URL |
 
@@ -1401,8 +1400,7 @@ Sign result and payment result are sent as **independent notifications** to thei
   "refundAmount": {
     "total": "2350",
     "currency": "USDT",
-    "currencyType": "CRYPTO",
-    "chain": "TRC20"
+    "currencyType": "CRYPTO"
   },
   "refundReason": "User cancelled order",
   "notifyUrl": "https://merchant.com/notify/refund"
@@ -1438,8 +1436,7 @@ Sign result and payment result are sent as **independent notifications** to thei
     "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currencyType": "CRYPTO",
-      "chain": "TRC20"
+      "currencyType": "CRYPTO"
     },
     "refundTime": "2023-12-23T11:30:00Z"
   }
@@ -1460,8 +1457,7 @@ Sign result and payment result are sent as **independent notifications** to thei
     "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currencyType": "CRYPTO",
-      "chain": "TRC20"
+      "currencyType": "CRYPTO"
     }
   }
 }
@@ -1481,8 +1477,7 @@ Sign result and payment result are sent as **independent notifications** to thei
     "refundAmount": {
       "total": "2350",
       "currency": "USDT",
-      "currencyType": "CRYPTO",
-      "chain": "TRC20"
+      "currencyType": "CRYPTO"
     },
     "failureReason": "REFUND_AMOUNT_EXCEED"
   }
@@ -3466,20 +3461,20 @@ Agreement type (agreementType) defines the deduction mode of agreement payment, 
 #### Usage Recommendations
 
 1. **Choose Appropriate Type**:
-  - Subscription-based business: Choose **CYCLE**
-  - On-demand consumption business: Choose **NON_CYCLE**
-  - One-time authorization: Choose **SINGLE**
+- Subscription-based business: Choose **CYCLE**
+- On-demand consumption business: Choose **NON_CYCLE**
+- One-time authorization: Choose **SINGLE**
 
 2. **Limit Configuration Principles**:
-  - Single limit should cover most transaction scenarios
-  - Period limits prevent excessive short-term deductions
-  - CYCLE type recommended to configure monthly limit
-  - NON_CYCLE type recommended to configure daily limit
+- Single limit should cover most transaction scenarios
+- Period limits prevent excessive short-term deductions
+- CYCLE type recommended to configure monthly limit
+- NON_CYCLE type recommended to configure daily limit
 
 3. **Agreement Management**:
-  - CYCLE/NON_CYCLE agreements require active cancellation or await expiration
-  - SINGLE agreements auto-expire after deduction, no management needed
-  - Recommend setting reasonable validity period (signValidTime) for long-term agreements
+- CYCLE/NON_CYCLE agreements require active cancellation or await expiration
+- SINGLE agreements auto-expire after deduction, no management needed
+- Recommend setting reasonable validity period (signValidTime) for long-term agreements
 
 ### 7.6 Sandbox Environment
 

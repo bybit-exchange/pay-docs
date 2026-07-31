@@ -42,14 +42,14 @@ This API supports merchants to complete both agreement signing and deduction pay
 | signParams.singleLimit.currency | string | Conditional | Currency code (required when passing singleLimit) |
 | signParams.singleLimit.currencyType | string | Conditional | `FIAT` or `CRYPTO` (required when passing singleLimit) |
 | signParams.singleLimit.chain | string | No | Chain network (optional for cryptocurrency, e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
-| signParams.singleLimit.chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| signParams.singleLimit.chainAddress | string | No | Chain address (required in dynamic chain settlement mode) |
 | signParams.periodLimits | array | No | Period limit configuration list |
 | signParams.periodLimits[].periodType | string | Conditional | Period type: `DAY`/`WEEK`/`MONTH`/`YEAR` |
 | signParams.periodLimits[].amount | string | Conditional | Period limit amount |
 | signParams.periodLimits[].currency | string | Conditional | Currency code |
 | signParams.periodLimits[].currencyType | string | Conditional | `FIAT` or `CRYPTO` |
 | signParams.periodLimits[].chain | string | No | Chain network (optional for cryptocurrency, e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
-| signParams.periodLimits[].chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| signParams.periodLimits[].chainAddress | string | No | Chain address (required in dynamic chain settlement mode) |
 | signParams.signNotifyUrl | string | No | Sign result async notification URL |
 | signParams.returnUrl | string | No | Redirect URL after sign completion |
 | signParams.signExpireMinutes | int | No | Sign link validity period (minutes), default 30 |
@@ -62,8 +62,8 @@ This API supports merchants to complete both agreement signing and deduction pay
 | payParams.amount.total | string | **Yes** | Amount (minimum unit) |
 | payParams.amount.currency | string | **Yes** | Currency code |
 | payParams.amount.currencyType | string | **Yes** | `FIAT` or `CRYPTO` |
-| payParams.amount.chain | string | No | Chain network (required for crypto, e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
-| payParams.amount.chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| payParams.amount.chain | string | No | Chain network (required in dynamic chain settlement mode, e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
+| payParams.amount.chainAddress | string | No | Chain address (required in dynamic chain settlement mode) |
 | payParams.orderInfo | object | **Yes** | Order information |
 | payParams.orderInfo.orderTitle | string | **Yes** | Order title |
 | payParams.orderInfo.orderDesc | string | No | Order description |

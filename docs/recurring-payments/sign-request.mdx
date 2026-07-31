@@ -29,14 +29,14 @@ Create a sign request to initiate the agreement signing process. Returns a QR co
 | singleLimit.currency | string | Conditional | Currency code |
 | singleLimit.currencyType | string | Conditional | `FIAT` or `CRYPTO` |
 | singleLimit.chain | string | No | Chain network (for crypto, e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
-| singleLimit.chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| singleLimit.chainAddress | string | No | Chain address (required in dynamic chain settlement mode) |
 | periodLimits | array | No | Period limit configuration list |
 | periodLimits[].periodType | string | Conditional | `DAY` / `WEEK` / `MONTH` / `YEAR` |
 | periodLimits[].amount | string | Conditional | Period limit amount |
 | periodLimits[].currency | string | Conditional | Currency code |
 | periodLimits[].currencyType | string | Conditional | `FIAT` or `CRYPTO` |
 | periodLimits[].chain | string | No | Chain network (e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
-| periodLimits[].chainAddress | string | No | Chain address (required for dynamic on-chain settlement) |
+| periodLimits[].chainAddress | string | No | Chain address (required in dynamic chain settlement mode) |
 | returnUrl | string | No | Redirect URL after sign completion |
 | signExpireMinutes | int | No | Sign link validity (minutes), default 30, max 1440 |
 | extraParams | string | No | Extension parameters (JSON string, passed through) |
