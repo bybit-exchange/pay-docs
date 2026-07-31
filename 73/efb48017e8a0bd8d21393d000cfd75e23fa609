@@ -1,0 +1,29 @@
+docs/recurring-payments/pay-with-sign.mdx
+  850f079225916a3c 45,52,65-66
+docs/recurring-payments/deduction.mdx
+  850f079225916a3c 29-30
+docs/recurring-payments/sign-request.mdx
+  850f079225916a3c 32,39
+docs/recurring-payments/refund.mdx
+  850f079225916a3c 77,104,129,150,170
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2-bit.10+672fbf0",
+  "base_commit_sha": "73efb48017e8a0bd8d21393d000cfd75e23fa609",
+  "prompts": {
+    "850f079225916a3c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d8ea36cf-b710-473a-bab4-304fa018fb8b",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "dawson.hou",
+      "messages": [],
+      "total_additions": 13,
+      "total_deletions": 19,
+      "accepted_lines": 13,
+      "overriden_lines": 0
+    }
+  }
+}
