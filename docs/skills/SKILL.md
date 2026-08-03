@@ -37,7 +37,6 @@ X-BAPI-RECV-WINDOW: 5000               # default 5000ms, max 10000ms
 Content-Type:       application/json
 ```
 
-> **QR Payment only:** also add `Version: 5.00` header.
 
 ### Signature Construction
 
