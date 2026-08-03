@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2-bit.10+672fbf0",
+  "base_commit_sha": "3f79300d2de7c51a3c0f66a14d51067e3aa02266",
+  "prompts": {
+    "8aa7facc5f81ccf7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ef238969-ae86-4cd8-9a51-a66d00ebaef9",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "dawson.hou",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 27,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
