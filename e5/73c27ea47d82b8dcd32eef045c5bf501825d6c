@@ -1,0 +1,27 @@
+docs/recurring-payments/pay-with-sign.mdx
+  10ecee07bbf3fd36 72,161-162,235-236
+docs/recurring-payments/deduction.mdx
+  10ecee07bbf3fd36 36,105-106,137-138
+docs/agreement-payment-api-lark-en.md
+  10ecee07bbf3fd36 785,844,876-877,1034,1122-1123,1194-1195,2963-2964
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.3.2-bit.10+672fbf0",
+  "base_commit_sha": "e573c27ea47d82b8dcd32eef045c5bf501825d6c",
+  "prompts": {
+    "10ecee07bbf3fd36": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d642e6c6-c7fd-4f6c-a646-77e54c7789f7",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "dawson.hou",
+      "messages": [],
+      "total_additions": 23,
+      "total_deletions": 15,
+      "accepted_lines": 21,
+      "overriden_lines": 0
+    }
+  }
+}
