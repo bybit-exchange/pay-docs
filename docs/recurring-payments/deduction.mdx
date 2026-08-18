@@ -33,7 +33,7 @@ Execute automatic deduction from user's account using a signed agreement. This i
 | orderInfo.orderDesc | string | No | Order description |
 | orderInfo.goodsName | string | No | Goods name |
 | orderInfo.goodsId | string | No | Goods ID |
-| orderInfo.goodsCategory | string | No | Goods category |
+| orderInfo.goodsCategory | string | **Yes** | Goods category (4-digit code, see [Appendix.MCC Industry Categories](./appendix#mcc-industry-categories)) |
 | sceneInfo | object | No | Scene information |
 | sceneInfo.deviceId | string | No | Device ID |
 | sceneInfo.deviceIp | string | No | Device IP |
@@ -102,7 +102,8 @@ Authorization: Bearer {access_token}
     "orderTitle": "Monthly subscription - January 2026",
     "orderDesc": "Premium membership",
     "goodsName": "Premium Plan",
-    "goodsId": "PREMIUM_001"
+    "goodsId": "PREMIUM_001",
+    "goodsCategory": "7372"
   },
   "notifyUrl": "https://merchant.com/notify/pay"
 }
@@ -133,7 +134,8 @@ Authorization: Bearer {access_token}
   },
   "orderInfo": {
     "orderTitle": "Ride fare",
-    "orderDesc": "Trip from A to B"
+    "orderDesc": "Trip from A to B",
+    "goodsCategory": "4121"
   },
   "sceneInfo": {
     "deviceId": "DEVICE_001",

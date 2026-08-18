@@ -782,7 +782,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | orderInfo.orderDesc | string | No | Order description |
 | orderInfo.goodsName | string | No | Goods name |
 | orderInfo.goodsId | string | No | Goods ID |
-| orderInfo.goodsCategory | string | No | Goods category |
+| orderInfo.goodsCategory | string | Yes | Goods category (4-digit code, see 7.1 MCC Industry Categories) |
 | sceneInfo | object | No | Scene information |
 | sceneInfo.deviceId | string | No | Device ID |
 | sceneInfo.deviceIp | string | No | Device IP |
@@ -841,7 +841,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
     "orderDesc": "December 23 trip fare",
     "goodsName": "Express service",
     "goodsId": "TAXI_SERVICE_001",
-    "goodsCategory": "Transportation service"
+    "goodsCategory": "4121"
   },
   "sceneInfo": {
     "deviceId": "DEVICE_001",
@@ -873,7 +873,8 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   },
   "orderInfo": {
     "orderTitle": "Ride fare",
-    "orderDesc": "December 23 trip fare"
+    "orderDesc": "December 23 trip fare",
+    "goodsCategory": "4121"
   },
   "notifyUrl": "https://merchant.com/notify/pay"
 }
@@ -1030,7 +1031,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | payParams.orderInfo.orderDesc | string | No | Order description |
 | payParams.orderInfo.goodsName | string | No | Goods name |
 | payParams.orderInfo.goodsId | string | No | Goods ID |
-| payParams.orderInfo.goodsCategory | string | No | Goods category |
+| payParams.orderInfo.goodsCategory | string | Yes | Goods category (4-digit code, see 7.1 MCC Industry Categories) |
 | payParams.sceneInfo | object | No | Scene information |
 | payParams.sceneInfo.deviceId | string | No | Device ID |
 | payParams.sceneInfo.deviceIp | string | No | Device IP |
@@ -1118,7 +1119,8 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
     },
     "orderInfo": {
       "orderTitle": "Taxi Fare",
-      "orderDesc": "Trip on December 23"
+      "orderDesc": "Trip on December 23",
+      "goodsCategory": "4121"
     },
     "payNotifyUrl": "https://merchant.com/notify/pay",
     "riskInfo": {
@@ -1189,7 +1191,8 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
     },
     "orderInfo": {
       "orderTitle": "Taxi Fare",
-      "orderDesc": "Second trip on December 23"
+      "orderDesc": "Second trip on December 23",
+      "goodsCategory": "4121"
     },
     "payNotifyUrl": "https://merchant.com/notify/pay"
   }
@@ -2957,7 +2960,8 @@ REQUEST_BODY='{
     "chain": "TRC20"
   },
   "orderInfo": {
-    "orderTitle": "Ride fare"
+    "orderTitle": "Ride fare",
+    "goodsCategory": "4121"
   },
   "notifyUrl": "https://merchant.com/notify/pay"
 }'

@@ -69,7 +69,7 @@ This API supports merchants to complete both agreement signing and deduction pay
 | payParams.orderInfo.orderDesc | string | No | Order description |
 | payParams.orderInfo.goodsName | string | No | Goods name |
 | payParams.orderInfo.goodsId | string | No | Goods ID |
-| payParams.orderInfo.goodsCategory | string | No | Goods category |
+| payParams.orderInfo.goodsCategory | string | **Yes** | Goods category (4-digit code, see [Appendix.MCC Industry Categories](./appendix#mcc-industry-categories)) |
 | payParams.sceneInfo | object | No | Scene information |
 | payParams.sceneInfo.deviceId | string | No | Device ID |
 | payParams.sceneInfo.deviceIp | string | No | Device IP |
@@ -158,7 +158,8 @@ This API supports merchants to complete both agreement signing and deduction pay
     },
     "orderInfo": {
       "orderTitle": "Taxi Fare",
-      "orderDesc": "Trip on December 23"
+      "orderDesc": "Trip on December 23",
+      "goodsCategory": "4121"
     },
     "payNotifyUrl": "https://merchant.com/notify/pay",
     "riskInfo": {
@@ -231,7 +232,8 @@ This API supports merchants to complete both agreement signing and deduction pay
     },
     "orderInfo": {
       "orderTitle": "Taxi Fare",
-      "orderDesc": "Second trip on December 23"
+      "orderDesc": "Second trip on December 23",
+      "goodsCategory": "4121"
     },
     "payNotifyUrl": "https://merchant.com/notify/pay"
   }
