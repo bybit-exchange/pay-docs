@@ -19,12 +19,12 @@ Query agreement list under merchant with pagination and filtering support.
 | merchantId | string | **Yes** | Merchant ID |
 | userId | string | No | Platform user ID (filter by user) |
 | agreementType | string | No | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` (query all if not provided) |
-| status | string | No | Status filter: `INIT` / `PENDING` / `SIGNED` / `SUSPENDED` / `UNSIGNED` / `EXPIRED` / `FAILED` |
+| status | string | No | Status filter: `INIT` / `PENDING` / `PROCESSING` / `SIGNED` / `SUSPENDED` / `UNSIGNED` / `EXPIRED` / `REJECTED` / `FAILED` / `TIMEOUT` |
 | sceneCode | string | No | Scene code filter |
 | startTime | string | No | Sign start time (ISO8601) |
 | endTime | string | No | Sign end time (ISO8601) |
-| pageNo | int | No | Page number, default 1 |
-| pageSize | int | No | Page size, default 20, max 100 |
+| pageNo | int | **Yes** | Page number, minimum 1 |
+| pageSize | int | **Yes** | Page size, range 1-100 |
 
 ---
 

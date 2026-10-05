@@ -8,7 +8,7 @@ sidebar_position: 11
 
 GET `/v5/pay/agreement/transaction/list`
 
-Query deduction transaction or refund record list under an agreement with pagination support.
+Query deduction transaction and refund record lists under an agreement with pagination and time range filtering support.
 
 ---
 
@@ -29,7 +29,7 @@ Query deduction transaction or refund record list under an agreement with pagina
 
 ---
 
-## Response Parameters (Deduction Transactions)
+## Response Parameters
 
 | Parameter | Type | Description |
 |:----------|:-----|:------------|
@@ -39,37 +39,37 @@ Query deduction transaction or refund record list under an agreement with pagina
 | result.total | int | Total record count |
 | result.pageNo | int | Current page number |
 | result.pageSize | int | Page size |
-| result.list | array | Transaction list |
-| result.list[].tradeNo | string | Platform trade number |
-| result.list[].outTradeNo | string | Merchant order number |
-| result.list[].status | string | Transaction status |
-| result.list[].amount | object | Requested amount |
-| result.list[].cryptoPayment | object | Actual crypto payment (for fiat orders) |
-| result.list[].payTime | string | Payment time |
-| result.list[].refundAmount | object | Refunded amount |
-
-## Response Parameters (Refund Records)
-
-| Parameter | Type | Description |
-|:----------|:-----|:------------|
-| retCode | int | Response code |
-| retMsg | string | Response message |
-| result | object | Response data |
-| result.total | int | Total record count |
-| result.pageNo | int | Current page number |
-| result.pageSize | int | Page size |
-| result.list | array | Refund list |
-| result.list[].refundNo | string | Platform refund number |
-| result.list[].outRefundNo | string | Merchant refund number |
-| result.list[].tradeNo | string | Original trade number |
-| result.list[].status | string | Refund status |
-| result.list[].refundAmount | object | Refund amount |
-| result.list[].refundTime | string | Refund success time |
-| result.list[].failureReason | string | Failure reason |
+| result.tradeList | array | Deduction transaction entries in the current page |
+| result.tradeList[].tradeNo | string | Platform trade number |
+| result.tradeList[].outTradeNo | string | Merchant order number |
+| result.tradeList[].status | string | Transaction status: `PROCESSING` / `SUCCESS` / `FAILED` / `TIMEOUT` |
+| result.tradeList[].amount | object | Merchant requested amount |
+| result.tradeList[].amount.total | string | Amount (minimum unit) |
+| result.tradeList[].amount.currency | string | Currency code |
+| result.tradeList[].amount.currencyType | string | Currency type: `FIAT` / `CRYPTO` |
+| result.tradeList[].amount.chain | string | Chain network |
+| result.tradeList[].cryptoPayment | object | Defined by the response schema but not populated by the current list implementation |
+| result.tradeList[].payTime | string | Payment time |
+| result.tradeList[].refundAmount | object | Defined by the response schema but not populated by the current list implementation |
+| result.refundList | array | Refund entries in the current page |
+| result.refundList[].refundNo | string | Platform refund number |
+| result.refundList[].outRefundNo | string | Merchant refund number |
+| result.refundList[].tradeNo | string | Original trade number |
+| result.refundList[].status | string | Refund status: `PROCESSING` / `SUCCESS` / `FAILED` / `TIMEOUT` |
+| result.refundList[].refundAmount | object | Refund amount |
+| result.refundList[].refundAmount.total | string | Refund amount (minimum unit) |
+| result.refundList[].refundAmount.currency | string | Currency code |
+| result.refundList[].refundAmount.currencyType | string | Currency type: `FIAT` / `CRYPTO` |
+| result.refundList[].refundTime | string | Refund success time |
+| result.refundList[].failureReason | string | Failure reason (returned on failure) |
 
 ---
 
 ## Request Examples
+
+:::info
+The examples retain `recordType` for request compatibility. The current list implementation does not use this parameter as a filter, so it does not guarantee that only one record type is returned.
+:::
 
 ### List Successful Transactions
 
@@ -118,7 +118,7 @@ Authorization: Bearer {access_token}
     "total": 50,
     "pageNo": 1,
     "pageSize": 20,
-    "list": [
+    "tradeList": [
       {
         "tradeNo": "PAY202601070001",
         "outTradeNo": "ORDER20260107001",
@@ -129,37 +129,10 @@ Authorization: Bearer {access_token}
           "currencyType": "CRYPTO",
           "chain": "TRC20"
         },
-        "payTime": "2026-01-07T10:30:00Z",
-        "refundAmount": {
-          "total": "0",
-          "currency": "USDT",
-          "currencyType": "CRYPTO"
-        }
-      },
-      {
-        "tradeNo": "PAY202601070002",
-        "outTradeNo": "ORDER20260107002",
-        "status": "SUCCESS",
-        "amount": {
-          "total": "10000",
-          "currency": "USD",
-          "currencyType": "FIAT"
-        },
-        "cryptoPayment": {
-          "currency": "USDT",
-          "amount": "10005.50",
-          "chain": "TRC20",
-          "exchangeRate": "1.00055",
-          "rateTime": "2026-01-07T10:29:55Z"
-        },
-        "payTime": "2026-01-07T14:30:00Z",
-        "refundAmount": {
-          "total": "2000",
-          "currency": "USD",
-          "currencyType": "FIAT"
-        }
+        "payTime": "2026-01-07T10:30:00Z"
       }
-    ]
+    ],
+    "refundList": []
   }
 }
 ```
@@ -174,7 +147,8 @@ Authorization: Bearer {access_token}
     "total": 10,
     "pageNo": 1,
     "pageSize": 20,
-    "list": [
+    "tradeList": [],
+    "refundList": [
       {
         "refundNo": "RF202601070001",
         "outRefundNo": "REFUND20260107001",
@@ -183,22 +157,10 @@ Authorization: Bearer {access_token}
         "refundAmount": {
           "total": "2350",
           "currency": "USDT",
-          "currencyType": "CRYPTO",
-          "chain": "TRC20"
+          "currencyType": "CRYPTO"
         },
-        "refundTime": "2026-01-07T11:30:00Z"
-      },
-      {
-        "refundNo": "RF202601070002",
-        "outRefundNo": "REFUND20260107002",
-        "tradeNo": "PAY202601070002",
-        "status": "SUCCESS",
-        "refundAmount": {
-          "total": "2000",
-          "currency": "USD",
-          "currencyType": "FIAT"
-        },
-        "refundTime": "2026-01-07T16:00:00Z"
+        "refundTime": "2026-01-07T11:30:00Z",
+        "failureReason": ""
       }
     ]
   }
@@ -211,4 +173,4 @@ Authorization: Bearer {access_token}
 
 - Use pagination for large result sets
 - Combine `status` and time range filters for efficient querying
-- `cryptoPayment` is only present for fiat currency transactions
+- The response includes both `tradeList` and `refundList`; either list can be empty depending on the current page contents
