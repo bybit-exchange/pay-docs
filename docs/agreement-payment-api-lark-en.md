@@ -728,7 +728,6 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   "retMsg": "Success",
   "result": {
     "agreementNo": "AGR202312230001",
-    "eventType": "UNSIGNED",
     "status": "UNSIGNED",
     "unsignTime": "2023-12-23T15:30:00Z"
   }
@@ -1077,7 +1076,8 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
 | result.payResult.cryptoPayment.chain | string | Chain network |
 | result.payResult.cryptoPayment.exchangeRate | string | Exchange rate |
 | result.payResult.cryptoPayment.rateTime | string | Rate lock time |
-| result.payResult.payTime | string | Payment success time (returned on success) |
+| result.payResult.cryptoPayment.transOrderNo | string | Downstream deduction transaction number |
+| result.payResult.payTime | string | Payment success time (empty before success) |
 | result.payResult.failureReason | string | Failure reason (returned on failure) |
 
 #### Request Example 1: Sign + Pay (First Use)
@@ -1089,6 +1089,7 @@ When rate limit is triggered, API returns HTTP status code `429`, response body 
   "signParams": {
     "merchantUserId": "merchant_user_123",
     "sceneCode": "TAXI",
+    "productCode": "PROD_001",
     "externalAgreementNo": "MERCHANT_AGR_001",
     "signValidTime": "2026-12-23T10:30:00Z",
     "singleLimit": {
@@ -1498,13 +1499,15 @@ Sign result and payment result are sent as **independent notifications** to thei
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
 | merchantId | string | Yes | Merchant ID |
+| userId | string | No | Platform user ID; accepted by the interface but not used by the current query lookup |
+| agreementType | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization); accepted but not used by the current query lookup |
 | agreementNo | string | Either | Platform agreement number |
 | externalAgreementNo | string | Either | Merchant agreement number |
 
 #### Request Example
 
 ```
-GET /v5/pay/agreement/query?merchantId=M123456789&agreementNo=AGR202312230001
+GET /v5/pay/agreement/query?merchantId=M123456789&userId=U_123456789&agreementType=CYCLE&agreementNo=AGR202312230001
 ```
 
 #### Response Parameters
@@ -1518,7 +1521,7 @@ GET /v5/pay/agreement/query?merchantId=M123456789&agreementNo=AGR202312230001
 | result.externalAgreementNo | string | Merchant agreement number |
 | result.userId | string | Platform user ID |
 | result.merchantUserId | string | Merchant-side user ID |
-| result.status | string | Status: INIT/PENDING/SIGNED/SUSPENDED/UNSIGNED/EXPIRED/REJECTED/FAILED/TIMEOUT |
+| result.status | string | Status: INIT/PENDING/PROCESSING/SIGNED/SUSPENDED/UNSIGNED/EXPIRED/REJECTED/FAILED/TIMEOUT |
 | result.signTime | string | Sign time |
 | result.validTime | string | Validity period |
 | result.singleLimit | object | Single transaction limit |
@@ -1578,12 +1581,12 @@ GET /v5/pay/agreement/query?merchantId=M123456789&agreementNo=AGR202312230001
 | merchantId | string | Yes | Merchant ID |
 | userId | string | No | Platform user ID (filter agreements for specified user) |
 | agreementType | string | No | Sign type: CYCLE/NON_CYCLE/SINGLE (query all if not passed) |
-| status | string | No | Agreement status filter: INIT/PENDING/SIGNED/SUSPENDED/UNSIGNED/EXPIRED/FAILED |
+| status | string | No | Agreement status filter: INIT/PENDING/PROCESSING/SIGNED/SUSPENDED/UNSIGNED/EXPIRED/REJECTED/FAILED/TIMEOUT |
 | sceneCode | string | No | Scene code filter |
 | startTime | string | No | Sign start time (ISO8601 format) |
 | endTime | string | No | Sign end time (ISO8601 format) |
-| pageNo | int | No | Page number, default 1 |
-| pageSize | int | No | Page size, default 20, max 100 |
+| pageNo | int | Yes | Page number, minimum 1 |
+| pageSize | int | Yes | Page size, range 1-100 |
 
 #### Request Example
 
@@ -1596,6 +1599,7 @@ GET /v5/pay/agreement/list?merchantId=M123456789&status=SIGNED&pageNo=1&pageSize
 | Parameter | Type | Description |
 | --- | --- | --- |
 | retCode | int | Response code, 20000-success, non-20000-failure |
+| retMsg | string | Response message |
 | result | object | Response data |
 | result.total | int | Total record count |
 | result.pageNo | int | Current page number |
@@ -1644,20 +1648,20 @@ GET /v5/pay/agreement/list?merchantId=M123456789&status=SIGNED&pageNo=1&pageSize
 
 **Request Path**: GET /v5/pay/agreement/transaction/query
 
-**Description**: Query single deduction transaction or refund record details, distinguished by recordType
+**Description**: Query a single deduction transaction or refund record by its transaction/refund number. The current implementation determines the returned detail type from the matched order record.
 
 #### Request Parameters
 
 | Parameter | Type | Required | Description |
 | --- | --- | --- | --- |
 | merchantId | string | Yes | Merchant ID |
-| userId | string | Yes | Platform user ID (our platform's user identifier) |
-| agreementType | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
-| recordType | string | No | Record type: PAY(deduction transaction)/REFUND(refund record), default PAY |
-| tradeNo | string | Conditional | Platform trade number (when recordType=PAY, either this or outTradeNo) |
-| outTradeNo | string | Conditional | Merchant order number (when recordType=PAY, either this or tradeNo) |
-| refundNo | string | Conditional | Platform refund number (when recordType=REFUND, either this or outRefundNo) |
-| outRefundNo | string | Conditional | Merchant refund number (when recordType=REFUND, either this or refundNo) |
+| userId | string | No | Platform user ID; accepted by the interface but not used by the current query lookup |
+| agreementType | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization); accepted but not used by the current query lookup |
+| recordType | string | No | Record type: PAY(deduction transaction)/REFUND(refund record); accepted but not used by the current query lookup, and no default is applied |
+| tradeNo | string | Conditional | Platform trade number; provide at least one transaction/refund number |
+| outTradeNo | string | Conditional | Merchant order number; provide at least one transaction/refund number |
+| refundNo | string | Conditional | Platform refund number; provide at least one transaction/refund number |
+| outRefundNo | string | Conditional | Merchant refund number; provide at least one transaction/refund number |
 
 #### Request Example (Query Deduction Transaction)
 
@@ -1671,35 +1675,62 @@ GET /v5/pay/agreement/transaction/query?merchantId=M123456789&userId=U_123456789
 GET /v5/pay/agreement/transaction/query?merchantId=M123456789&userId=U_123456789&agreementType=CYCLE&recordType=REFUND&refundNo=RF202312230001
 ```
 
-#### Response Parameters (Deduction Transaction recordType=PAY)
+#### Response Parameters (Deduction Transaction)
 
 | Parameter | Type | Description |
 | --- | --- | --- |
 | retCode | int | Response code, 20000-success, non-20000-failure |
 | retMsg | string | Response message |
-| result | object | Transaction details |
-| result.tradeNo | string | Platform trade number |
-| result.outTradeNo | string | Merchant order number |
-| result.status | string | Transaction status |
-| result.amount | object | Merchant requested amount |
-| result.cryptoPayment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
-| result.payTime | string | Payment time |
-| result.refundAmount | object | Refunded amount |
+| result | object | Response data |
+| result.tradeDetail | object | Transaction details; populated when the matched order is a deduction transaction |
+| result.tradeDetail.tradeNo | string | Platform trade number |
+| result.tradeDetail.outTradeNo | string | Merchant order number |
+| result.tradeDetail.status | string | Transaction status: PROCESSING/SUCCESS/FAILED/TIMEOUT |
+| result.tradeDetail.amount | object | Merchant requested amount |
+| result.tradeDetail.amount.total | string | Amount (minimum unit) |
+| result.tradeDetail.amount.currency | string | Currency code |
+| result.tradeDetail.amount.currencyType | string | Currency type: FIAT/CRYPTO |
+| result.tradeDetail.amount.chain | string | Chain network |
+| result.tradeDetail.cryptoPayment | object | Defined by the response schema but not populated by the current query implementation |
+| result.tradeDetail.payTime | string | Payment time |
+| result.tradeDetail.refundAmount | object | Defined by the response schema but not populated by the current query implementation |
+| result.tradeDetail.orderInfo | object | Order information |
+| result.tradeDetail.orderInfo.orderTitle | string | Order title |
+| result.tradeDetail.orderInfo.orderDesc | string | Order description |
+| result.tradeDetail.orderInfo.goodsName | string | Goods name |
+| result.tradeDetail.orderInfo.goodsId | string | Goods ID |
+| result.tradeDetail.orderInfo.goodsCategory | string | Goods category |
+| result.tradeDetail.customerInfo | object | Customer KYC information; returned only for successful orders when enabled for the merchant |
+| result.tradeDetail.customerInfo.firstName | string | Customer first name |
+| result.tradeDetail.customerInfo.lastName | string | Customer last name |
+| result.tradeDetail.customerInfo.dateOfBirth | string | Customer date of birth |
+| result.tradeDetail.customerInfo.kyc1Country | string | KYC level 1 country |
+| result.tradeDetail.customerInfo.kyc2Country | string | KYC level 2 country |
 
-#### Response Parameters (Refund Record recordType=REFUND)
+#### Response Parameters (Refund Record)
 
 | Parameter | Type | Description |
 | --- | --- | --- |
 | retCode | int | Response code, 20000-success, non-20000-failure |
 | retMsg | string | Response message |
-| result | object | Refund details |
-| result.refundNo | string | Platform refund number |
-| result.outRefundNo | string | Merchant refund number |
-| result.tradeNo | string | Original trade number |
-| result.status | string | Refund status: PROCESSING/SUCCESS/FAILED |
-| result.refundAmount | object | Refund amount |
-| result.refundTime | string | Refund success time |
-| result.failureReason | string | Failure reason |
+| result | object | Response data |
+| result.refundDetail | object | Refund details; populated when the matched order is a refund |
+| result.refundDetail.refundNo | string | Platform refund number |
+| result.refundDetail.outRefundNo | string | Merchant refund number |
+| result.refundDetail.tradeNo | string | Original trade number |
+| result.refundDetail.status | string | Refund status: PROCESSING/SUCCESS/FAILED/TIMEOUT |
+| result.refundDetail.refundAmount | object | Refund amount |
+| result.refundDetail.refundAmount.total | string | Refund amount (minimum unit) |
+| result.refundDetail.refundAmount.currency | string | Currency code |
+| result.refundDetail.refundAmount.currencyType | string | Currency type: FIAT/CRYPTO |
+| result.refundDetail.refundTime | string | Refund success time |
+| result.refundDetail.failureReason | string | Failure reason |
+| result.refundDetail.customerInfo | object | Customer KYC information; returned only for successful orders when enabled for the merchant |
+| result.refundDetail.customerInfo.firstName | string | Customer first name |
+| result.refundDetail.customerInfo.lastName | string | Customer last name |
+| result.refundDetail.customerInfo.dateOfBirth | string | Customer date of birth |
+| result.refundDetail.customerInfo.kyc1Country | string | KYC level 1 country |
+| result.refundDetail.customerInfo.kyc2Country | string | KYC level 2 country |
 
 #### Response Example (Deduction Transaction)
 
@@ -1708,26 +1739,24 @@ GET /v5/pay/agreement/transaction/query?merchantId=M123456789&userId=U_123456789
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "tradeNo": "PAY202312230002",
-    "outTradeNo": "TAXI20231223002",
-    "status": "SUCCESS",
-    "amount": {
-      "total": "10000",
-      "currency": "USD",
-      "currencyType": "FIAT"
-    },
-    "cryptoPayment": {
-      "currency": "USDT",
-      "amount": "10005.50",
-      "chain": "TRC20",
-      "exchangeRate": "1.00055",
-      "rateTime": "2023-12-23T10:29:55Z"
-    },
-    "payTime": "2023-12-23T10:30:00Z",
-    "refundAmount": {
-      "total": "0",
-      "currency": "USD",
-      "currencyType": "FIAT"
+    "tradeDetail": {
+      "tradeNo": "PAY202312230002",
+      "outTradeNo": "TAXI20231223002",
+      "status": "SUCCESS",
+      "amount": {
+        "total": "10000",
+        "currency": "USD",
+        "currencyType": "FIAT",
+        "chain": ""
+      },
+      "payTime": "2023-12-23T10:30:00Z",
+      "orderInfo": {
+        "orderTitle": "Ride fare",
+        "orderDesc": "December 23 trip fare",
+        "goodsName": "Express service",
+        "goodsId": "TAXI_SERVICE_001",
+        "goodsCategory": "4121"
+      }
     }
   }
 }
@@ -1740,17 +1769,19 @@ GET /v5/pay/agreement/transaction/query?merchantId=M123456789&userId=U_123456789
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "refundNo": "RF202312230001",
-    "outRefundNo": "TAXI_RF20231223001",
-    "tradeNo": "PAY202312230001",
-    "status": "SUCCESS",
-    "refundAmount": {
-      "total": "2350",
-      "currency": "USDT",
-      "currencyType": "CRYPTO",
-      "chain": "TRC20"
-    },
-    "refundTime": "2023-12-23T11:30:00Z"
+    "refundDetail": {
+      "refundNo": "RF202312230001",
+      "outRefundNo": "TAXI_RF20231223001",
+      "tradeNo": "PAY202312230001",
+      "status": "SUCCESS",
+      "refundAmount": {
+        "total": "2350",
+        "currency": "USDT",
+        "currencyType": "CRYPTO"
+      },
+      "refundTime": "2023-12-23T11:30:00Z",
+      "failureReason": ""
+    }
   }
 }
 ```
@@ -1769,14 +1800,14 @@ GET /v5/pay/agreement/transaction/query?merchantId=M123456789&userId=U_123456789
 | --- | --- | --- | --- |
 | merchantId | string | Yes | Merchant ID |
 | userId | string | Yes | Platform user ID (our platform's user identifier) |
-| agreementType | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization) |
+| agreementType | string | Yes | Sign type: CYCLE(periodic deduction) / NON_CYCLE(non-periodic deduction) / SINGLE(single authorization); accepted but not used by the current list filter |
 | agreementNo | string | Yes | Platform agreement number |
-| recordType | string | No | Record type: PAY(deduction transaction)/REFUND(refund record), default PAY |
-| status | string | No | Status filter: SUCCESS/FAILED/PROCESSING |
+| recordType | string | No | Record type: PAY(deduction transaction)/REFUND(refund record); accepted by the interface but not used by the current list filter, and no default is applied |
+| status | string | No | Status filter: PROCESSING/SUCCESS/FAILED/TIMEOUT |
 | startTime | string | No | Start time (ISO8601 format) |
 | endTime | string | No | End time (ISO8601 format) |
-| pageNo | int | No | Page number, default 1 |
-| pageSize | int | No | Page size, default 20, max 100 |
+| pageNo | int | Yes | Page number, minimum 1 |
+| pageSize | int | Yes | Page size, range 1-100 |
 
 #### Request Example
 
@@ -1784,25 +1815,7 @@ GET /v5/pay/agreement/transaction/query?merchantId=M123456789&userId=U_123456789
 GET /v5/pay/agreement/transaction/list?merchantId=M123456789&userId=U_123456789&agreementType=CYCLE&agreementNo=AGR202312230001&recordType=PAY&status=SUCCESS&pageNo=1&pageSize=20
 ```
 
-#### Response Parameters (Deduction Transaction recordType=PAY)
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| retCode | int | Response code, 20000-success, non-20000-failure |
-| result | object | Response data |
-| result.total | int | Total record count |
-| result.pageNo | int | Current page number |
-| result.pageSize | int | Page size |
-| result.list | array | Transaction list |
-| result.list[].tradeNo | string | Platform trade number |
-| result.list[].outTradeNo | string | Merchant order number |
-| result.list[].status | string | Transaction status |
-| result.list[].amount | object | Merchant requested amount |
-| result.list[].cryptoPayment | object | User's actual cryptocurrency payment info (returned for fiat orders) |
-| result.list[].payTime | string | Payment time |
-| result.list[].refundAmount | object | Refunded amount |
-
-#### Response Parameters (Refund Record recordType=REFUND)
+#### Response Parameters
 
 | Parameter | Type | Description |
 | --- | --- | --- |
@@ -1812,16 +1825,31 @@ GET /v5/pay/agreement/transaction/list?merchantId=M123456789&userId=U_123456789&
 | result.total | int | Total record count |
 | result.pageNo | int | Current page number |
 | result.pageSize | int | Page size |
-| result.list | array | Refund list |
-| result.list[].refundNo | string | Platform refund number |
-| result.list[].outRefundNo | string | Merchant refund number |
-| result.list[].tradeNo | string | Original trade number |
-| result.list[].status | string | Refund status: PROCESSING/SUCCESS/FAILED |
-| result.list[].refundAmount | object | Refund amount |
-| result.list[].refundTime | string | Refund success time |
-| result.list[].failureReason | string | Failure reason (returned on failure) |
+| result.tradeList | array | Deduction transaction entries in the current page |
+| result.tradeList[].tradeNo | string | Platform trade number |
+| result.tradeList[].outTradeNo | string | Merchant order number |
+| result.tradeList[].status | string | Transaction status: PROCESSING/SUCCESS/FAILED/TIMEOUT |
+| result.tradeList[].amount | object | Merchant requested amount |
+| result.tradeList[].amount.total | string | Amount (minimum unit) |
+| result.tradeList[].amount.currency | string | Currency code |
+| result.tradeList[].amount.currencyType | string | Currency type: FIAT/CRYPTO |
+| result.tradeList[].amount.chain | string | Chain network |
+| result.tradeList[].cryptoPayment | object | Defined by the response schema but not populated by the current list implementation |
+| result.tradeList[].payTime | string | Payment time |
+| result.tradeList[].refundAmount | object | Defined by the response schema but not populated by the current list implementation |
+| result.refundList | array | Refund entries in the current page |
+| result.refundList[].refundNo | string | Platform refund number |
+| result.refundList[].outRefundNo | string | Merchant refund number |
+| result.refundList[].tradeNo | string | Original trade number |
+| result.refundList[].status | string | Refund status: PROCESSING/SUCCESS/FAILED/TIMEOUT |
+| result.refundList[].refundAmount | object | Refund amount |
+| result.refundList[].refundAmount.total | string | Refund amount (minimum unit) |
+| result.refundList[].refundAmount.currency | string | Currency code |
+| result.refundList[].refundAmount.currencyType | string | Currency type: FIAT/CRYPTO |
+| result.refundList[].refundTime | string | Refund success time |
+| result.refundList[].failureReason | string | Failure reason (returned on failure) |
 
-#### Response Example (Deduction Transaction recordType=PAY)
+#### Response Example (Deduction Transaction Entries)
 
 ```json
 {
@@ -1831,7 +1859,7 @@ GET /v5/pay/agreement/transaction/list?merchantId=M123456789&userId=U_123456789&
     "total": 50,
     "pageNo": 1,
     "pageSize": 20,
-    "list": [
+    "tradeList": [
       {
         "tradeNo": "PAY202312230001",
         "outTradeNo": "TAXI20231223001",
@@ -1839,28 +1867,18 @@ GET /v5/pay/agreement/transaction/list?merchantId=M123456789&userId=U_123456789&
         "amount": {
           "total": "10000",
           "currency": "USD",
-          "currencyType": "FIAT"
+          "currencyType": "FIAT",
+          "chain": ""
         },
-        "cryptoPayment": {
-          "currency": "USDT",
-          "amount": "10005.50",
-          "chain": "TRC20",
-          "exchangeRate": "1.00055",
-          "rateTime": "2023-12-23T10:29:55Z"
-        },
-        "payTime": "2023-12-23T10:30:00Z",
-        "refundAmount": {
-          "total": "0",
-          "currency": "USD",
-          "currencyType": "FIAT"
-        }
+        "payTime": "2023-12-23T10:30:00Z"
       }
-    ]
+    ],
+    "refundList": []
   }
 }
 ```
 
-#### Response Example (Refund Record recordType=REFUND)
+#### Response Example (Refund Entries)
 
 ```json
 {
@@ -1870,7 +1888,8 @@ GET /v5/pay/agreement/transaction/list?merchantId=M123456789&userId=U_123456789&
     "total": 10,
     "pageNo": 1,
     "pageSize": 20,
-    "list": [
+    "tradeList": [],
+    "refundList": [
       {
         "refundNo": "RF202312230001",
         "outRefundNo": "TAXI_RF20231223001",
@@ -1879,10 +1898,10 @@ GET /v5/pay/agreement/transaction/list?merchantId=M123456789&userId=U_123456789&
         "refundAmount": {
           "total": "2350",
           "currency": "USDT",
-          "currencyType": "CRYPTO",
-          "chain": "TRC20"
+          "currencyType": "CRYPTO"
         },
-        "refundTime": "2023-12-23T11:30:00Z"
+        "refundTime": "2023-12-23T11:30:00Z",
+        "failureReason": ""
       }
     ]
   }

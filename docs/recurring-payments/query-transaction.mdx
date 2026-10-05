@@ -8,7 +8,7 @@ sidebar_position: 10
 
 GET `/v5/pay/agreement/transaction/query`
 
-Query single deduction transaction or refund record details.
+Query a single deduction transaction or refund record by its transaction or refund number. The current implementation determines the returned detail type from the matched order record.
 
 ---
 
@@ -17,17 +17,16 @@ Query single deduction transaction or refund record details.
 | Parameter | Type | Required | Description |
 |:----------|:-----|:---------|:------------|
 | merchantId | string | **Yes** | Merchant ID |
-| userId | string | **Yes** | Platform user ID |
-| agreementType | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE` |
-| recordType | string | No | Record type: `PAY` (default) / `REFUND` |
-| tradeNo | string | Conditional | Platform trade number (for `recordType=PAY`) |
-| outTradeNo | string | Conditional | Merchant order number (for `recordType=PAY`) |
-| refundNo | string | Conditional | Platform refund number (for `recordType=REFUND`) |
-| outRefundNo | string | Conditional | Merchant refund number (for `recordType=REFUND`) |
+| userId | string | No | Platform user ID; accepted by the interface but not used by the current query lookup |
+| agreementType | string | **Yes** | Sign type: `CYCLE` / `NON_CYCLE` / `SINGLE`; accepted but not used by the current query lookup |
+| recordType | string | No | Record type: `PAY` / `REFUND`; accepted but not used by the current query lookup, and no default is applied |
+| tradeNo | string | Conditional | Platform trade number; provide at least one transaction/refund number |
+| outTradeNo | string | Conditional | Merchant order number; provide at least one transaction/refund number |
+| refundNo | string | Conditional | Platform refund number; provide at least one transaction/refund number |
+| outRefundNo | string | Conditional | Merchant refund number; provide at least one transaction/refund number |
 
 :::info
-- For `recordType=PAY`: Either `tradeNo` or `outTradeNo` required
-- For `recordType=REFUND`: Either `refundNo` or `outRefundNo` required
+At least one of `tradeNo`, `outTradeNo`, `refundNo`, or `outRefundNo` must be provided.
 :::
 
 ---
@@ -38,14 +37,31 @@ Query single deduction transaction or refund record details.
 |:----------|:-----|:------------|
 | retCode | int | Response code |
 | retMsg | string | Response message |
-| result | object | Transaction details |
-| result.tradeNo | string | Platform trade number |
-| result.outTradeNo | string | Merchant order number |
-| result.status | string | Transaction status |
-| result.amount | object | Requested amount |
-| result.cryptoPayment | object | Actual crypto payment (for fiat orders) |
-| result.payTime | string | Payment time |
-| result.refundAmount | object | Refunded amount |
+| result | object | Response data |
+| result.tradeDetail | object | Transaction details; populated when the matched order is a deduction transaction |
+| result.tradeDetail.tradeNo | string | Platform trade number |
+| result.tradeDetail.outTradeNo | string | Merchant order number |
+| result.tradeDetail.status | string | Transaction status: `PROCESSING` / `SUCCESS` / `FAILED` / `TIMEOUT` |
+| result.tradeDetail.amount | object | Merchant requested amount |
+| result.tradeDetail.amount.total | string | Amount (minimum unit) |
+| result.tradeDetail.amount.currency | string | Currency code |
+| result.tradeDetail.amount.currencyType | string | Currency type: `FIAT` / `CRYPTO` |
+| result.tradeDetail.amount.chain | string | Chain network |
+| result.tradeDetail.cryptoPayment | object | Defined by the response schema but not populated by the current query implementation |
+| result.tradeDetail.payTime | string | Payment time |
+| result.tradeDetail.refundAmount | object | Defined by the response schema but not populated by the current query implementation |
+| result.tradeDetail.orderInfo | object | Order information |
+| result.tradeDetail.orderInfo.orderTitle | string | Order title |
+| result.tradeDetail.orderInfo.orderDesc | string | Order description |
+| result.tradeDetail.orderInfo.goodsName | string | Goods name |
+| result.tradeDetail.orderInfo.goodsId | string | Goods ID |
+| result.tradeDetail.orderInfo.goodsCategory | string | Goods category |
+| result.tradeDetail.customerInfo | object | Customer KYC information; returned only for successful orders when enabled for the merchant |
+| result.tradeDetail.customerInfo.firstName | string | Customer first name |
+| result.tradeDetail.customerInfo.lastName | string | Customer last name |
+| result.tradeDetail.customerInfo.dateOfBirth | string | Customer date of birth |
+| result.tradeDetail.customerInfo.kyc1Country | string | KYC level 1 country |
+| result.tradeDetail.customerInfo.kyc2Country | string | KYC level 2 country |
 
 ## Response Parameters (Refund Record)
 
@@ -53,14 +69,24 @@ Query single deduction transaction or refund record details.
 |:----------|:-----|:------------|
 | retCode | int | Response code |
 | retMsg | string | Response message |
-| result | object | Refund details |
-| result.refundNo | string | Platform refund number |
-| result.outRefundNo | string | Merchant refund number |
-| result.tradeNo | string | Original trade number |
-| result.status | string | Refund status: `PROCESSING` / `SUCCESS` / `FAILED` |
-| result.refundAmount | object | Refund amount |
-| result.refundTime | string | Refund success time |
-| result.failureReason | string | Failure reason |
+| result | object | Response data |
+| result.refundDetail | object | Refund details; populated when the matched order is a refund |
+| result.refundDetail.refundNo | string | Platform refund number |
+| result.refundDetail.outRefundNo | string | Merchant refund number |
+| result.refundDetail.tradeNo | string | Original trade number |
+| result.refundDetail.status | string | Refund status: `PROCESSING` / `SUCCESS` / `FAILED` / `TIMEOUT` |
+| result.refundDetail.refundAmount | object | Refund amount |
+| result.refundDetail.refundAmount.total | string | Refund amount (minimum unit) |
+| result.refundDetail.refundAmount.currency | string | Currency code |
+| result.refundDetail.refundAmount.currencyType | string | Currency type: `FIAT` / `CRYPTO` |
+| result.refundDetail.refundTime | string | Refund success time |
+| result.refundDetail.failureReason | string | Failure reason |
+| result.refundDetail.customerInfo | object | Customer KYC information; returned only for successful orders when enabled for the merchant |
+| result.refundDetail.customerInfo.firstName | string | Customer first name |
+| result.refundDetail.customerInfo.lastName | string | Customer last name |
+| result.refundDetail.customerInfo.dateOfBirth | string | Customer date of birth |
+| result.refundDetail.customerInfo.kyc1Country | string | KYC level 1 country |
+| result.refundDetail.customerInfo.kyc2Country | string | KYC level 2 country |
 
 ---
 
@@ -92,33 +118,31 @@ Authorization: Bearer {access_token}
 
 ## Response Examples
 
-### Deduction Transaction (with Fiat to Crypto Conversion)
+### Deduction Transaction
 
 ```json
 {
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "tradeNo": "PAY202601070002",
-    "outTradeNo": "ORDER20260107002",
-    "status": "SUCCESS",
-    "amount": {
-      "total": "10000",
-      "currency": "USD",
-      "currencyType": "FIAT"
-    },
-    "cryptoPayment": {
-      "currency": "USDT",
-      "amount": "10005.50",
-      "chain": "TRC20",
-      "exchangeRate": "1.00055",
-      "rateTime": "2026-01-07T10:29:55Z"
-    },
-    "payTime": "2026-01-07T10:30:00Z",
-    "refundAmount": {
-      "total": "0",
-      "currency": "USD",
-      "currencyType": "FIAT"
+    "tradeDetail": {
+      "tradeNo": "PAY202601070002",
+      "outTradeNo": "ORDER20260107002",
+      "status": "SUCCESS",
+      "amount": {
+        "total": "10000",
+        "currency": "USD",
+        "currencyType": "FIAT",
+        "chain": ""
+      },
+      "payTime": "2026-01-07T10:30:00Z",
+      "orderInfo": {
+        "orderTitle": "Ride fare",
+        "orderDesc": "January 7 trip fare",
+        "goodsName": "Express service",
+        "goodsId": "TAXI_SERVICE_001",
+        "goodsCategory": "4121"
+      }
     }
   }
 }
@@ -131,17 +155,19 @@ Authorization: Bearer {access_token}
   "retCode": 20000,
   "retMsg": "Success",
   "result": {
-    "refundNo": "RF202601070001",
-    "outRefundNo": "REFUND20260107001",
-    "tradeNo": "PAY202601070001",
-    "status": "SUCCESS",
-    "refundAmount": {
-      "total": "2350",
-      "currency": "USDT",
-      "currencyType": "CRYPTO",
-      "chain": "TRC20"
-    },
-    "refundTime": "2026-01-07T11:30:00Z"
+    "refundDetail": {
+      "refundNo": "RF202601070001",
+      "outRefundNo": "REFUND20260107001",
+      "tradeNo": "PAY202601070001",
+      "status": "SUCCESS",
+      "refundAmount": {
+        "total": "2350",
+        "currency": "USDT",
+        "currencyType": "CRYPTO"
+      },
+      "refundTime": "2026-01-07T11:30:00Z",
+      "failureReason": ""
+    }
   }
 }
 ```
@@ -150,6 +176,6 @@ Authorization: Bearer {access_token}
 
 ## Notes
 
-- Use this API to confirm transaction status after timeout
-- `refundAmount` in transaction response shows total refunded amount
-- For `PROCESSING` status, wait for webhook or poll periodically
+- Use this API to confirm transaction or refund status after timeout
+- The detail type is determined by the matched order and returned in either `tradeDetail` or `refundDetail`
+- For `PROCESSING` status, wait for the webhook or poll periodically

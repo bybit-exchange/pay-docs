@@ -108,13 +108,17 @@ This API supports merchants to complete both agreement signing and deduction pay
 | result.payResult.outTradeNo | string | Merchant order number |
 | result.payResult.status | string | Transaction status: `PROCESSING`/`SUCCESS`/`FAILED`/`TIMEOUT` |
 | result.payResult.amount | object | Merchant requested amount |
+| result.payResult.amount.total | string | Amount (minimum unit) |
+| result.payResult.amount.currency | string | Currency code |
+| result.payResult.amount.currencyType | string | Currency type: `FIAT` / `CRYPTO` |
 | result.payResult.cryptoPayment | object | User's actual cryptocurrency payment info (for fiat orders) |
 | result.payResult.cryptoPayment.currency | string | Cryptocurrency currency |
 | result.payResult.cryptoPayment.amount | string | Cryptocurrency amount |
 | result.payResult.cryptoPayment.chain | string | Chain network (e.g., BSC, TRX, ARBI, LTC, SOL, ETH, TON, APTOS) |
 | result.payResult.cryptoPayment.exchangeRate | string | Exchange rate |
 | result.payResult.cryptoPayment.rateTime | string | Rate lock time |
-| result.payResult.payTime | string | Payment success time (returned on success) |
+| result.payResult.cryptoPayment.transOrderNo | string | Downstream deduction transaction number |
+| result.payResult.payTime | string | Payment success time (empty before success) |
 | result.payResult.failureReason | string | Failure reason (returned on failure) |
 
 ---
@@ -128,6 +132,7 @@ This API supports merchants to complete both agreement signing and deduction pay
   "signParams": {
     "merchantUserId": "merchant_user_123",
     "sceneCode": "TAXI",
+    "productCode": "PROD_001",
     "externalAgreementNo": "MERCHANT_AGR_001",
     "signValidTime": "2026-12-23T10:30:00Z",
     "singleLimit": {
