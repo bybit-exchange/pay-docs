@@ -1,0 +1,20 @@
+docs/scan-payment/payout.mdx
+  s_f2bf2523a02e4f::t_b1eea2a51ac4a5 6-30,32-49,51-70,72,77-80,82-89,91-109,114-151,155-239,241-261,266-273,276-294,297-298
+  s_f2bf2523a02e4f::t_997d660473d1a3 31,76,113
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2-bit.2+419f699",
+  "base_commit_sha": "5d5be73b49c33042edd0ca95f80d0588ee840493",
+  "prompts": {},
+  "sessions": {
+    "s_f2bf2523a02e4f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0b3d7-a96a-7b70-a4fc-651a27c452e1",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "yu.xiao <yu.xiao@bybit.com>"
+    }
+  }
+}
