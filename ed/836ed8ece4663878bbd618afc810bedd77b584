@@ -1,0 +1,19 @@
+docs/guide.mdx
+  s_ca28d2fcc310ae::t_af9f2f9815c78f 98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2-bit.2+419f699",
+  "base_commit_sha": "ed836ed8ece4663878bbd618afc810bedd77b584",
+  "prompts": {},
+  "sessions": {
+    "s_ca28d2fcc310ae": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0b3d7-a9c0-7042-8460-5755f4d80c07",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "yu.xiao <yu.xiao@bybit.com>"
+    }
+  }
+}
