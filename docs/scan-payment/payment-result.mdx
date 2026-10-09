@@ -174,3 +174,84 @@ Content-Type: application/json
     }
 }
 ```
+
+### Auth
+
+Auth reuses the Payment Result endpoint. The query parameters remain unchanged: use `paymentType = E_COMMERCE` and provide either `payId` or `merchantTradeNo`. Using `payId` is recommended.
+The response adds the following fields:
+
+| Field Name | Type | Required | Description |
+| --- | --- | --- | --- |
+| `result.order.authStatus` | string | Yes | Current authorization status. |
+| `result.order.authExpireAt` | string | No | Authorization expiry time as a UTC Unix timestamp in milliseconds. Returned after authorization succeeds. |
+| `result.customer` | [`Customer Type`](data-model/customer) | No | Authorized customer fields. Returned only when `authStatus` is `SUCCESS` and the authorization has not expired. |
+
+Authorization status:
+
+| `authStatus` | Order `status` | Description |
+| --- | --- | --- |
+| `PENDING` | `INIT` | Waiting for the user to agree to or reject the authorization request. |
+| `SUCCESS` | `PAY_SUCCESS` | The user agreed and the authorization is still valid. Authorized customer fields may be returned. |
+| `REJECTED` | `ERROR` | The user rejected the authorization request. |
+| `OVERTIME` | `TIMEOUT` | The user did not complete authorization before `orderExpireTime`. |
+| `EXPIRED` | `PAY_SUCCESS` | The user previously agreed, but the authorization validity period has ended. The original order remains successful and customer fields are no longer returned. |
+
+`authStatus` is the authoritative authorization status. The existing order `status` continues to represent the payment-order result.
+The actual `customer` fields are determined by the merchant's current authorization package:
+
+| Authorization Field | Response Field | Description |
+| --- | --- | --- |
+| `uid` | `customer.uid` | Bybit user UID. |
+| `legalIdNumber` | `customer.legalIdNumber` | Legal identity document number. |
+| `idType` | `customer.idType` | Legal identity document type. |
+| `fullName` | `customer.firstName`, `customer.lastName` | Customer's first and last name. |
+| `birthdate` | `customer.dateOfBirth` | Date of birth. |
+| `kyc1Country` | `customer.kyc1Country` | KYC Level 1 country or region code. |
+| `email` | `customer.email` | Email address. |
+| `phoneNumber` | `customer.phone` | Phone number, including the country calling code when available. |
+
+`legalIdNumber` and `idType` are returned as a pair from one complete identity-document source.
+#### Request demo
+```plaintext
+{{base_url}}/v5/bybitpay/pay_result?merchantId=305142568&paymentType=E_COMMERCE&payId=01M45AUTHEXAMPLE00000000001
+
+```
+
+#### Response demo
+```json
+{
+  "retCode": 100000,
+  "retMsg": "success",
+  "result": {
+    "order": {
+      "merchantId": "305142568",
+      "clientId": "",
+      "paymentType": "E_COMMERCE",
+      "merchantTradeNo": "auth-20261005-000001",
+      "payId": "01M45AUTHEXAMPLE00000000001",
+      "status": "PAY_SUCCESS",
+      "amount": "0",
+      "currency": "USDT",
+      "currencyType": "crypto",
+      "createTime": 1791178200,
+      "paymentTime": 1791178300,
+      "finishTime": 0,
+      "refundOrders": [],
+      "authStatus": "SUCCESS",
+      "authExpireAt": "1791264700000"
+    },
+    "customer": {
+      "uid": "100000001",
+      "legalIdNumber": "P1234567",
+      "idType": "PASSPORT",
+      "firstName": "John",
+      "lastName": "Doe",
+      "dateOfBirth": "1990-01-01",
+      "kyc1Country": "SGP",
+      "email": "john.doe@example.com",
+      "phone": "+65 81234567"
+    }
+  }
+}
+
+```

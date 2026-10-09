@@ -54,6 +54,53 @@ User scans merchant's QR code and completes payment through Bybit App.
 
 ---
 
+## Auth Flow
+
+Merchant creates a zero-amount Auth order. The user scans the QR code and decides whether to authorize the requested customer fields in Bybit App. Auth does not initiate a payment or asset transfer.
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Merchant   │     │    Bybit     │     │   Bybit App  │     │     User     │
+│    Server    │     │   Platform   │     │              │     │              │
+└──────┬───────┘     └──────┬───────┘     └──────┬───────┘     └──────┬───────┘
+       │                    │                    │                    │
+       │ 1. Create Auth     │                    │                    │
+       │   Order (amount 0) │                    │                    │
+       │ ─────────────────→ │                    │                    │
+       │                    │                    │                    │
+       │ 2. Return QR Code  │                    │                    │
+       │ ←───────────────── │                    │                    │
+       │                    │                    │                    │
+       │     Display QR     │                    │    3. Scan QR      │
+       │ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─│─ ─ ─ ─ ─ ─ ─ ─ ─ ─→│                    │
+       │                    │                    │← ─ ─ ─ ─ ─ ─ ─ ─ ─ │
+       │                    │                    │                    │
+       │                    │                    │ 4. Review Auth     │
+       │                    │                    │ ←─────────────────→│
+       │                    │                    │                    │
+       │                    │                    │ 5. Agree / Reject  │
+       │                    │                    │ ←─────────────────→│
+       │                    │                    │                    │
+       │ 6. Auth Webhook    │                    │                    │
+       │ ←───────────────── │                    │                    │
+       │                    │                    │                    │
+       │ 7. Query Auth      │                    │                    │
+       │ ─────────────────→ │                    │                    │
+       │                    │                    │                    │
+       │ 8. Auth Result     │                    │                    │
+       │ ←───────────────── │                    │                    │
+       │                    │                    │                    │
+       ▼                    ▼                    ▼                    ▼
+```
+
+**Key Features:**
+- Zero-amount authorization without payment or asset transfer
+- User authorization through Bybit App
+- Authorization result notification by Webhook
+- Merchant query support for Auth status and authorized customer fields
+
+---
+
 ## Recurring Payments Flow
 
 User pre-authorizes merchant for automatic deductions without manual confirmation each time.

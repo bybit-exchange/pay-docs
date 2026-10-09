@@ -310,3 +310,47 @@ Content-Type: application/json
 - `cancelled`: Order was cancelled
 
 **Note**: Unlike payment orders, the `createdAt` field in broker prefund orders uses **milliseconds** (13 digits), not seconds.
+
+### Auth
+
+Auth reuses the existing Payment Notify webhook. The webhook URL, method, authentication, signature, headers, response, and retry rules remain unchanged.
+The existing `PayOrder` webhook body adds the following fields:
+
+| Field Name | Type | Required | Description |
+| --- | --- | --- | --- |
+| `authStatus` | string | Yes | Current authorization status: `SUCCESS`, `REJECTED`, `OVERTIME`, or `EXPIRED`. |
+| `authExpireAt` | string | No | Authorization expiry time as a UTC Unix timestamp in milliseconds. Returned for `SUCCESS`. |
+| `customer` | [`Customer Type`](data-model/customer) | No | Authorized customer fields. Returned only for `SUCCESS` while the authorization remains valid. |
+
+The webhook is triggered after authorization reaches `SUCCESS`, `REJECTED`, or `OVERTIME`. `PENDING` does not trigger a merchant webhook. Authorization expiry itself does not trigger an additional webhook; query `/v5/bybitpay/pay_result` for the current status. If delivery or retry of an existing success notification occurs after the authorization has expired, the notification reflects the current `EXPIRED` status and does not include `customer`.
+#### Notify PayOrder demo
+```json
+{
+  "merchantId": "305142568",
+  "clientId": "",
+  "paymentType": "E_COMMERCE",
+  "merchantTradeNo": "auth-20261005-000001",
+  "payId": "01M45AUTHEXAMPLE00000000001",
+  "status": "PAY_SUCCESS",
+  "amount": "0",
+  "currency": "USDT",
+  "currencyType": "crypto",
+  "createTime": 1791178200,
+  "paymentTime": 1791178300,
+  "finishTime": 0,
+  "authStatus": "SUCCESS",
+  "authExpireAt": "1791264700000",
+  "customer": {
+    "uid": "100000001",
+    "legalIdNumber": "P1234567",
+    "idType": "PASSPORT",
+    "firstName": "John",
+    "lastName": "Doe",
+    "dateOfBirth": "1990-01-01",
+    "kyc1Country": "SGP",
+    "email": "john.doe@example.com",
+    "phone": "+65 81234567"
+  }
+}
+
+```
