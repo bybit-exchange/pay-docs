@@ -1,0 +1,29 @@
+docs/scan-payment/payment-notify.mdx
+  s_ca28d2fcc310ae::t_7c73c33808374d 312-322,324-356
+  s_ca28d2fcc310ae::t_51330e5f2bd42d 323
+docs/guide.mdx
+  s_ca28d2fcc310ae::t_98d6f91362dcdf 57-74,77-103
+  s_ca28d2fcc310ae::t_2b38a435595299 75-76
+docs/scan-payment/create-payment.mdx
+  s_ca28d2fcc310ae::t_7c73c33808374d 9-12,36,90-99,104-150
+  s_ca28d2fcc310ae::t_51330e5f2bd42d 100-103
+docs/scan-payment/payment-result.mdx
+  s_ca28d2fcc310ae::t_51330e5f2bd42d 187
+  s_ca28d2fcc310ae::t_7c73c33808374d 177-186,188-257
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2-bit.2+419f699",
+  "base_commit_sha": "fb9d70e7c1bd2f606e9a080165eec87effccde1b",
+  "prompts": {},
+  "sessions": {
+    "s_ca28d2fcc310ae": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0b3d7-a9c0-7042-8460-5755f4d80c07",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "yu.xiao <yu.xiao@bybit.com>"
+    }
+  }
+}
