@@ -6,7 +6,10 @@ sidebar_position: 1
 ### HTTP Request
 POST `/v5/bybitpay/create_pay`
 
-### Request Parameters
+### E-Commerce Request
+
+#### Request Parameters
+
 | Parameter | Required | Type | Comments|
 |:----- |:-------|:-----|------ |
 |merchantId |**true** |string |Onboarding merchant UID|
@@ -30,18 +33,7 @@ POST `/v5/bybitpay/create_pay`
 |chainAddress |false|string |Chain address|
 |chainType |false|string |The receiver's chain type (BSC/TRX/ARBI/LTC/SOL/ETH/TON/APTOS)|
 
-### Response Parameters
-| Parameter | Type | Comments|
-|:----- |:-----|----- |
-|payId |string |Pay-order ID created successfully|
-|terminalType |string |Transaction source (APP, WEB, WAP, MINIAPP, OTHERS)|
-|expireTime |number |Order expiration time in UTC timestamp (second precision)|
-|checkoutLink |string |Unified checkout link in Bybit, redirect for payment|
-|qrContent |string |QR code content (base64 Image, valid for 1 hour), developers generate QR image|
-|order |&lt;[PayOrderType](data-model/pay-order)&gt; |Bybit pay order detail|
-|customer |&lt;[CustomerType](data-model/customer)&gt; |Customer info|
-
-### Request Example
+#### Request Example
 
 ```http
 POST /v5/bybitpay/create_pay HTTP/1.1
@@ -95,7 +87,67 @@ Content-Type: application/json
 }
 ```
 
-### Response Example
+### Auth Request
+
+Auth reuses the Payment Creation endpoint. Set `paymentType` to `E_COMMERCE` and use `paymentMethod = AUTH` to distinguish this scenario from the existing E-Commerce Payment flow.
+Fields not listed below follow the common Payment Creation definition above.
+
+| Field Name | Type | Required | Description |
+| --- | --- | --- | --- |
+| `paymentType` | string | Yes | Must be `E_COMMERCE`. |
+| `paymentMethod` | string | Yes | Must be `AUTH`. |
+| `orderAmount` | string | Yes | Must be exactly `0`. Auth does not initiate a payment or asset transfer. |
+| `goods` | array&lt;[`Good Type`](data-model/good)&gt; | No | Optional for Auth. If provided, each item follows the existing validation rules. |
+| `env` | [`Env Type`](data-model/env) | Yes | Transaction Source. The validation rules are the same as the existing E-Commerce Payment flow. |
+| `riskInfo` | [`RiskInfo`](data-model/risk-info) | No | Risk info for order pay |
+| `customer` | [`Customer Type`](data-model/customer) | No | Customer info |
+| `quotationId` | string | No | Not used in current use case |
+| `chainAddress` | string | No | Not used in current use case |
+| `chainType` | string | No | Not used in current use case |
+
+`orderExpireTime` is the authorization confirmation deadline. It remains a UTC Unix timestamp in seconds, defaults to one hour, and cannot exceed one hour from order creation.
+#### Request demo
+```json
+{
+  "merchantId": "305142568",
+  "merchantName": "Example Merchant",
+  "merchantTradeNo": "auth-20261005-000001",
+  "paymentType": "E_COMMERCE",
+  "paymentMethod": "AUTH",
+  "orderAmount": "0",
+  "currency": "USDT",
+  "currencyType": "crypto",
+  "successUrl": "https://merchant.example.com/auth/success",
+  "failedUrl": "https://merchant.example.com/auth/failed",
+  "webhookUrl": "https://merchant.example.com/webhook/bybitpay",
+  "orderExpireTime": 1791180000,
+  "env": {
+    "browserVersion": "Mozilla/5.0",
+    "device": "merchant-device-id",
+    "ip": "127.0.0.1",
+    "terminalType": "APP"
+  }
+}
+
+```
+
+### Common Response
+
+The response structure is shared by E-Commerce and Auth. For Auth, `result.order.amount` is `0` and `result.order.authStatus` is initially `PENDING`.
+
+#### Response Parameters
+
+| Parameter | Type | Comments|
+|:----- |:-----|----- |
+|payId |string |Pay-order ID created successfully|
+|terminalType |string |Transaction source (APP, WEB, WAP, MINIAPP, OTHERS)|
+|expireTime |number |Order expiration time in UTC timestamp (second precision)|
+|checkoutLink |string |Unified checkout link in Bybit, redirect for payment|
+|qrContent |string |QR code content (base64 Image, valid for 1 hour), developers generate QR image|
+|order |&lt;[PayOrderType](data-model/pay-order)&gt; |Bybit pay order detail|
+|customer |&lt;[CustomerType](data-model/customer)&gt; |Customer info|
+
+#### Response Example
 
 ```json
 {
