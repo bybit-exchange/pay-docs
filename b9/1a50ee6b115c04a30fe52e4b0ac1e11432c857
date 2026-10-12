@@ -1,0 +1,21 @@
+docs/scan-payment/payment-notify.mdx
+  s_0eba24fb3fe315::t_439d31c5f09858 8,26,38,40-45,47,49-50,53,55-62
+docs/scan-payment/sign-algo.mdx
+  s_0eba24fb3fe315::t_6b9d6ae5654e86 2-3,5-85
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2-bit.2+419f699",
+  "base_commit_sha": "b91a50ee6b115c04a30fe52e4b0ac1e11432c857",
+  "prompts": {},
+  "sessions": {
+    "s_0eba24fb3fe315": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a123f5-d7a0-7050-925c-4e3f3e6941da",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "yu.xiao <yu.xiao@bybit.com>"
+    }
+  }
+}
