@@ -9,13 +9,17 @@ Bybit Pay signs each payment webhook so that the merchant can verify its source 
 
 Create a webhook RSA key in the Bybit Pay Merchant Portal and copy the public key shown there. Store the public key securely in your webhook service.
 
+The public key is an X.509 DER key encoded as a single-line Base64 string, without PEM headers or line breaks. This is the same format as the existing Bybit Pay platform public key.
+
 The private key is managed by Bybit Pay and is never returned to the merchant. If you delete and recreate the webhook RSA key, update the public key in your webhook service before processing notifications signed by the new key.
+
+If your integration already verifies Bybit Pay webhooks, keep the existing verification logic and replace only the configured platform public key. The signature content, algorithm, padding, Base64 encoding, and request headers remain unchanged.
 
 ## Algorithm
 
 | Item | Value |
 |:-----|:------|
-| Key type | RSA 2048-bit |
+| Key type | RSA 1024-bit |
 | Hash | SHA-256 |
 | Padding | PKCS#1 v1.5 |
 | Algorithm name | SHA256withRSA / RSASSA-PKCS1-v1_5_SHA_256 |
@@ -48,7 +52,7 @@ For example:
 2. Read and retain the raw HTTP request body.
 3. Concatenate the timestamp and raw body without a separator.
 4. Base64-decode the signature header.
-5. Verify the decoded signature with SHA-256, PKCS#1 v1.5, and the RSA-2048 public key copied from the Merchant Portal.
+5. Verify the decoded signature with SHA-256, PKCS#1 v1.5, and the RSA-1024 public key copied from the Merchant Portal.
 6. Parse and process the JSON body only after verification succeeds.
 
 ### Java example
@@ -64,15 +68,10 @@ static boolean verifyWebhook(
         String timestamp,
         byte[] rawRequestBody,
         String signatureBase64,
-        String publicKeyPem
+        String publicKeyBase64
 ) throws Exception {
-    String pemBody = publicKeyPem
-            .replace("-----BEGIN PUBLIC KEY-----", "")
-            .replace("-----END PUBLIC KEY-----", "")
-            .replaceAll("\\s", "");
-
     var publicKey = KeyFactory.getInstance("RSA").generatePublic(
-            new X509EncodedKeySpec(Base64.getDecoder().decode(pemBody)));
+            new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyBase64)));
 
     Signature verifier = Signature.getInstance("SHA256withRSA");
     verifier.initVerify(publicKey);

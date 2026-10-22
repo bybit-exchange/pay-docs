@@ -39,7 +39,7 @@ Bybit Pay signs the exact callback JSON using the merchant webhook RSA key creat
 
 | Item | Value |
 |:-----|:------|
-| Key type | RSA 2048-bit |
+| Key type | RSA 1024-bit |
 | Hash | SHA-256 |
 | Padding | PKCS#1 v1.5 |
 | Signature header encoding | Base64 |
@@ -56,7 +56,7 @@ To verify a callback:
 2. Read the raw request body without parsing or reserializing it.
 3. Concatenate the timestamp and raw body without a separator.
 4. Base64-decode the signature.
-5. Verify it with SHA-256, PKCS#1 v1.5, and the RSA-2048 public key copied from the Merchant Portal.
+5. Verify it with SHA-256, PKCS#1 v1.5, and the RSA-1024 public key copied from the Merchant Portal.
 6. Parse and process the JSON only after verification succeeds.
 
 The `publicKey` is not sent in the webhook headers. Keep the public key from the Merchant Portal in your webhook service. See [Webhook Signature Algorithm](sign-algo) for a verification example.
