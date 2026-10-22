@@ -1,84 +1,109 @@
 ---
-title: Webhook Signature Algorithm
-sidebar_label: Webhook Signature Algorithm
+title: Signature Algorithm
+sidebar_label: Signature Algorithm
 ---
+## Encrypt
+1. Get the current timestamp `${timestamp}`
+2. Combine`${timestamp}` and request body (if the http method is `POST`, the request body is `json` text, if the http method is `GET`, the request body is unescape `query` string, like `name=foo&age=18` is valid, `name%3dfoo%26age%3d18` is invalid) into a new string `$content`
+3. Sign `$content` with `sha256` and  `PKCS1V15, 1024`
+4. Encode the signed bytes content to `base64`
 
-Bybit Pay signs each payment webhook so that the merchant can verify its source and integrity. This signature applies only to webhook notifications sent by Bybit Pay.
+### Example
+We sign the following data. The timestamp is `1736233260`, the RSA key is
 
-## Obtain the public key
+```shell
+-----The following key pairs are for testing only-----
+-----BEGIN RSA PUBLIC KEY-----
+MIGJAoGBAOFSnhqtuXXXXXXXXXXXXXXXXXXXXXXXX4Yih6hViOdSGd7imWmCSZyP
+psl3TmLhUoB+rTzYDXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXUM0f+AxlKYMj8OQ
+AgDPmZG1a5ydFrje4PLytC7sUw3GP4TTk8xg6iMHmYPdRDv7AEWdAgMBAAE=
+-----END RSA PUBLIC KEY-----
 
-Create a webhook RSA key in the Bybit Pay Merchant Portal and copy the public key shown there. Store the public key securely in your webhook service.
+-----BEGIN RSA PRIVATE KEY-----
+MIICXwIBAAKBgQDhUp4arbuNEzraJPsl3gfju+j12/1QCVOGIoeoVYjnUhne4plp
+gkmcj6bJd05i4VKAfq082A3WK5WGJ4OnFZ+slIcY6TFg+EKeSuBs471DNH/gMZSm
+DI/DkAIAz5mRtWuXXXXXXXXXXXXXXXXXxj+E05PMYOojB5mD3UQ7+wBFnQIDAQAB
+AoGBAIqpeCi83516xw32EiSEleBdBIlA34vAoYj7ePZr5PtN+CPE2Von1rslYCO9
+axzIwyfWTTATWbiCS9sqOAe78+1t3shU0ryXelWQ95LOdiMp0ZvU3ya6MzSVuiuL
+6gOQYu8kzRqCzqvyMNdAHFMmP0XXXXXXXXXXXXXXXXXXZAtVAkEA/N6gl4tYJBef
+e/Gxi7qhuIKz0mvfA/yieRuiVhXXXXXXXXXXXXXXXXXXbs45hh+n4bw8AA9k0bvi
+3IBIdV/CbwJBAOQcsOPf+lrs4PXXXXXXXXXXXXXXXXXXxuerfPYMAzvJ7EU1u72o
+/5V9zdim+hPq+9cvsqO7dkJx+cXXXXXXXXXXXXXXXXXXXXXXXXXXXaiIxOdCbbtc
+MY4uV8noiqDRf/pvAkyMMM+nm5pXXXXXXXXXXXXXXXXXXXXXXXXXIUx1sZ85AkEA
+15eWR4jEoXMIFkd7Onc6tKuJ8kokqfXXXXXXXXXXXXXXXXXXXXXBRxSjnIQUDwck
+Bnj6KW1fk+UM29dUDjmTqQJBAITyP16XXXXXXXXXXXXXXXXXXXXXvgCxCzRRi5ph
+IavMyjrhDKyBGZ0mI6eoREaC4bxl31RRkYtg9mNeU3TxsBM=
+-----END RSA PRIVATE KEY-----
+```
 
-The public key is an X.509 DER key encoded as a single-line Base64 string, without PEM headers or line breaks. This is the same format as the existing Bybit Pay platform public key.
+json request body:
+```json
+{"merchantId":"305142568","clientId":"client_001","paymentType":"E_COMMERCE","merchantTradeNo":"af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c","payId":"01JY2KM5QNPXR8S4HTJZT9BC12","status":"PAY_SUCCESS","amount":"100","currency":"USDT","currencyType":"crypto","createTime":1736233200,"paymentTime":1736233260,"finishTime":1736233260,"customer":{"externalUserId":"user123@merchant.com","userName":"John Doe","registerTime":1704067200,"kycCountry":"USA","uid":"104326789"}}
+```
+1. Get the current timestamp 1736233260
+2. Combine${timestamp} and request body (if the http method is POST, the request body is json text, if the http method is GET, the request body is unescape query string, like name=foo&age=18 is valid, name%3dfoo%26age%3d18 is invalid) into a new string $content
 
-The private key is managed by Bybit Pay and is never returned to the merchant. If you delete and recreate the webhook RSA key, update the public key in your webhook service before processing notifications signed by the new key.
+```json
+1736233260{"merchantId":"305142568","clientId":"client_001","paymentType":"E_COMMERCE","merchantTradeNo":"af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c","payId":"01JY2KM5QNPXR8S4HTJZT9BC12","status":"PAY_SUCCESS","amount":"100","currency":"USDT","currencyType":"crypto","createTime":1736233200,"paymentTime":1736233260,"finishTime":1736233260,"customer":{"externalUserId":"user123@merchant.com","userName":"John Doe","registerTime":1704067200,"kycCountry":"USA","uid":"104326789"}}
+```
 
-If your integration already verifies Bybit Pay webhooks, keep the existing verification logic and replace only the configured platform public key. The signature content, algorithm, padding, Base64 encoding, and request headers remain unchanged.
+3. Sign $contentwith sha256 and PKCS1V15, 1024
+4. Encode the encrypted bytes in base64
 
-## Algorithm
+```json
+vOyN+NnfWppnhxS6y1D+CAllj6Z/3np1Tm+nrt16e/EDl4VZjU2sVPSS/cBcf5Hy/jBarA8Y7yrvYqJonJAsAZcFKu9twW2XWyMbURC63Iumh5gkAE9UEx4/irpX4W6KXhqc2+7wc1tapC5zfVWRMIQ5Dh+7VscxLY+/WjKb/Vw=
+```
 
-| Item | Value |
-|:-----|:------|
-| Key type | RSA 1024-bit |
-| Hash | SHA-256 |
-| Padding | PKCS#1 v1.5 |
-| Algorithm name | SHA256withRSA / RSASSA-PKCS1-v1_5_SHA_256 |
-| Signature transport encoding | Base64 |
+## Decrypt
+1. Get `timestamp`, `signature` from request header.
+2. Get request body (if the http method is `POST`, the request body is `json` text, if the http method is `GET`, the request body is `unescape query` string)
+3. Combine `${timestamp}` and response body into a new string `$content`
+4. decode the signature bytes from base64.
+5. Encrypt string content with sha256 and verify signature base PKCS1V15,1024.
+### Example
+We provided the following data.
+```json
+vOyN+NnfWppnhxS6y1D+CAllj6Z/3np1Tm+nrt16e/EDl4VZjU2sVPSS/cBcf5Hy/jBarA8Y7yrvYqJonJAsAZcFKu9twW2XWyMbURC63Iumh5gkAE9UEx4/irpX4W6KXhqc2+7wc1tapC5zfVWRMIQ5Dh+7VscxLY+/WjKb/Vw=
+```
+ The timestamp is 1736233260, the RSA key is
 
-Base64 is used only to encode the binary signature for the HTTP header. It does not change the JSON body and is not an encryption algorithm.
+```shell
+-----The following key pairs are for testing only-----
+-----BEGIN RSA PUBLIC KEY-----
+MIGJAoGBAOFSnhqtuXXXXXXXXXXXXXXXXXXXXXXXX4Yih6hViOdSGd7imWmCSZyP
+psl3TmLhUoB+rTzYDXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXUM0f+AxlKYMj8OQ
+AgDPmZG1a5ydFrje4PLytC7sUw3GP4TTk8xg6iMHmYPdRDv7AEWdAgMBAAE=
+-----END RSA PUBLIC KEY-----
 
-## Signature content
+-----BEGIN RSA PRIVATE KEY-----
+MIICXwIBAAKBgQDhUp4arbuNEzraJPsl3gfju+j12/1QCVOGIoeoVYjnUhne4plp
+gkmcj6bJd05i4VKAfq082A3WK5WGJ4OnFZ+slIcY6TFg+EKeSuBs471DNH/gMZSm
+DI/DkAIAz5mRtWuXXXXXXXXXXXXXXXXXxj+E05PMYOojB5mD3UQ7+wBFnQIDAQAB
+AoGBAIqpeCi83516xw32EiSEleBdBIlA34vAoYj7ePZr5PtN+CPE2Von1rslYCO9
+axzIwyfWTTATWbiCS9sqOAe78+1t3shU0ryXelWQ95LOdiMp0ZvU3ya6MzSVuiuL
+6gOQYu8kzRqCzqvyMNdAHFMmP0XXXXXXXXXXXXXXXXXXZAtVAkEA/N6gl4tYJBef
+e/Gxi7qhuIKz0mvfA/yieRuiVhXXXXXXXXXXXXXXXXXXbs45hh+n4bw8AA9k0bvi
+3IBIdV/CbwJBAOQcsOPf+lrs4PXXXXXXXXXXXXXXXXXXxuerfPYMAzvJ7EU1u72o
+/5V9zdim+hPq+9cvsqO7dkJx+cXXXXXXXXXXXXXXXXXXXXXXXXXXXaiIxOdCbbtc
+MY4uV8noiqDRf/pvAkyMMM+nm5pXXXXXXXXXXXXXXXXXXXXXXXXXIUx1sZ85AkEA
+15eWR4jEoXMIFkd7Onc6tKuJ8kokqfXXXXXXXXXXXXXXXXXXXXXBRxSjnIQUDwck
+Bnj6KW1fk+UM29dUDjmTqQJBAITyP16XXXXXXXXXXXXXXXXXXXXXvgCxCzRRi5ph
+IavMyjrhDKyBGZ0mI6eoREaC4bxl31RRkYtg9mNeU3TxsBM=
+-----END RSA PRIVATE KEY-----
+```
 
-The string to verify is:
+1. Get `timestamp`, `signature` from request header.
+`timestamp`=`1736233260`
+`signature`=`[base64 encoded signature]`
+2. Get request body (if the http method is `POST`, the request body is json text, if the http method is `GET`, the request body is `unescape query` string)
 
-~~~text
-timestamp + raw_request_body
-~~~
+```json
+{"merchantId":"305142568","clientId":"client_001","paymentType":"E_COMMERCE","merchantTradeNo":"af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c","payId":"01JY2KM5QNPXR8S4HTJZT9BC12","status":"PAY_SUCCESS","amount":"100","currency":"USDT","currencyType":"crypto","createTime":1736233200,"paymentTime":1736233260,"finishTime":1736233260,"customer":{"externalUserId":"user123@merchant.com","userName":"John Doe","registerTime":1704067200,"kycCountry":"USA","uid":"104326789"}}
+```
+3. Combine `${timestamp}` and response body into a new string `$content`
+```json
+1736233260{"merchantId":"305142568","clientId":"client_001","paymentType":"E_COMMERCE","merchantTradeNo":"af8c2d1-5b3e-4a9f-b6c7-8d2e1f3a4b5c","payId":"01JY2KM5QNPXR8S4HTJZT9BC12","status":"PAY_SUCCESS","amount":"100","currency":"USDT","currencyType":"crypto","createTime":1736233200,"paymentTime":1736233260,"finishTime":1736233260,"customer":{"externalUserId":"user123@merchant.com","userName":"John Doe","registerTime":1704067200,"kycCountry":"USA","uid":"104326789"}}
+```
 
-- timestamp is the exact value of the timestamp request header.
-- raw_request_body is the exact JSON text received over HTTP.
-- Do not parse, reformat, sort, escape, or reserialize the JSON before verification.
-- Do not add a separator, newline, or whitespace between the two values.
-
-For example:
-
-~~~text
-1736233260{"merchantId":"305142568","paymentType":"E_COMMERCE","status":"PAY_SUCCESS"}
-~~~
-
-## Verification steps
-
-1. Read the timestamp and signature request headers.
-2. Read and retain the raw HTTP request body.
-3. Concatenate the timestamp and raw body without a separator.
-4. Base64-decode the signature header.
-5. Verify the decoded signature with SHA-256, PKCS#1 v1.5, and the RSA-1024 public key copied from the Merchant Portal.
-6. Parse and process the JSON body only after verification succeeds.
-
-### Java example
-
-~~~java
-import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.Signature;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
-
-static boolean verifyWebhook(
-        String timestamp,
-        byte[] rawRequestBody,
-        String signatureBase64,
-        String publicKeyBase64
-) throws Exception {
-    var publicKey = KeyFactory.getInstance("RSA").generatePublic(
-            new X509EncodedKeySpec(Base64.getDecoder().decode(publicKeyBase64)));
-
-    Signature verifier = Signature.getInstance("SHA256withRSA");
-    verifier.initVerify(publicKey);
-    verifier.update(timestamp.getBytes(StandardCharsets.UTF_8));
-    verifier.update(rawRequestBody);
-    return verifier.verify(Base64.getDecoder().decode(signatureBase64));
-}
-~~~
-
-Return an error and do not process the notification when verification fails.
+4. Decode the signature bytes from base64
+5. Encrypt string content with sha256 and verify signature  base PKCS1V15,1024
