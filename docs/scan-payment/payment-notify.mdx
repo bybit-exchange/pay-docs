@@ -5,15 +5,41 @@ sidebar_position: 3
 ---
 ### Authentication
 - Share the IP whitelist with each other;
-- Bybit Pay signs callbacks via RSA_SHA256. For details, please see [Signature Algorithm](#signature-algorithm)
+- Bybit Pay signs callbacks using SHA256withRSA (RSA PKCS#1 v1.5 with SHA-256). For details, please see [Signature Algorithm](#signature-algorithm)
 
-:::warning Merchant-specific Webhook RSA key
-A merchant-specific `RSA_1024_WEBHOOK` key is optional. By default, callbacks are signed with the Bybit Pay platform key. Once you create a merchant-specific key in the Merchant Portal, it takes effect immediately and subsequent callbacks are signed with that key. The signature algorithm, signed content, headers, Base64 encoding, and single-line public key format remain unchanged; an existing verifier only needs to use the corresponding public key.
+### Merchant-specific Webhook RSA Key
+
+A merchant-specific Webhook RSA key is optional. The Key Management page provides two independent key types:
+
+| Key Type | Purpose | How It Is Used |
+|:---|:---|:---|
+| `RSA_1024_WEBHOOK` | Sign and verify Webhook callbacks | Bybit Pay signs the callback with the private key, and the merchant verifies it with the public key copied from the Merchant Portal. |
+| `AES_256` | Encrypt Payout to Card data | The merchant encrypts card data before sending it to Bybit Pay. It is not used for Webhook signing. |
+
+- If `RSA_1024_WEBHOOK` has not been created, callbacks are signed with the Bybit Pay platform key.
+- Once `RSA_1024_WEBHOOK` is created, it takes effect immediately and subsequent callbacks are signed with the merchant-specific key.
+
+`RSA_1024_WEBHOOK` uses exactly the same SHA256withRSA algorithm (RSA PKCS#1 v1.5 with SHA-256) as the Bybit Pay platform key. Only the RSA key pair becomes merchant-specific. The signed content, headers, Base64 encoding, and single-line public key format remain unchanged. API request signing is not affected.
+
+#### Create the Key
+
+1. Sign in to the Bybit Pay Merchant Portal.
+1. Open [Key Management](https://www.bybit.com/en/bybitpay/psp/dashboard/key-management/).
+1. Click **Create new key**.
+1. Select `RSA_1024_WEBHOOK`, enter a key name, and confirm the creation.
+1. Copy the displayed public key and add it to your webhook verifier.
+
+![Merchant-specific Webhook RSA key in Key Management](/img/bybit-pay-webhook-rsa-key-management.png)
+
+:::danger Creating or deleting this key immediately affects live Webhook verification
+Do not create `RSA_1024_WEBHOOK` unless a merchant-specific Webhook key is required and your verifier is ready for the key change. There is no delayed activation. Immediately after creation, new callbacks can no longer be verified with only the Bybit Pay platform public key. If the verifier is not updated in time, Webhook verification will fail and business processing that depends on the notification may be interrupted.
 
 To avoid verification failures during a key change:
-- **Create:** Perform the change in a controlled window. Add the new public key to your verifier immediately after creation, and temporarily accept both the platform key and the merchant-specific key.
+- **Create:** Prepare the verifier change before creating the key and perform the operation in a controlled window. Add the new public key immediately after creation and temporarily accept both the platform key and the merchant-specific key.
 - **Delete:** Add or retain the platform public key before deletion. Deletion takes effect immediately, so temporarily keep accepting the deleted merchant key for callbacks already in flight.
 - **Replace:** Delete the old merchant key, confirm verification with the platform key, then create and add the new merchant key. Accept the applicable old and new keys during each transition.
+
+If uninterrupted Webhook processing is required, the verifier must support multiple public keys during the transition.
 :::
 
 ### HTTP Request
